@@ -15,7 +15,7 @@ This parser supports CSV files, conforming to the rfc4180 standard and is itself
 
 > [!NOTE]
 > While the usage of the header is optional, if you use one, use the `headed` method of the parser, otherwise use `headless` method.
-> [Learn more.](README#usage)
+> [Learn more.](#usage)
 
 ### Handling missing or not provided values
 
