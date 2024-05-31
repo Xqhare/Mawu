@@ -1,5 +1,9 @@
 # Mawu
-A simple JSON and CSV parsing library written in rust
+A simple JSON and CSV parsing library written in rust.
+
+Mawu, named after the ancient creator goddess Mawu in west-african mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 standards and the ECMA-404 standard.
+
+
 
 ## Features
 
@@ -7,11 +11,22 @@ A simple JSON and CSV parsing library written in rust
 - Type aware
 - Supports both CSV and JSON
     - CSV
-        - With or without header
+        - With or without header, and data shift is more likely to occur
         - settable delimiter
 
 ## CSV
-This parser supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else. 
+This parser supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
+
+Please note that CSV, while a standard exists, is seldom implemented as such in practice.
+
+One example would be a common shorthand for an array by using `aaa / bbb / ccc` to represent `[aaa, bbb, ccc]`. 
+This is not part of the rfc4180 standard and thus not implemented in Mawu, instead it would be treated as a single string, with the appropriate errors.
+`aaa / "bbb" / ccc` would produce an error for example, as Mewa treats the entire thing as one string, but it encounters unescaped double-quotes.
+
+Another example is the way encoding is implemented. Mewa uses `utf-8` encoding exclusively for CSV, and does not recognize or produce a `BOM` or similar at the beginning of the file.
+There are CSV files encoded in `utf-16` and `utf-32` as well as some more esoteric implementations like the IBM one where you can define new field names in the middle of a CSV file by using `#GROUP_OBJECT_PROFILE#` [learn more](https://www.ibm.com/docs/en/sig-and-i/10.0.2?topic=schedules-example-comma-separated-value-csv-file) and many others.
+
+Because of this, most if not all CSV files are only supported in the ecosystem or app they were created in, and there is no guarantee that Mawu will be able to parse them correctly.
 
 > [!NOTE]
 > While the usage of the header is optional, if you use one, use the `headed` method of the parser, otherwise use `headless` method.
@@ -23,7 +38,7 @@ This parser supports CSV files, conforming to the rfc4180 standard and is itself
 > It is advisable to ensure there are no missing or not provided values in your data before using Mawu.
 
 While Mawu does handle missing or not provided values, it is not 100% reliable for a variety of reasons.
-Exactly how this is handled is explained in the following paragraph, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu.
+Exactly how this is handled is explained in the following paragraphs, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu.
 
 This parser implements missing or not provided values differently depending on if a header is present or not.
 If a header is present, the missing values will be filled with a `Mawu::None` Value. 
