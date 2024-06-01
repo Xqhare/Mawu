@@ -31,7 +31,6 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
             - [Parsing a malformed CSV file example](#parsing-a-malformed-csv-file-example)
         - [CSV Return value](#csv-return-value)
         - [CSV Usage](#csv-usage)
-
     - [JSON](#json)
 
 ## Naming the creation: A Legacy of the Divine
