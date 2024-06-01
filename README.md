@@ -21,10 +21,9 @@ Mawu, named after the ancient creator goddess Mawu in west-african mythology, of
 - [Features](#features)
 - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
 - [CSV](#csv)
-    - [Handling empty values](#handling-empty-values)
+    - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
         - [With header](#with-header)
         - [Without header](#without-header)
-    - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
 
 - [JSON](#json)
 
@@ -56,12 +55,26 @@ Because of this, most if not all CSV files are only supported in the ecosystem o
 > While the usage of the header is optional, you need to use the `from_csv_headless(path)` method of the library, otherwise use the `from_csv_headed(path)` method.
 > [Learn more.](#usage)
 
-### Handling empty values
+### Handling missing or not provided values
+> [!caution]
+> It is advisable to ensure there are no missing or not provided values in your data before using Mawu.
+> To cut a long story short: You risk shifting your data, which is somewhat undesirable for most use-cases.
+
+The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are several ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
+
+While Mawu does handle missing or not provided values, it is not 100% reliable.
+Exactly how this is handled is explained in the following paragraphs, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu.
+
+This library implements missing or not provided values differently depending on if a header is present or not.
+
+Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant whitespace, so the missing `bbb` is converted into a space.
 
 A row in the form of `aaa,,ccc` would result in a `MawuValue` of `[aaa][Mawu::Empty][ccc]` because of the unescaped second comma.
 
 #### With header
-With a header of `AAA,BBB,CCC`, the row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty]`.
+If a header is present, the missing values will be filled with a `Mawu::None` Value. 
+
+A header of `AAA,BBB,CCC`, and the row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty]`.
 With a header of `AAA,BBB,CCC,DDD`, the row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty][Mawu::Empty]`.
 
 Please note that as long as a header is present Mawu will append `Mawu::Empty` values for as many columns as there are columns declared in the header.
@@ -69,26 +82,14 @@ Please note that as long as a header is present Mawu will append `Mawu::Empty` v
 
 #### Without header
 
-The row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty]` because of the trailing comma without content.
-However, the row `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]`.
-
-### Handling missing or not provided values
-
-> [!caution]
-> It is advisable to ensure there are no missing or not provided values in your data before using Mawu.
-> To cut a long story short: You risk shifting your data, which is somewhat undesirable for most use-cases.
-
-The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are several ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
-
-While Mawu does handle missing or not provided values, it is not 100% reliable for a variety of reasons.
-Exactly how this is handled is explained in the following paragraphs, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu.
-
-This library implements missing or not provided values differently depending on if a header is present or not.
-If a header is present, the missing values will be filled with a `Mawu::None` Value. 
 Should a header be not present, any row ending in a `,` will append as many `Mawu::None` values as there are columns in the first row.
 
-Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant whitespace, so the missing `bbb` is converted into a space.
-A row where the missing value is `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]` only in the case where there is no header, and it is in the first row.
+The row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty]` because of the trailing comma without content.
+A row where the missing value is `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]` only in the case where it is in the first row.
+However, the row `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]`.
+
+
+
 
 ### Return value
 Mawu will return a `Result<MawuResult, MawuError>`. By using `MawuResult::headed` or `MawuResult::headless`, you access the data wrapped inside the `MawuResult`.
