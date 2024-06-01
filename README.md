@@ -16,6 +16,18 @@ Mawu, named after the ancient creator goddess Mawu in west-african mythology, of
         - settable delimiter
 - Supports missing or not provided values
 
+## Chapters and subchapters
+
+- [Features](#features)
+- [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
+- [CSV](#csv)
+    - [Handling empty values](#handling-empty-values)
+        - [With header](#with-header)
+        - [Without header](#without-header)
+    - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
+
+- [JSON](#json)
+
 ## Naming the Creation: A Legacy of the Divine
 
 The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
@@ -35,8 +47,8 @@ This is not part of the rfc4180 standard and thus not implemented in Mawu, inste
 Another example is the way encoding is implemented. Mewa uses `utf-8` encoding exclusively for CSV, and does not recognize or produce a `BOM` or similar at the beginning of the file.
 There are CSV files encoded in `utf-16` and `utf-32` as well as some more esoteric implementations like the IBM one where you can define new field names in the middle of a CSV file by using `#GROUP_OBJECT_PROFILE#` [learn more](https://www.ibm.com/docs/en/sig-and-i/10.0.2?topic=schedules-example-comma-separated-value-csv-file) and many others.
 
-One last example is the handling of a value of `""` in the middle of a CSV file. This is, again, not part of the rfc4180 standard and sometimes interpreted as an empty string, other times as a missing value.
-Mawu will treat it as an empty string.
+One last example is the handling of a value of `""` in the middle of a CSV file. This is part of the rfc4180 standard only implicitly, and sometimes interpreted as an empty string, other times as a missing value.
+Mawu will treat it as an empty string and uses it as the default for an empty value.
 
 Because of this, most if not all CSV files are only supported in the ecosystem or app they were created in, and there is no guarantee that Mawu will be able to parse them correctly.
 
@@ -44,10 +56,29 @@ Because of this, most if not all CSV files are only supported in the ecosystem o
 > While the usage of the header is optional, you need to use the `from_csv_headless(path)` method of the library, otherwise use the `from_csv_headed(path)` method.
 > [Learn more.](#usage)
 
+### Handling empty values
+
+A row in the form of `aaa,,ccc` would result in a `MawuValue` of `[aaa][Mawu::Empty][ccc]` because of the unescaped second comma.
+
+#### With header
+With a header of `AAA,BBB,CCC`, the row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty]`.
+With a header of `AAA,BBB,CCC,DDD`, the row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty][Mawu::Empty]`.
+
+Please note that as long as a header is present Mawu will append `Mawu::Empty` values for as many columns as there are columns declared in the header.
+
+
+#### Without header
+
+The row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::Empty]` because of the trailing comma without content.
+However, the row `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]`.
+
 ### Handling missing or not provided values
 
 > [!caution]
 > It is advisable to ensure there are no missing or not provided values in your data before using Mawu.
+> To cut a long story short: You risk shifting your data, which is somewhat undesirable for most use-cases.
+
+The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are several ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
 
 While Mawu does handle missing or not provided values, it is not 100% reliable for a variety of reasons.
 Exactly how this is handled is explained in the following paragraphs, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu.
@@ -57,7 +88,6 @@ If a header is present, the missing values will be filled with a `Mawu::None` Va
 Should a header be not present, any row ending in a `,` will append as many `Mawu::None` values as there are columns in the first row.
 
 Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant whitespace, so the missing `bbb` is converted into a space.
-A missing value in the form of `aaa,,ccc` would result in a `MawuValue` of `[aaa][Mawu::None][ccc]` because of the unescaped second comma.
 A row where the missing value is `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]` only in the case where there is no header, and it is in the first row.
 
 ### Return value
