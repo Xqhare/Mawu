@@ -19,20 +19,20 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
 - Supports missing or not provided values
 
 ## Overview
-- [Mawu](#mawu)
-- [Features](#features)
-- [Overview](#overview)
-- [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
-- [CSV](#csv)
-    - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
-        - [With header](#with-header)
-        - [Without header](#without-header)
-    - [Handling of malformed CSV files](#handling-of-malformed-csv-files)
-        - [Parsing a malformed CSV file example](#parsing-a-malformed-csv-file-example)
-    - [CSV Return value](#csv-return-value)
-    - [CSV Usage](#csv-usage)
+    - [Mawu](#mawu)
+    - [Features](#features)
+    - [Overview](#overview)
+    - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
+    - [CSV](#csv)
+        - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
+            - [With header](#with-header)
+            - [Without header](#without-header)
+        - [Handling of malformed CSV files](#handling-of-malformed-csv-files)
+            - [Parsing a malformed CSV file example](#parsing-a-malformed-csv-file-example)
+        - [CSV Return value](#csv-return-value)
+        - [CSV Usage](#csv-usage)
 
-- [JSON](#json)
+    - [JSON](#json)
 
 ## Naming the creation: A Legacy of the Divine
 The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
