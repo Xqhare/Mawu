@@ -19,7 +19,7 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
 - Supports missing or not provided values
 
 ## Overview
-    - [Mawu](#mawu)
+- [Mawu](#mawu)
     - [Features](#features)
     - [Overview](#overview)
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
