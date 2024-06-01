@@ -11,6 +11,7 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
 ## Features
 - Simple and fast
 - Type aware
+- Zero additional dependencies
 - Supports both CSV and JSON
     - CSV
         - With or without header, and data shift is more likely to occur
@@ -26,7 +27,7 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
     - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
         - [With header](#with-header)
         - [Without header](#without-header)
-    - [Handling malformed CSV files](#handling-malformed-csv-files)
+    - [Handling of malformed CSV files](#handling-of-malformed-csv-files)
         - [Parsing a malformed CSV file example](#parsing-a-malformed-csv-file-example)
     - [CSV Return value](#csv-return-value)
     - [CSV Usage](#csv-usage)
