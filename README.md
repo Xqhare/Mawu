@@ -46,9 +46,9 @@ Please note that CSV, while a standard exists, is seldom implemented as such in 
 
 One example would be a common shorthand for an array by using `aaa / bbb / ccc` to represent `[aaa, bbb, ccc]`. 
 This is not part of the rfc4180 standard and thus not implemented in Mawu, instead it would be treated as a single string, with the appropriate errors.
-`aaa / "bbb" / ccc` would produce an error for example, as Mewa treats the entire thing as one string, but it encounters unescaped double-quotes.
+`aaa / "bbb" / ccc` would produce an error for example, as Mawu treats the entire thing as one string, but it encounters unescaped double-quotes.
 
-Another example is the way encoding is implemented. Mewa uses `utf-8` encoding exclusively for CSV, and does not recognize or produce a `BOM` or similar at the beginning of the file.
+Another example is the way encoding is implemented. Mawu uses `utf-8` encoding exclusively for CSV, and does not recognize or produce a `BOM` or similar at the beginning of the file.
 There are CSV files encoded in `utf-16`, `utf-32` or even some `ASCII`-variants, and there are some more esoteric implementations like the IBM one where you can define new field names in the middle of a CSV file by using `#GROUP_OBJECT_PROFILE#` [learn more](https://www.ibm.com/docs/en/sig-and-i/10.0.2?topic=schedules-example-comma-separated-value-csv-file).
 
 Because of this, most if not all CSV files are only supported in the ecosystem or app they were created in, and there is no guarantee that Mawu will be able to parse them correctly.
@@ -90,7 +90,7 @@ A row where the missing value is `aaa,bbb` would result in a `MawuValue` of `[aa
 However, the same row of `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb][Mawu::None]` in the case where the first row is `aaa,bbb,ccc`, or as many `Mawu::None` values as there are columns in the first row.
 
 ### Handling of malformed CSV files
-A CSV file can be malformed in a multitude of ways, especially with all the different implementations floating around, and Mewa adhering to a strict subset of them.
+A CSV file can be malformed in a multitude of ways, especially with all the different implementations floating around, and Mawu adhering to a strict subset of them.
 
 To be able to handle a malformed CSV file, some assumptions have to be made about it by Mawu, and they very well might be wrong.
 So while Mawu does handle some malformed CSV files, it is not recommended to do so, and if you choose to do so, to take the utmost care when handling the result of any parsing.
@@ -101,13 +101,14 @@ Mawu is able to handle the following types of malformed CSV files:
 - missing value entries
 - incomplete header
 
+Mawu is able to handle all of these types of malformed CSV files, 
 To simplify the internal handling of malformed CSV files, Mawu does not differentiate between headed and headless CSV files if it is parsing one.
 
 #### Parsing a malformed CSV file example
 > [!WARNING]
 > Parsing a malformed CSV file is not recommended and error-prone.
 
-As there is no difference made by Mewa when parsing a malformed CSV file, you can use the `from_csv_malformed(path)` method.
+As there is no difference made by Mawu when parsing a malformed CSV file, you can use the `from_csv_malformed(path)` method.
 This will return a `Result<MawuResult, MawuError>`, with the `MawuResult` always being of type `MawuResult::headless` and the contents being of type `Vec<Vec<MawuValue>>`.
 
 ```rust
