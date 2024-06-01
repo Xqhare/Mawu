@@ -14,6 +14,14 @@ Mawu, named after the ancient creator goddess Mawu in west-african mythology, of
     - CSV
         - With or without header, and data shift is more likely to occur
         - settable delimiter
+- Supports missing or not provided values
+
+## Naming the Creation: A Legacy of the Divine
+
+The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
+There's a long and rich human tradition of naming significant things after deities. Mawu embodies this tradition perfectly.
+
+Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
 
 ## CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
@@ -27,10 +35,13 @@ This is not part of the rfc4180 standard and thus not implemented in Mawu, inste
 Another example is the way encoding is implemented. Mewa uses `utf-8` encoding exclusively for CSV, and does not recognize or produce a `BOM` or similar at the beginning of the file.
 There are CSV files encoded in `utf-16` and `utf-32` as well as some more esoteric implementations like the IBM one where you can define new field names in the middle of a CSV file by using `#GROUP_OBJECT_PROFILE#` [learn more](https://www.ibm.com/docs/en/sig-and-i/10.0.2?topic=schedules-example-comma-separated-value-csv-file) and many others.
 
+One last example is the handling of a value of `""` in the middle of a CSV file. This is, again, not part of the rfc4180 standard and sometimes interpreted as an empty string, other times as a missing value.
+Mawu will treat it as an empty string.
+
 Because of this, most if not all CSV files are only supported in the ecosystem or app they were created in, and there is no guarantee that Mawu will be able to parse them correctly.
 
 > [!NOTE]
-> While the usage of the header is optional, you need to use the `from_csv_headed(path)` method of the library, otherwise use the `from_csv_headless(path)` method.
+> While the usage of the header is optional, you need to use the `from_csv_headless(path)` method of the library, otherwise use the `from_csv_headed(path)` method.
 > [Learn more.](#usage)
 
 ### Handling missing or not provided values
