@@ -3,4 +3,6 @@ name = "mawu"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
+[dev-dependencies]
+json = "0.12.4"
+pretty_assertions = "1.4.0"
