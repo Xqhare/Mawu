@@ -1,7 +1,7 @@
 # Mawu
 A simple JSON and CSV parsing library written in rust.
 
-Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. It is a zero dependency library.
+Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. It is not a zero dependency library, it's only dependency is `unicode-segmentation`.
 
 Also, it should be said that this is a hobbyist repo and is probably not ready for production use.
 
@@ -11,7 +11,6 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
 ## Features
 - Simple and fast
 - Type aware
-- Zero additional dependencies
 - Supports both CSV and JSON
     - CSV
         - With or without header, and data shift is more likely to occur
