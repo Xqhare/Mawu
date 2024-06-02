@@ -1,6 +1,6 @@
 use std::fmt;
 
-
+#[derive(Debug)]
 pub enum CsvError {
     ParseError(CsvParseError),
 }
@@ -16,7 +16,8 @@ impl fmt::Display for CsvError {
     
 }
 
-enum CsvParseError {
+#[derive(Debug)]
+pub enum CsvParseError {
     UnescapedDoubleQuote,
     UnterminatedQuote,
     UnescapedCharacter(char),
