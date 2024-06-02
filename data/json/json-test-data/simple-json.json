@@ -1,0 +1,38 @@
+{
+    "quiz": {
+        "sport": {
+            "q1": {
+                "question": "Which one is correct team name in 1. Bundesliga?",
+                "options": [
+                    "2. Fc Bayern",
+                    "Hannover Ball-Verein",
+                    "RedBull Lepizig",
+                    "VfB Stuttgart"
+                ],
+                "answer": "VfB Stuttgart"
+            }
+        },
+        "maths": {
+            "q1": {
+                "question": "5 + 8 = ?",
+                "options": [
+                    "10",
+                    "11",
+                    "12",
+                    "13"
+                ],
+                "answer": "13"
+            },
+            "q2": {
+                "question": "12 - 10 = ?",
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "answer": "2"
+            }
+        }
+    }
+}
