@@ -2,6 +2,7 @@ use std::{fmt, result};
 
 pub mod csv_error;
 
+#[derive(Debug)]
 pub enum MawuError {
     IoError(std::io::Error),
     CsvError(csv_error::CsvError),
