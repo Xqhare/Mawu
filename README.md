@@ -22,6 +22,8 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
     - [Features](#features)
     - [Overview](#overview)
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
+    - [`MawuValue`](#mawuvalue)
+        - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
     - [CSV](#csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
@@ -38,6 +40,49 @@ There's a long and rich human tradition of naming significant things after deiti
 
 Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
 
+## `MawuValue`
+Mawu uses the `MawuValue` enum to represent the different types of values that can be found in both JSON and CSV files, in one, the other, or exclusively.
+
+Both the CSV parser and the JSON parser use a different subset of this enum to represent the different types of values.
+The difference is slight however, as only the `array` and `object` are different at all, and are represented as `MawuValue::CsvArray` and `MawuValue::CsvObject` for the CSV parser, and `Mawu::Array` and `Mawu::Object` for the JSON parser.
+
+### An exhaustive list of all `MawuValue`'s
+- General types
+    - `MawuValue::None`
+    - `MawuValue::Bool`
+    - `MawuValue::Int`
+    - `MawuValue::Float`
+    - `MawuValue::String`
+- JSON exclusive types
+    - `MawuValue::Array`
+    - `MawuValue::Object`
+- CSV exclusive types
+    - `MawuValue::CsvArray`
+    - `MawuValue::CsvObject`
+
+Again, convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}` and `as_{MawuValue}` functions.
+
+#### Example of getting a `MawuValue` if its type is not known or different in the same field
+
+```rust
+
+match mawu_value {
+    // General types
+    MawuValue::None => None,
+    MawuValue::Bool(b) => b.as_bool(),
+    MawuValue::Int(i) => i.as_i64(),
+    MawuValue::Float(f) => f.as_f64(),
+    MawuValue::String(s) => s.as_str(),
+    // Json exclusive types
+    MawuValue::Array(a) => a.as_array(),
+    MawuValue::Object(o) => o.as_object(),
+    // Csv exclusive types
+    MawuValue::CsvArray(ca) => ca.as_csv_array(),
+    MawuValue::CsvObject(co) => co.as_csv_object(),
+}
+
+```
+
 ## CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
 
@@ -52,6 +97,8 @@ There are CSV files encoded in `utf-16`, `utf-32` or even some `ASCII`-variants,
 
 Because of this, most if not all CSV files are only supported in the ecosystem or app they were created in, and there is no guarantee that Mawu will be able to parse them correctly.
 
+Mawu handles CSV files with an empty or filled last row.
+
 > [!NOTE]
 > While the usage of the header is optional, you will need to use either the `from_csv_headless(path)`, or the `from_csv_headed(path)` method.
 > [Learn more.](#usage)
@@ -59,13 +106,13 @@ Because of this, most if not all CSV files are only supported in the ecosystem o
 ### Handling missing or not provided values
 > [!caution]
 > It is advisable to ensure there are no missing or not provided values in your data before using Mawu.
-> To cut a long story short: You risk shifting your data, which is somewhat undesirable for most use-cases.
+> To cut a long story short: You risk shifting your data, which is somewhat undesirable for most encases.
 
 The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are many different ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
 So while Mawu does handle missing or not provided values, it is, and cannot ever be, 100% reliable.
 Exactly how this is handled is explained in the following paragraphs, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu (or any other CSV library really).
 
-Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant whitespace, so the missing `bbb` is converted into a space.
+Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant white space, so the missing `bbb` is converted into a space.
 A row in the form of `aaa,,ccc` would result in a `MawuValue` of `[aaa][Mawu::None][ccc]` for the same reasons.
 One last example is the handling of a value of `""` in the middle of a CSV file. This is also part of the rfc4180 standard only implicitly, and sometimes interpreted as an empty string, other times as a missing value.
 Mawu will treat it as an empty string and uses it as the default for any empty value itself.
@@ -118,7 +165,7 @@ fn main() {
     let mawu_malformed: Vec<Vec<MawuValue>> = Mawu::from_csv_malformed("/path/to/file.csv");
 
     // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu_malformed.unwrap().contents {
+    for entry in mawu_malformed.unwrap().as_csv_array().unwrap() {
         for value in entry {
             println!("{}", value);
         }
@@ -128,8 +175,11 @@ fn main() {
 ```
 
 ### CSV Return value
-Mawu will return a `Result<MawuResult, MawuError>`. By using `MawuResult::headed` or `MawuResult::headless`, you access the data wrapped inside the `MawuResult`.
-The `contents` field will be of type `Vec<Vec<MawuValue>>` if used without a header, or `Vec<HashMap<String, MawuValue>>` if used with a header.
+Mawu will return a `Result<MawuValue, MawuError>`. The wrapped `MawuValue` will have one of two types, depending on if a file with a header is parsed or not.
+
+If `Mawu::from_csv_headed(path)` is used, the `MawuValue` will be of type `Vec<Vec<MawuValue>>`, and if `Mawu::from_csv_headless(path)` is used, the `MawuValue` will be of type `Vec<HashMap<String, MawuValue>>`.
+
+To get to your data, you will need to iterate over the contents of the `MawuValue` returned. You can do this by calling `as_csv_object()` or `as_csv_array()` on the `MawuValue` returned as appropriate. If you are not sure what the returned value type is, you can check by using `is_csv_object()` or `is_csv_array()`, convenience functions for all types are provided by Mawu.  
 
 ### CSV Usage
 Reading a CSV file and just printing out the values:
@@ -142,7 +192,7 @@ fn main() {
     let mawu: Vec<HashMap<String, MawuValue>> = Mawu::from_csv_headed("/path/to/file.csv");
 
     // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu.unwrap().contents {
+    for entry in mawu.unwrap().as_csv_object().unwrap() {
         for (key, value) in &entry {
             println!("{}: {}", key, value);
         }
@@ -152,7 +202,7 @@ fn main() {
     let mawu_headless: Vec<Vec<MawuValue>> = Mawu::from_csv_headless("/path/to/file.csv");
 
     // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu_headless.unwrap().contents {
+    for entry in mawu_headless.unwrap().as_csv_array().unwrap() {
         for value in entry {
             println!("{}", value);
         }
