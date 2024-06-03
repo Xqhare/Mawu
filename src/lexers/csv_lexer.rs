@@ -1,64 +1,11 @@
 use std::collections::{HashMap, VecDeque};
 
-use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{errors::{csv_error::{CsvError, CsvParseError}, MawuError}, mawu_values::MawuValue, utils::is_newline};
 
-
-pub fn headed(input_string: String) -> Result<MawuValue, MawuError> {
-    let mut file_contents = input_string.graphemes(true).collect::<VecDeque<&str>>();
-    let head = {
-        let mut head_done = false;
-        let mut head_out: Vec<String> = Default::default();
-        while !head_done {
-            if let Some(h) = file_contents.pop_front() {
-                if is_newline(h) {
-                    head_done = true;
-                } else if h == "," {
-                    // do literally nothing
-                } else {
-                    if h == "\"" {
-                        let mut value: String = Default::default();
-                        let mut open_quote = true;
-                        while open_quote {
-                            if file_contents.front() == Some(&"\"") && file_contents.get(1) == Some(&"\"") {
-                                value.push_str("\"");
-                                let _ = file_contents.pop_front();
-                                let _ = file_contents.pop_front();
-                            } else if file_contents.front() == Some(&"\"") {
-                                let _ = file_contents.pop_front();
-                                open_quote = false;
-                            } else {
-                                if let Some(t) = file_contents.pop_front() {
-                                    value.push_str(t);
-                                }
-                            }
-                        }
-                        head_out.push(value);
-                    } else {
-                        let mut value: String = h.to_string();
-                        while file_contents.front() != Some(&",") && !is_newline(file_contents.front().ok_or_else(|| MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline)))?) {
-                            if let Some(t) = file_contents.pop_front() {
-                                let mut entry = t.to_string();
-                                while file_contents.front() != Some(&",") && !is_newline(file_contents.front().ok_or_else(|| MawuError::CsvError(CsvError::UnrecognizedHeader("".to_string())))?) {
-                                    if let Some(g) = file_contents.pop_front() {
-                                        entry.push_str(g);
-                                    }
-                                }
-                                value.push_str(&entry);
-                            }
-                        }
-                        head_out.push(value);
-                    }
-                }
-            } else {
-                let t = file_contents.iter().map(|s| format!("{}", s)).collect::<String>();
-                return Err(MawuError::CsvError(CsvError::UnrecognizedHeader(t)));
-            };
-        };
-        head_out
-    };
-    let body = parse_csv_body(file_contents)?;
+pub fn headed(file_contents: VecDeque<&str>) -> Result<MawuValue, MawuError> {
+    let (head, left_content) = make_head(file_contents)?;
+    let body = parse_csv_body(left_content, head.len())?;
     let mut out: Vec<HashMap<String, MawuValue>> = Default::default();
     for entry in body {
         let mut tmp_bind: HashMap<String, MawuValue> = Default::default();
@@ -74,12 +21,15 @@ pub fn headed(input_string: String) -> Result<MawuValue, MawuError> {
     Ok(MawuValue::CSVObject(out))
 }
 
-pub fn headless(input_string: String) -> Result<MawuValue, MawuError> {
-    todo!();
+pub fn headless(file_contents: VecDeque<&str>) -> Result<MawuValue, MawuError> {
+    let (head, left_content) = make_head(file_contents)?;
+    let mut body = parse_csv_body(left_content, head.len())?;
+    body.insert(0, head.into_iter().map(|s| MawuValue::from(s)).collect::<Vec<MawuValue>>());
+    Ok(MawuValue::CSVArray(body))
 }
 
 #[allow(unused_assignments)]
-fn parse_csv_body(mut csv_body: VecDeque<&str>) -> Result<Vec<Vec<MawuValue>>, MawuError> {
+fn parse_csv_body(mut csv_body: VecDeque<&str>, head_length: usize) -> Result<Vec<Vec<MawuValue>>, MawuError> {
     let mut out: Vec<Vec<MawuValue>> = Default::default();
     let mut row_data: Vec<MawuValue> = Default::default();
     while csv_body.front().is_some() {
@@ -89,12 +39,16 @@ fn parse_csv_body(mut csv_body: VecDeque<&str>) -> Result<Vec<Vec<MawuValue>>, M
                     let _ = csv_body.pop_front();
                 }          
                 out.push(row_data);
-                // assignment is only overwritten before being read if the very first character
-                // is a newline and thus fine.
+                // assignment is only overwritten before being read if the very first character IS a newline and thus, probably, maybe, fine.
                 row_data = Default::default();
             } else if h == "," {
                 if is_newline(csv_body.front().ok_or_else(|| MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline)))?) {
-                    row_data.push(MawuValue::Null);
+                    // push as many nulls as needed to fill in the missing data
+                    if head_length > row_data.len() {
+                        for _ in 0..(head_length - row_data.len()) {
+                            row_data.push(MawuValue::Null);
+                        }
+                    }
                 }
             } else if h == "\"" {
                 let mut value: String = Default::default();
@@ -114,7 +68,6 @@ fn parse_csv_body(mut csv_body: VecDeque<&str>) -> Result<Vec<Vec<MawuValue>>, M
                     }
                 }
                 row_data.push(MawuValue::from(value));
-                
             } else {
                 let mut value: String = h.to_string();
                 while csv_body.front() != Some(&",") && !is_newline(csv_body.front().ok_or_else(|| MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline)))?) {
@@ -134,3 +87,56 @@ fn parse_csv_body(mut csv_body: VecDeque<&str>) -> Result<Vec<Vec<MawuValue>>, M
     }
     Ok(out)
 }
+
+fn make_head(mut file_contents: VecDeque<&str>) -> Result<(Vec<String>, VecDeque<&str>), MawuError> {
+    let mut head_done = false;
+    let mut head_out: Vec<String> = Default::default();
+    while !head_done {
+        if let Some(h) = file_contents.pop_front() {
+            if is_newline(h) {
+                head_done = true;
+            } else if h == "," {
+                // do literally nothing
+            } else {
+                if h == "\"" {
+                    let mut value: String = Default::default();
+                    let mut open_quote = true;
+                    while open_quote {
+                        if file_contents.front() == Some(&"\"") && file_contents.get(1) == Some(&"\"") {
+                            value.push_str("\"");
+                            let _ = file_contents.pop_front();
+                            let _ = file_contents.pop_front();
+                        } else if file_contents.front() == Some(&"\"") {
+                            let _ = file_contents.pop_front();
+                            open_quote = false;
+                        } else {
+                            if let Some(t) = file_contents.pop_front() {
+                                value.push_str(t);
+                            }
+                        }
+                    }
+                    head_out.push(value);
+                } else {
+                    let mut value: String = h.to_string();
+                    while file_contents.front() != Some(&",") && !is_newline(file_contents.front().ok_or_else(|| MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline)))?) {
+                        if let Some(t) = file_contents.pop_front() {
+                            let mut entry = t.to_string();
+                            while file_contents.front() != Some(&",") && !is_newline(file_contents.front().ok_or_else(|| MawuError::CsvError(CsvError::UnrecognizedHeader("".to_string())))?) {
+                                if let Some(g) = file_contents.pop_front() {
+                                    entry.push_str(g);
+                                }
+                            }
+                            value.push_str(&entry);
+                        }
+                    }
+                    head_out.push(value);
+                }
+            }
+        } else {
+            let t = file_contents.iter().map(|s| format!("{}", s)).collect::<String>();
+            return Err(MawuError::CsvError(CsvError::UnrecognizedHeader(t)));
+        };
+    };
+    Ok((head_out, file_contents))
+}
+
