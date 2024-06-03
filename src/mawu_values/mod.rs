@@ -4,6 +4,7 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, PartialEq)]
 pub enum MawuValue {
     CSVObject(Vec<HashMap<String, MawuValue>>),
+    CSVArray(Vec<Vec<MawuValue>>),
     Object(HashMap<String, MawuValue>),
     Array(Vec<MawuValue>),
     Int(i32),
@@ -15,7 +16,17 @@ pub enum MawuValue {
 
 impl From<String> for MawuValue {
     fn from(value: String) -> Self {
-        MawuValue::String(value)
+        if value.is_empty() {
+            MawuValue::Null
+        } else if value.parse::<i32>().is_ok() {
+            MawuValue::Int(value.parse().unwrap())
+        } else if value.parse::<f32>().is_ok() {
+            MawuValue::Float(value.parse().unwrap())
+        } else if value.parse::<bool>().is_ok() {
+            MawuValue::Bool(value.parse().unwrap())
+        } else {
+            MawuValue::String(value)
+        }
     }
 }
 
@@ -23,6 +34,13 @@ impl MawuValue {
     pub fn is_csv_object(&self) -> bool {
         match self {
             MawuValue::CSVObject(_) => true,
+            _ => false
+        }
+    }
+
+    pub fn is_csv_array(&self) -> bool {
+        match self {
+            MawuValue::CSVArray(_) => true,
             _ => false
         }
     }
@@ -79,6 +97,13 @@ impl MawuValue {
     pub fn as_csv_object(&self) -> Option<&Vec<HashMap<String, MawuValue>>> {
         match self {
             MawuValue::CSVObject(v) => Some(v),
+            _ => None
+        }
+    }
+
+    pub fn as_csv_array(&self) -> Option<&Vec<Vec<MawuValue>>> {
+        match self {
+            MawuValue::CSVArray(v) => Some(v),
             _ => None
         }
     }
