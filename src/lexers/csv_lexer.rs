@@ -66,10 +66,8 @@ pub fn headed(input_string: String) -> Result<MawuValue, MawuError> {
             for (index, value) in entry.iter().enumerate() {
                 tmp_bind.insert(head[index].clone(), value.clone());
             }
-        } else if entry.len() > head.len() {
-            return Err(MawuError::CsvError(CsvError::ParseError(CsvParseError::ExtraValue(format!("{:?}", entry)))));
         } else {
-            return Err(MawuError::CsvError(CsvError::ParseError(CsvParseError::MissingValue(format!("{:?}", entry)))));
+            return Err(MawuError::CsvError(CsvError::ParseError(CsvParseError::ExtraValue(format!("{:?}", entry)))));
         };
         out.push(tmp_bind);
     }
@@ -87,7 +85,7 @@ fn parse_csv_body(mut csv_body: VecDeque<&str>) -> Result<Vec<Vec<MawuValue>>, M
     while csv_body.front().is_some() {
         if let Some(h) = csv_body.pop_front() {
             if is_newline(h) {
-                if is_newline(csv_body.front().ok_or_else(|| MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline)))?) {
+                if csv_body.is_empty() || is_newline(csv_body.front().ok_or_else(|| MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline)))?) {
                     let _ = csv_body.pop_front();
                 }          
                 out.push(row_data);
