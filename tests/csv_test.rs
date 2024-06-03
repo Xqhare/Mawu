@@ -6,14 +6,14 @@ mod csv_tests {
 
     #[test]
     fn my_own_random_data_all_types() {
-        let t= mawu::csv::from_csv_headed("data/csv/csv-test-data/my-own-random-data/all-types.csv");
-        //assert_eq!(t.is_ok(), true);
-        for x in t.as_ref().unwrap().as_csv_object().unwrap() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/my-own-random-data/all-types.csv");
+        assert_eq!(mawu.is_ok(), true);
+        for value in mawu.as_ref().unwrap().as_csv_object().unwrap() {
             //println!("{:?}", x);
-            assert_eq!(x.len(), 3);
-            let id = x.get("Id").unwrap();
-            let types = x.get("Type").unwrap();
-            let content = x.get("Content").unwrap();
+            assert_eq!(value.len(), 3);
+            let id = value.get("Id").unwrap();
+            let types = value.get("Type").unwrap();
+            let content = value.get("Content").unwrap();
             if id == &MawuValue::String(1.to_string()) {
                 assert_eq!(types, &MawuValue::String("uint".to_string()));
                 assert_eq!(content, &MawuValue::String("0".to_string()));
@@ -55,5 +55,64 @@ mod csv_tests {
                 assert_eq!(content, &MawuValue::String("Los Disturbados - \"Stuparena\"".to_string()));
             }
         }
+    }
+
+    #[test]
+    fn random_data_no_license_customers100() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/random-data-no-license/customers-100.csv");
+        assert_eq!(mawu.is_ok(), true);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap().len(), 100);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 12);
+
+        // checking a few entries against the known `true` values
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].get("Index").unwrap(), &MawuValue::String("1".to_string()));
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].get("Customer Id").unwrap(), &MawuValue::String("DD37Cf93aecA6Dc".to_string()));
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].get("Country").unwrap(), &MawuValue::String("Chile".to_string()));
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].get("Website").unwrap(), &MawuValue::String("http://www.stephenson.com/".to_string()));
+
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[99].get("Index").unwrap(), &MawuValue::String("100".to_string()));
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[99].get("Customer Id").unwrap(), &MawuValue::String("2354a0E336A91A1".to_string()));
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[99].get("Country").unwrap(), &MawuValue::String("Honduras".to_string()));
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[99].get("Website").unwrap(), &MawuValue::String("http://www.hatfield-saunders.net/".to_string()));
+    }
+
+    #[test]
+    fn random_data_no_license_customers100000() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/random-data-no-license/customers-100000.csv");
+        assert_eq!(mawu.is_ok(), true);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap().len(), 100000);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 12);
+    }
+
+    #[test]
+    fn random_data_no_license_organizations100() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/random-data-no-license/organizations-100.csv");
+        assert_eq!(mawu.is_ok(), true);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap().len(), 100);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 9);
+    }
+
+    #[test]
+    fn random_data_no_license_organizations100000() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/random-data-no-license/organizations-100000.csv");
+        assert_eq!(mawu.is_ok(), true);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap().len(), 100000);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 9);
+    }
+
+    #[test]
+    fn random_data_no_license_people100() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/random-data-no-license/people-100.csv");
+        assert_eq!(mawu.is_ok(), true);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap().len(), 100);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 9);
+    }
+
+    #[test]
+    fn random_data_no_license_people100000() {
+        let mawu = mawu::csv::from_csv_headed("data/csv/csv-test-data/random-data-no-license/people-100000.csv");
+        assert_eq!(mawu.is_ok(), true);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap().len(), 100000);
+        assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 9);
     }
 }
