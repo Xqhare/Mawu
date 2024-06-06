@@ -152,9 +152,43 @@ impl MawuValue {
 
     pub fn as_null(&self) -> Option<&() > {
         match self {
-            MawuValue::Null => Some(&()),
-            _ => None
+            MawuValue::Null => None,
+            _ => Some(&())
         }
     }
+
+}
+
+#[test]
+fn test_mawu_value() {
+    let mawu_string_value = MawuValue::from("test".to_string());
+    assert_eq!(mawu_string_value, MawuValue::String("test".to_string()));
+    assert_eq!(mawu_string_value.is_string(), true);
+    assert_eq!(mawu_string_value.as_string(), Some(&"test".to_string()));
+
+    let mawu_int_value = MawuValue::from("123".to_string());
+    assert_eq!(mawu_int_value, MawuValue::Int(123));
+    assert_eq!(mawu_int_value.is_int(), true);
+    assert_eq!(mawu_int_value.as_int(), Some(&123));
+
+    let mawu_float_value = MawuValue::from("123.456".to_string());
+    assert_eq!(mawu_float_value, MawuValue::Float(123.456));
+    assert_eq!(mawu_float_value.is_float(), true);
+    assert_eq!(mawu_float_value.as_float(), Some(&123.456));
+
+    let mawu_bool_true_value = MawuValue::from("true".to_string());
+    assert_eq!(mawu_bool_true_value, MawuValue::Bool(true));
+    assert_eq!(mawu_bool_true_value.is_bool(), true);
+    assert_eq!(mawu_bool_true_value.as_bool(), Some(&true));
+
+    let mawu_bool_false_value = MawuValue::from("false".to_string());
+    assert_eq!(mawu_bool_false_value, MawuValue::Bool(false));
+    assert_eq!(mawu_bool_false_value.is_bool(), true);
+    assert_eq!(mawu_bool_false_value.as_bool(), Some(&false));
+
+    let mawu_null_value = MawuValue::from("".to_string());
+    assert_eq!(mawu_null_value, MawuValue::Null);
+    assert_eq!(mawu_null_value.is_null(), true);
+    assert_eq!(mawu_null_value.as_null(), None);
 
 }
