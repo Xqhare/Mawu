@@ -48,7 +48,7 @@ The difference is slight however, as only the `array` and `object` are different
 
 ### An exhaustive list of all `MawuValue`'s
 - General types
-    - `MawuValue::None`
+    - `MawuValue::Null`
     - `MawuValue::Bool`
     - `MawuValue::Int`
     - `MawuValue::Float`
@@ -61,6 +61,8 @@ The difference is slight however, as only the `array` and `object` are different
     - `MawuValue::CsvObject`
 
 Again, convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}` and `as_{MawuValue}` functions.
+When you call any `as_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
+Calling `as_null` will return `None` instead when the value is none, and `Some()` otherwise.
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
 
@@ -68,7 +70,7 @@ Again, convenience functions for all types are provided by Mawu, in the form of 
 
 match mawu_value {
     // General types
-    MawuValue::None => None,
+    MawuValue::Null => None,
     MawuValue::Bool(b) => b.as_bool(),
     MawuValue::Int(i) => i.as_i64(),
     MawuValue::Float(f) => f.as_f64(),
