@@ -5,9 +5,6 @@ Mawu, named after the ancient creator goddess Mawu in West African mythology, of
 
 Also, it should be said that this is a hobbyist repo and is probably not ready for production use.
 
-> [!WARNING]
-> WIP CODE. DO NOT USE.
-
 ## Features
 - Simple and fast
 - Type aware
@@ -104,13 +101,10 @@ Mawu handles CSV files with an empty or filled last row.
 > [Learn more.](#usage)
 
 ### Handling missing or not provided values
-> [!caution]
-> It is advisable to ensure there are no missing or not provided values in your data before using Mawu.
-> To cut a long story short: You risk shifting your data, which is somewhat undesirable for most encases.
 
 The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are many different ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
 So while Mawu does handle missing or not provided values, it is, and cannot ever be, 100% reliable.
-Exactly how this is handled is explained in the following paragraphs, however it is advisable to ensure there are no missing or not provided values in your data before using Mawu (or any other CSV library really).
+Exactly how this is handled is explained in the following paragraphs.
 
 Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant white space, so the missing `bbb` is converted into a space.
 A row in the form of `aaa,,ccc` would result in a `MawuValue` of `[aaa][Mawu::None][ccc]` for the same reasons.
