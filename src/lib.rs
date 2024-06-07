@@ -17,8 +17,5 @@ pub mod csv {
         csv_lexer::headless(file_handling::read_file(path)?.graphemes(true).collect::<VecDeque<&str>>())
     }
 
-    pub fn from_csv_malformed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
-        from_csv_headless(path)
-    }
 }
 
