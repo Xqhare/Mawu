@@ -160,7 +160,7 @@ impl MawuValue {
 }
 
 #[test]
-fn test_mawu_value() {
+fn test_mawu_value_from_string() {
     let mawu_string_value = MawuValue::from("test".to_string());
     assert_eq!(mawu_string_value, MawuValue::String("test".to_string()));
     assert_eq!(mawu_string_value.is_string(), true);
@@ -191,4 +191,22 @@ fn test_mawu_value() {
     assert_eq!(mawu_null_value.is_null(), true);
     assert_eq!(mawu_null_value.as_null(), None);
 
+}
+
+#[test]
+fn test_mawu_value_constructed() {
+    let mawu_object_value = MawuValue::Object(HashMap::new());
+    let mawu_array_value = MawuValue::Array(vec![]);
+    let mawu_csv_object_value = MawuValue::CSVObject(vec![HashMap::new()]);
+    let mawu_csv_array_value = MawuValue::CSVArray(vec![vec![]]);
+
+    assert_eq!(mawu_object_value.is_object(), true);
+    assert_eq!(mawu_array_value.is_array(), true);
+    assert_eq!(mawu_csv_object_value.is_csv_object(), true);
+    assert_eq!(mawu_csv_array_value.is_csv_array(), true);
+
+    assert_eq!(mawu_object_value.as_object(), Some(&HashMap::new()));
+    assert_eq!(mawu_array_value.as_array(), Some(&vec![]));
+    assert_eq!(mawu_csv_object_value.as_csv_object(), Some(&vec![HashMap::new()]));
+    assert_eq!(mawu_csv_array_value.as_csv_array(), Some(&vec![vec![]]));
 }
