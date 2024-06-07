@@ -28,8 +28,6 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
             - [Without header](#without-header)
-        - [Handling of malformed CSV files](#handling-of-malformed-csv-files)
-            - [Parsing a malformed CSV file example](#parsing-a-malformed-csv-file-example)
         - [CSV Return value](#csv-return-value)
         - [CSV Usage](#csv-usage)
     - [JSON](#json)
@@ -136,45 +134,6 @@ Should a header be not present, any row ending in a `,` will append as many `Maw
 The row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::None]` because of the trailing comma without content.
 A row where the missing value is `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb]` only in the case where it is in the first row.
 However, the same row of `aaa,bbb` would result in a `MawuValue` of `[aaa][bbb][Mawu::None]` in the case where the first row is `aaa,bbb,ccc`, or as many `Mawu::None` values as there are columns in the first row.
-
-### Handling of malformed CSV files
-A CSV file can be malformed in a multitude of ways, especially with all the different implementations floating around, and Mawu adhering to a strict subset of them.
-
-To be able to handle a malformed CSV file, some assumptions have to be made about it by Mawu, and they very well might be wrong.
-So while Mawu does handle some malformed CSV files, it is not recommended to do so, and if you choose to do so, to take the utmost care when handling the result of any parsing.
-
-Mawu is able to handle the following types of malformed CSV files:
-- missing quotes (this is done by simply adding one if it seems to be missing)
-- extra value entries
-- missing value entries
-- incomplete header
-
-Mawu is able to handle all of these types of malformed CSV files, 
-To simplify the internal handling of malformed CSV files, Mawu does not differentiate between headed and headless CSV files if it is parsing one.
-
-#### Parsing a malformed CSV file example
-> [!WARNING]
-> Parsing a malformed CSV file is not recommended and error-prone.
-
-As there is no difference made by Mawu when parsing a malformed CSV file, you can use the `from_csv_malformed(path)` method.
-This will return a `Result<MawuResult, MawuError>`, with the `MawuResult` always being of type `MawuResult::headless` and the contents being of type `Vec<Vec<MawuValue>>`.
-
-```rust
-use mawu::Mawu::*;
-
-fn main() {
-    // for a malformed CSV file
-    let mawu_malformed: Vec<Vec<MawuValue>> = Mawu::from_csv_malformed("/path/to/file.csv");
-
-    // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu_malformed.unwrap().as_csv_array().unwrap() {
-        for value in entry {
-            println!("{}", value);
-        }
-    }
-
-}
-```
 
 ### CSV Return value
 Mawu will return a `Result<MawuValue, MawuError>`. The wrapped `MawuValue` will have one of two types, depending on if a file with a header is parsed or not.
