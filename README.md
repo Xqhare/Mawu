@@ -1,7 +1,7 @@
 # Mawu
 A simple JSON and CSV parsing library written in rust.
 
-Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. It is not a zero dependency library, it's only dependency is `unicode-segmentation`. Mawu only supports 64bit systems.
+Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. It is not a zero dependency library, its only dependency is `unicode-segmentation`. Mawu only supports 64bit systems.
 
 Also, it should be said that this is a hobbyist repo and is probably not ready for production use.
 
@@ -40,46 +40,96 @@ Mawu uses the `MawuValue` enum to represent the different types of values that c
 
 Both the CSV parser and the JSON parser use a different subset of this enum to represent the different types of values.
 The difference is slight however, as only the `array` and `object` are different at all, and are represented as `MawuValue::CsvArray` and `MawuValue::CsvObject` for the CSV parser, and `Mawu::Array` and `Mawu::Object` for the JSON parser.
+Mawu supports only 64 bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 
 ### An exhaustive list of all `MawuValue`'s
-- General types
+- Primitive types
     - `MawuValue::None`
     - `MawuValue::Bool`
+        - wrapping a `bool`
+    - `MawuValue::Uint`
+        - wrapping a `u64`
     - `MawuValue::Int`
+        - wrapping a `i64`
     - `MawuValue::Float`
+        - wrapping a `f64`
     - `MawuValue::String`
 - JSON exclusive types
     - `MawuValue::Array`
+        - wrapping a `Vec<MawuValue>`
     - `MawuValue::Object`
+        - wrapping a `HashMap<String, MawuValue>`
 - CSV exclusive types
     - `MawuValue::CsvArray`
+        - wrapping a `Vec<Vec<MawuValue>>`
     - `MawuValue::CsvObject`
+        - wrapping a `Vec<HashMap<String, Vec<MawuValue>>>`
 
-Again, convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}` and `as_{MawuValue}` functions.
+Again, convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
 When you call any `as_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
 Calling `as_null` will return `None` instead when the value is none, and `Some()` otherwise.
+`is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, and if the value is `None`, respectively.
+
+> [!tip] `as_{MawuValue}` vs `to_{MawuValue}` for primitive types
+> All `as_{MawuValue}` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_{MawuValue}`, and will only return a value if it was parsed as such.
+> The `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
+> If you want fine-grained control over what type you get and what to do with its data directly, you can call `as_{MawuValue}`. 
+> If you are going to clone the data anyway, you can call `to_{MawuValue}` directly. Should you call the right `to_{MawuValue}` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again.
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
 
 ```rust
-
-match mawu_value {
-    // General types
-    MawuValue::None => None,
-    MawuValue::Bool(b) => b.as_bool(),
-    MawuValue::Uint(u) => u.as_uint(),
-    MawuValue::Int(i) => i.as_int(),
-    MawuValue::Float(f) => f.as_float(),
-    MawuValue::String(s) => s.as_string(),
-    // Json exclusive types
-    MawuValue::Array(a) => a.as_array(),
-    MawuValue::Object(o) => o.as_object(),
-    // Csv exclusive types
-    MawuValue::CsvArray(ca) => ca.as_csv_array(),
-    MawuValue::CsvObject(co) => co.as_csv_object(),
+// These are the primitive types
+if mawu_value.is_none() {
+    let value: Option<()> = mawu_value.as_none().unwrap();
+    assert_eq!(value, None);
+    // Do something with `value`
+} else if mawu_value.is_bool() {
+    let value: &bool = mawu_value.as_bool().unwrap();
+    assert_eq!(value, &true);
+    // Do something with `value`
+} else if mawu_value.is_uint() {
+    let value: &u64 = mawu_value.as_uint().unwrap();
+    assert_eq!(value, &1);
+    // Do something with `value`
+} else if mawu_value.is_int() {
+    let value: &i64 = mawu_value.as_int().unwrap();
+    assert_eq!(value, &-1);
+    // Do something with `value`
+} else if mawu_value.is_float() {
+    let value: &f64 = mawu_value.as_float().unwrap();
+    assert_eq!(value, &-1.0);
+    // Do something with `value`
+} else if mawu_value.is_string() {
+    let _alternate_value: &String = mawu_value.as_string().unwrap();
+    let value: &str = value.as_str().unwrap();
+    assert_eq!(value, "hello");
+    // Do something with `value` or `alternate_value`
+// These are the JSON exclusive types
+} else if mawu_value.is_array() {
+    let array: &Vec<MawuValue> = mawu_value.as_array().unwrap();
+    assert_eq!(array.len(), 1);
+    // Do something with `array`
+} else if mawu_value.is_object() {
+    let object: &HashMap<String, MawuValue> = mawu_value.as_object().unwrap();
+    assert_eq!(object.len(), 1);
+    // Do something with `object`
+// These are the CSV exclusive return types
+} else if mawu_value.is_csv_array() {
+    let csv_array: &Vec<Vec<MawuValue>> = mawu_value.as_csv_array().unwrap();
+    assert_eq!(csv_array.len(), 1);
+    // Do something with `csv_array`
+} else if mawu_value.is_csv_object() {
+    let csv_object: &Vec<HashMap<String, MawuValue>> = mawu_value.as_csv_object().unwrap();
+    assert_eq!(csv_object.len(), 1);
+    // Do something with `csv_object`
 }
 
 ```
+
+> [!abstract] `MawuValue`
+> Chads use `as_{MawuValue}`, just know what kind of data they are getting and know what to do with a reference.
+> Normie Kernel devs use `to_{MawuValue}`, need to check what kind of data they are getting and have to clone it anyway.
 
 ## CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
@@ -181,11 +231,15 @@ Most edge cases and the way they are handled are explained in the following para
 
 In the rfc8259 standard, a JSON object is a set of key-value pairs where the keys should be unique. As this is not a hard requirement however, JSON parsers have handled this in a number of ways.
 Mawu will parse JSON objects as a `HashMap<String, MawuValue>` and uses the same behavior for duplicate keys, in that they are replaced with the last value.
+Because of the same behavior, Mawu will return JSON objects not in the same order as the JSON file.
 
-As the order of object members differs between parsers, Mawu does not order the members in any way, and will use the order in the JSON file.
+#### Arrays
+
+Ordering of arrays is kept.
 
 #### Numbers
 
 `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all.
 
-The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`, so Mawu supports any rust `f64` value.
+The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64 bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
+Should Mawu encounter a number not representable in 64 bits, it will return an error.
