@@ -69,6 +69,10 @@ impl From<&str> for MawuValue {
 }
 
 impl MawuValue {
+    /// Check if the value is an `CSV-Object`
+    ///
+    /// ## Returns
+    /// `true` if the value is an `CSV-Object`, `false` otherwise.
     pub fn is_csv_object(&self) -> bool {
         match self {
             MawuValue::CSVObject(_) => true,
@@ -76,6 +80,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is an `CSV-Array`
+    ///
+    /// ## Returns
+    /// `true` if the value is an `CSV-Array`, `false` otherwise.
     pub fn is_csv_array(&self) -> bool {
         match self {
             MawuValue::CSVArray(_) => true,
@@ -83,6 +91,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is an object
+    ///
+    /// ## Returns
+    /// `true` if the value is an object, `false` otherwise.
     pub fn is_object(&self) -> bool {
         match self {
             MawuValue::Object(_) => true,
@@ -90,6 +102,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is an array
+    ///
+    /// ## Returns
+    /// `true` if the value is an array, `false` otherwise.
     pub fn is_array(&self) -> bool {
         match self {
             MawuValue::Array(_) => true,
@@ -97,6 +113,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is a string
+    ///
+    /// ## Returns
+    /// `true` if the value is a string, `false` otherwise.
     pub fn is_string(&self) -> bool {
         match self {
             MawuValue::String(_) => true,
@@ -104,6 +124,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is an unsigned integer
+    ///
+    /// ## Returns
+    /// `true` if the value is an unsigned integer, `false` otherwise.
     pub fn is_uint(&self) -> bool {
         match self {
             MawuValue::Uint(_) => true,
@@ -111,6 +135,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is an integer
+    ///
+    /// ## Returns
+    /// `true` if the value is an integer, `false` otherwise.
     pub fn is_int(&self) -> bool {
         match self {
             MawuValue::Int(_) => true,
@@ -118,6 +146,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is a float
+    /// 
+    /// ## Returns
+    /// `true` if the value is a float, `false` otherwise.
     pub fn is_float(&self) -> bool {
         match self {
             MawuValue::Float(_) => true,
@@ -125,6 +157,10 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is a boolean
+    ///
+    /// ## Returns
+    /// `true` if the value is a boolean, `false` otherwise.
     pub fn is_bool(&self) -> bool {
         match self {
             MawuValue::Bool(_) => true,
@@ -154,6 +190,10 @@ impl MawuValue {
         }
     }
 
+    /// Simple convenience method to check if the value is `None`.
+    ///
+    /// ## Returns
+    /// `true` if the value is `None`, `false` otherwise.
     pub fn is_none(&self) -> bool {
         match self {
             MawuValue::None => true,
@@ -161,6 +201,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&Vec<HashMap<String, MawuValue>>)` if the value is an `CSV-Object`, `None` otherwise.
     pub fn as_csv_object(&self) -> Option<&Vec<HashMap<String, MawuValue>>> {
         match self {
             MawuValue::CSVObject(v) => Some(v),
@@ -168,6 +209,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&Vec<Vec<MawuValue>>)` if the value is an `CSV-Array`, `None` otherwise.
     pub fn as_csv_array(&self) -> Option<&Vec<Vec<MawuValue>>> {
         match self {
             MawuValue::CSVArray(v) => Some(v),
@@ -175,6 +217,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&HashMap<String, MawuValue>)` if the value is an object, `None` otherwise.
     pub fn as_object(&self) -> Option<&HashMap<String, MawuValue>> {
         match self {
             MawuValue::Object(v) => Some(v),
@@ -182,6 +225,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&Vec<MawuValue>)` if the value is an array, `None` otherwise.
     pub fn as_array(&self) -> Option<&Vec<MawuValue>> {
         match self {
             MawuValue::Array(v) => Some(v),
@@ -189,6 +233,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&String)` if the value is a String, `None` otherwise.
     pub fn as_string(&self) -> Option<&String> {
         match self {
             MawuValue::String(v) => Some(v),
@@ -196,6 +241,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&str)` if the value is a String, `None` otherwise.
     pub fn as_str(&self) -> Option<&str> {
         match self {
             MawuValue::String(v) => Some(v.as_str()),
@@ -203,6 +249,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&u64)` if the value is an integer, `None` otherwise.
     pub fn as_uint(&self) -> Option<&u64> {
         match self {
             MawuValue::Uint(v) => Some(v),
@@ -210,6 +257,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&i64)` if the value is an integer, `None` otherwise.
     pub fn as_int(&self) -> Option<&i64> {
         match self {
             MawuValue::Int(v) => Some(v),
@@ -217,6 +265,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&f64)` if the value is a float, `None` otherwise.
     pub fn as_float(&self) -> Option<&f64> {
         match self {
             MawuValue::Float(v) => Some(v),
@@ -224,6 +273,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(&bool)` if the value is a boolean, `None` otherwise.
     pub fn as_bool(&self) -> Option<&bool> {
         match self {
             MawuValue::Bool(v) => Some(v),
@@ -231,6 +281,7 @@ impl MawuValue {
         }
     }
 
+    /// Returns `Some(())` if the value is not `None`, `None` otherwise.
     pub fn as_none(&self) -> Option<()> {
         match self {
             MawuValue::None => None,
@@ -238,6 +289,8 @@ impl MawuValue {
         }
     }
 
+    /// Returns a owned copy of the value as an `Vec<HashMap<String, MawuValue>>`.
+    /// Returns `None` if the value is not an `CSV-Object`.
     pub fn to_csv_object(&self) -> Option<Vec<HashMap<String, MawuValue>>> {
         match self {
             MawuValue::CSVObject(v) => Some(v.clone()),
@@ -245,6 +298,8 @@ impl MawuValue {
         }
     }
 
+    /// Returns a owned copy of the value as an `Vec<Vec<MawuValue>>`.
+    /// Returns `None` if the value is not a `CSV-Array`.
     pub fn to_csv_array(&self) -> Option<Vec<Vec<MawuValue>>> {
         match self {
             MawuValue::CSVArray(v) => Some(v.clone()),
@@ -252,6 +307,8 @@ impl MawuValue {
         }
     }
 
+    /// Returns a owned copy of the value as an `HashMap<String, MawuValue>`.
+    /// Returns `None` if the value is not an `Object`.
     pub fn to_object(&self) -> Option<HashMap<String, MawuValue>> {
         match self {
             MawuValue::Object(v) => Some(v.clone()),
@@ -259,21 +316,39 @@ impl MawuValue {
         }
     }
 
+    /// Returns a owned copy of the value as an `Vec<MawuValue>`.
+    /// Casts any primitive type representable as an `Array` to an `Array`.
+    /// Returns `None` if the value is not a primitive type.
     pub fn to_array(&self) -> Option<Vec<MawuValue>> {
         match self {
             MawuValue::Array(v) => Some(v.clone()),
+            MawuValue::String(v) => Some(vec![MawuValue::String(v.clone())]),
+            MawuValue::None => Some(vec![MawuValue::None]),
+            MawuValue::Int(v) => Some(vec![MawuValue::Int(*v)]),
+            MawuValue::Uint(v) => Some(vec![MawuValue::Uint(*v)]),
+            MawuValue::Float(v) => Some(vec![MawuValue::Float(*v)]),
+            MawuValue::Bool(v) => Some(vec![MawuValue::Bool(*v)]),
             _ => None,
         }
     }
 
+    /// Returns a owned copy of the value as a `String`.
+    /// Casts any other primitive type representable as a `String` to a `String`.
+    /// Returns `None` if the value is not a primitive type.
     pub fn to_string(&self) -> Option<String> {
         match self {
             MawuValue::String(v) => Some(v.to_string()),
+            MawuValue::None => Some("".to_string()),
+            MawuValue::Int(v) => Some(v.to_string()),
+            MawuValue::Uint(v) => Some(v.to_string()),
+            MawuValue::Float(v) => Some(v.to_string()),
+            MawuValue::Bool(v) => Some(v.to_string()),
             _ => None,
         }
     }
 
-    /// Also casts any other parsed number type representable as a `u64` to a `u64`.
+    /// Returns a owned copy of the value as a `u64`.
+    /// Casts any other primitive type representable as a `u64` to a `u64`.
     /// Returns `None` if the value is not a number.
     pub fn to_uint(&self) -> Option<u64> {
         match self {
@@ -306,7 +381,8 @@ impl MawuValue {
         }
     }
 
-    /// Also casts any other parsed number type representable as an `i64` to an `i64`.
+    /// Returns a owned copy of the value as an `i64`.
+    /// Casts any other primitive type representable as an `i64` to an `i64`.
     /// Returns `None` if the value is not a number.
     pub fn to_int(&self) -> Option<i64> {
         match self {
@@ -335,7 +411,8 @@ impl MawuValue {
         }
     }
 
-    /// Also casts any other parsed number type representable as a `f64` to a `f64`.
+    /// Returns a owned copy of the value as a `f64`.
+    /// Casts any other primitive type representable as a `f64` to a `f64`.
     /// Returns `None` if the value is not a number.
     pub fn to_float(&self) -> Option<f64> {
         match self {
@@ -360,10 +437,26 @@ impl MawuValue {
         }
     }
 
+    /// ## Returns
+    /// A owned copy of the value as a `bool`.
+    /// `None` if the value is not a boolean and could not be represented as one.
     pub fn to_bool(&self) -> Option<bool> {
         match self {
             MawuValue::Bool(v) => Some(*v),
-            _ => None,
+            // I don't think that this code will ever actually return anything besides `None`
+            _ => {
+                let tmp = self.to_string();
+                if tmp.is_some() {
+                    let tmp2 = tmp.unwrap().parse::<bool>();
+                    if tmp2.is_ok() {
+                        Some(tmp2.unwrap())
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            },
         }
     }
 
