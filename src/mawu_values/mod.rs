@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum MawuValue {
     CSVObject(Vec<HashMap<String, MawuValue>>),
@@ -30,133 +29,148 @@ impl From<String> for MawuValue {
     }
 }
 
+impl From<&String> for MawuValue {
+    fn from(value: &String) -> Self {
+        if value.is_empty() {
+            MawuValue::Null
+        } else if value.parse::<i32>().is_ok() {
+            MawuValue::Int(value.parse().unwrap())
+        } else if value.parse::<f32>().is_ok() {
+            MawuValue::Float(value.parse().unwrap())
+        } else if value.parse::<bool>().is_ok() {
+            MawuValue::Bool(value.parse().unwrap())
+        } else {
+            MawuValue::String(value.to_string())
+        }
+    }
+}
+
 impl MawuValue {
     pub fn is_csv_object(&self) -> bool {
         match self {
             MawuValue::CSVObject(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_csv_array(&self) -> bool {
         match self {
             MawuValue::CSVArray(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_object(&self) -> bool {
         match self {
             MawuValue::Object(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_array(&self) -> bool {
         match self {
             MawuValue::Array(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_string(&self) -> bool {
         match self {
             MawuValue::String(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_int(&self) -> bool {
         match self {
             MawuValue::Int(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_float(&self) -> bool {
         match self {
             MawuValue::Float(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_bool(&self) -> bool {
         match self {
             MawuValue::Bool(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_null(&self) -> bool {
         match self {
             MawuValue::Null => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn as_csv_object(&self) -> Option<&Vec<HashMap<String, MawuValue>>> {
         match self {
             MawuValue::CSVObject(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_csv_array(&self) -> Option<&Vec<Vec<MawuValue>>> {
         match self {
             MawuValue::CSVArray(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_object(&self) -> Option<&HashMap<String, MawuValue>> {
         match self {
             MawuValue::Object(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_array(&self) -> Option<&Vec<MawuValue>> {
         match self {
             MawuValue::Array(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_string(&self) -> Option<&String> {
         match self {
             MawuValue::String(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_int(&self) -> Option<&i32> {
         match self {
             MawuValue::Int(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_float(&self) -> Option<&f32> {
         match self {
             MawuValue::Float(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_bool(&self) -> Option<&bool> {
         match self {
             MawuValue::Bool(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
 
-    pub fn as_null(&self) -> Option<&() > {
+    pub fn as_null(&self) -> Option<&()> {
         match self {
             MawuValue::Null => None,
-            _ => Some(&())
+            _ => Some(&()),
         }
     }
-
 }
 
 #[test]
@@ -190,7 +204,6 @@ fn test_mawu_value_from_string() {
     assert_eq!(mawu_null_value, MawuValue::Null);
     assert_eq!(mawu_null_value.is_null(), true);
     assert_eq!(mawu_null_value.as_null(), None);
-
 }
 
 #[test]
@@ -207,6 +220,9 @@ fn test_mawu_value_constructed() {
 
     assert_eq!(mawu_object_value.as_object(), Some(&HashMap::new()));
     assert_eq!(mawu_array_value.as_array(), Some(&vec![]));
-    assert_eq!(mawu_csv_object_value.as_csv_object(), Some(&vec![HashMap::new()]));
+    assert_eq!(
+        mawu_csv_object_value.as_csv_object(),
+        Some(&vec![HashMap::new()])
+    );
     assert_eq!(mawu_csv_array_value.as_csv_array(), Some(&vec![vec![]]));
 }
