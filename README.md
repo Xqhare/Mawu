@@ -97,7 +97,7 @@ Because of this, most if not all CSV files are only supported in the ecosystem o
 Mawu handles CSV files with an empty or filled last row.
 
 > [!NOTE]
-> While the usage of the header is optional, you will need to use either the `from_csv_headless(path)`, or the `from_csv_headed(path)` method.
+> While the usage of the header is optional, you will need to use either the `read_csv_headless(path)`, or the `read_csv_headed(path)` method.
 > [Learn more.](#usage)
 
 ### Handling missing or not provided values
@@ -144,7 +144,7 @@ use mawu::Mawu::*;
 
 fn main() {
     // for a csv file with header
-    let mawu: Vec<HashMap<String, MawuValue>> = Mawu::from_csv_headed("/path/to/file.csv");
+    let mawu: Vec<HashMap<String, MawuValue>> = Mawu::read_csv_headed("/path/to/file.csv");
 
     // mawu will return a Result<MawuResult, MawuError>
     for entry in mawu.unwrap().as_csv_object().unwrap() {
@@ -154,7 +154,7 @@ fn main() {
     }
 
     // for a csv file without header
-    let mawu_headless: Vec<Vec<MawuValue>> = Mawu::from_csv_headless("/path/to/file.csv");
+    let mawu_headless: Vec<Vec<MawuValue>> = Mawu::read_csv_headless("/path/to/file.csv");
 
     // mawu will return a Result<MawuResult, MawuError>
     for entry in mawu_headless.unwrap().as_csv_array().unwrap() {
