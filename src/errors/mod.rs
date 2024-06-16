@@ -17,5 +17,4 @@ impl fmt::Display for MawuError {
             MawuError::CsvError(ref e) => e.fmt(f),
         }
     }
-    
 }

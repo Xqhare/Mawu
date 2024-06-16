@@ -15,7 +15,6 @@ impl fmt::Display for CsvError {
             CsvError::UnrecognizedHeader(ref s) => write!(f, "Unrecognized header: {}", s),
         }
     }
-    
 }
 
 #[derive(Debug)]
