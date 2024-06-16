@@ -20,50 +20,49 @@ mod csv_tests {
             for value in mawu.as_csv_object().unwrap() {
                 //println!("{:?}", x);
                 assert_eq!(value.len(), 3);
-                let id = value.get("Id").unwrap();
+                let id = value.get("Id").unwrap().as_uint().unwrap();
                 let types = value.get("Type").unwrap();
                 let content = value.get("Content").unwrap();
                 // test for all possible `MawuValue`s for CSV's
-                if id == &MawuValue::Uint(1) {
+                if *id == 1 {
                     assert_eq!(types, &MawuValue::String("uint".to_string()));
                     assert_eq!(content, &MawuValue::Uint(0));
-                }
-                if id == &MawuValue::Uint(2) {
+                } else
+                if *id == 2 {
                     assert_eq!(types, &MawuValue::String("uint".to_string()));
                     assert_eq!(content, &MawuValue::Uint(100));
-                }
-                if id == &MawuValue::Uint(10) {
+                } else
+                if *id == 10 {
                     assert_eq!(types, &MawuValue::String("sint".to_string()));
                     assert_eq!(content, &MawuValue::Int(-42));
-                }
-                if id == &MawuValue::Uint(20) {
+                } else
+                if *id == 20 {
                     assert_eq!(types, &MawuValue::String("float".to_string()));
                     assert_eq!(content, &MawuValue::Float(-185911.8114191311414));
-                }
-                if id == &MawuValue::Uint(25) {
+                } else
+                if *id == 25 {
                     assert_eq!(types, &MawuValue::String("bool".to_string()));
                     assert_eq!(content, &MawuValue::Bool(true));
-                }
-                if id == &MawuValue::Uint(26) {
+                } else
+                if *id == 26 {
                     assert_eq!(types, &MawuValue::String("bool".to_string()));
                     assert_eq!(content, &MawuValue::Bool(false));
-                }
-                if id == &MawuValue::Uint(27) {
+                } else
+                if *id == 27 {
                     assert_eq!(types, &MawuValue::String("none".to_string()));
                     assert_eq!(content, &MawuValue::Null);
-                }
-                if id == &MawuValue::Uint(28) {
+                } else
+                if *id == 28 {
                     assert_eq!(types, &MawuValue::Null);
                     assert_eq!(content, &MawuValue::Null);
-                }
-                if id == &MawuValue::Uint(31) {
+                } else
+                if *id == 31 {
                     assert_eq!(types, &MawuValue::String("string".to_string()));
                     assert_eq!(
                         content,
                         &MawuValue::String("a string, with a comma".to_string())
                     );
-                }
-                if id == &MawuValue::Uint(50) {
+                } else if *id == 50 {
                     assert_eq!(types, &MawuValue::String("string".to_string()));
                     assert_eq!(
                         content,
