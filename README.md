@@ -167,4 +167,24 @@ fn main() {
 ```
 
 ## JSON
-This library supports JSON files, conforming to the rfc8259 standard and the ECMA-404 standard.
+This library supports JSON files that conform to the rfc8259 and the ECMA-404 standard.
+JSON is one of the most used and common file formats used for data interchange. Defined in 2001 by Douglas Crockford, JSON has gone through several editions and has been used in production for over 20 years.
+Because of the several editions and conciseness of JSON grammar, many aspects are left undefined and the various implementations are not consistent in the way they parse JSON.
+
+Mawu is designed to stick as close to the standards as possible, and does not support any common JSON extension like trailing commas.
+Most edge cases and the way they are handled are explained in the following paragraphs.
+
+### Edge cases
+
+#### Objects
+
+In the rfc8259 standard, a JSON object is a set of key-value pairs where the keys should be unique. As this is not a hard requirement however, JSON parsers have handled this in a number of ways.
+Mawu will parse JSON objects as a `HashMap<String, MawuValue>` and uses the same behavior for duplicate keys, in that they are replaced with the last value.
+
+As the order of object members differs between parsers, Mawu does not order the members in any way, and will use the order in the JSON file.
+
+#### Numbers
+
+`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all.
+
+The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`, so Mawu supports any rust `f64` value.
