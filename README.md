@@ -67,9 +67,10 @@ match mawu_value {
     // General types
     MawuValue::Null => None,
     MawuValue::Bool(b) => b.as_bool(),
-    MawuValue::Int(i) => i.as_i64(),
-    MawuValue::Float(f) => f.as_f64(),
-    MawuValue::String(s) => s.as_str(),
+    MawuValue::Uint(u) => u.as_uint(),
+    MawuValue::Int(i) => i.as_int(),
+    MawuValue::Float(f) => f.as_float(),
+    MawuValue::String(s) => s.as_string(),
     // Json exclusive types
     MawuValue::Array(a) => a.as_array(),
     MawuValue::Object(o) => o.as_object(),
