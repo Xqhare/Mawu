@@ -24,46 +24,46 @@ mod csv_tests {
                 let types = value.get("Type").unwrap();
                 let content = value.get("Content").unwrap();
                 // test for all possible `MawuValue`s for CSV's
-                if id == &MawuValue::Int(1) {
+                if id == &MawuValue::Uint(1) {
                     assert_eq!(types, &MawuValue::String("uint".to_string()));
-                    assert_eq!(content, &MawuValue::Int(0));
+                    assert_eq!(content, &MawuValue::Uint(0));
                 }
-                if id == &MawuValue::Int(2) {
+                if id == &MawuValue::Uint(2) {
                     assert_eq!(types, &MawuValue::String("uint".to_string()));
-                    assert_eq!(content, &MawuValue::Int(100));
+                    assert_eq!(content, &MawuValue::Uint(100));
                 }
-                if id == &MawuValue::Int(10) {
+                if id == &MawuValue::Uint(10) {
                     assert_eq!(types, &MawuValue::String("sint".to_string()));
                     assert_eq!(content, &MawuValue::Int(-42));
                 }
-                if id == &MawuValue::Int(20) {
+                if id == &MawuValue::Uint(20) {
                     assert_eq!(types, &MawuValue::String("float".to_string()));
                     assert_eq!(content, &MawuValue::Float(-185911.8114191311414));
                 }
-                if id == &MawuValue::Int(25) {
+                if id == &MawuValue::Uint(25) {
                     assert_eq!(types, &MawuValue::String("bool".to_string()));
                     assert_eq!(content, &MawuValue::Bool(true));
                 }
-                if id == &MawuValue::Int(26) {
+                if id == &MawuValue::Uint(26) {
                     assert_eq!(types, &MawuValue::String("bool".to_string()));
                     assert_eq!(content, &MawuValue::Bool(false));
                 }
-                if id == &MawuValue::Int(27) {
+                if id == &MawuValue::Uint(27) {
                     assert_eq!(types, &MawuValue::String("none".to_string()));
                     assert_eq!(content, &MawuValue::Null);
                 }
-                if id == &MawuValue::Int(28) {
+                if id == &MawuValue::Uint(28) {
                     assert_eq!(types, &MawuValue::Null);
                     assert_eq!(content, &MawuValue::Null);
                 }
-                if id == &MawuValue::Int(31) {
+                if id == &MawuValue::Uint(31) {
                     assert_eq!(types, &MawuValue::String("string".to_string()));
                     assert_eq!(
                         content,
                         &MawuValue::String("a string, with a comma".to_string())
                     );
                 }
-                if id == &MawuValue::Int(50) {
+                if id == &MawuValue::Uint(50) {
                     assert_eq!(types, &MawuValue::String("string".to_string()));
                     assert_eq!(
                         content,
@@ -86,7 +86,7 @@ mod csv_tests {
             // checking a few entries against the known `true` values
             assert_eq!(
                 mawu.as_csv_object().unwrap()[0].get("Index").unwrap(),
-                &MawuValue::Int(1)
+                &MawuValue::Uint(1)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[0].get("Customer Id").unwrap(),
@@ -103,7 +103,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[34].get("Index").unwrap(),
-                &MawuValue::Int(35)
+                &MawuValue::Uint(35)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[34]
@@ -122,7 +122,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[54].get("Index").unwrap(),
-                &MawuValue::Int(55)
+                &MawuValue::Uint(55)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[54]
@@ -141,7 +141,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[99].get("Index").unwrap(),
-                &MawuValue::Int(100)
+                &MawuValue::Uint(100)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[99]
@@ -173,7 +173,7 @@ mod csv_tests {
             // checking a few entries against the known `true` values
             assert_eq!(
                 mawu.as_csv_object().unwrap()[0].get("Index").unwrap(),
-                &MawuValue::Int(1)
+                &MawuValue::Uint(1)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[0].get("Customer Id").unwrap(),
@@ -190,7 +190,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[39].get("Index").unwrap(),
-                &MawuValue::Int(40)
+                &MawuValue::Uint(40)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[39]
@@ -209,7 +209,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[345].get("Index").unwrap(),
-                &MawuValue::Int(346)
+                &MawuValue::Uint(346)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[345]
@@ -228,7 +228,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[1034].get("Index").unwrap(),
-                &MawuValue::Int(1035)
+                &MawuValue::Uint(1035)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[1034]
@@ -247,7 +247,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[2823].get("Index").unwrap(),
-                &MawuValue::Int(2824)
+                &MawuValue::Uint(2824)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[2823]
@@ -266,7 +266,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[44412].get("Index").unwrap(),
-                &MawuValue::Int(44413)
+                &MawuValue::Uint(44413)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[44412]
@@ -285,7 +285,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[53644].get("Index").unwrap(),
-                &MawuValue::Int(53645)
+                &MawuValue::Uint(53645)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[53644]
@@ -304,7 +304,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[61768].get("Index").unwrap(),
-                &MawuValue::Int(61769)
+                &MawuValue::Uint(61769)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[61768]
@@ -323,7 +323,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[82751].get("Index").unwrap(),
-                &MawuValue::Int(82752)
+                &MawuValue::Uint(82752)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[82751]
@@ -342,7 +342,7 @@ mod csv_tests {
 
             assert_eq!(
                 mawu.as_csv_object().unwrap()[99999].get("Index").unwrap(),
-                &MawuValue::Int(100000)
+                &MawuValue::Uint(100000)
             );
             assert_eq!(
                 mawu.as_csv_object().unwrap()[99999]
@@ -426,38 +426,39 @@ mod csv_tests {
                 for entry in value {
                     match index {
                         0 => {
-                            assert_eq!(value[0], MawuValue::Int(1));
+                            assert_eq!(value[0], MawuValue::Uint(1));
                             assert_eq!(value[1], MawuValue::String("uint".to_string()));
-                            assert_eq!(value[2], MawuValue::Int(0));
+                            assert_eq!(value[2], MawuValue::Uint(0));
                         }
                         8 => {
-                            assert_eq!(value[0], MawuValue::Int(9));
+                            assert_eq!(value[0], MawuValue::Uint(9));
                             assert_eq!(value[1], MawuValue::String("sint".to_string()));
                             assert_eq!(value[2], MawuValue::Int(-188));
                         }
                         18 => {
-                            assert_eq!(value[0], MawuValue::Int(19));
+                            assert_eq!(value[0], MawuValue::Uint(19));
                             assert_eq!(value[1], MawuValue::String("float".to_string()));
                             assert_eq!(value[2], MawuValue::Float(8114191311414.185911));
                         }
 
                         26 => {
-                            assert_eq!(value[0], MawuValue::Int(27));
+                            assert_eq!(value[0], MawuValue::Uint(27));
                             assert_eq!(value[1], MawuValue::String("none".to_string()));
                             assert_eq!(value[2], MawuValue::Null);
                         }
                         27 => {
-                            assert_eq!(value[0], MawuValue::Int(28));
+                            assert_eq!(value[0], MawuValue::Uint(28));
                             assert_eq!(value[1], MawuValue::Null);
                             assert_eq!(value[2], MawuValue::Null);
                         }
                         35 => {
-                            assert_eq!(value[0], MawuValue::Int(36));
+                            assert_eq!(value[0], MawuValue::Uint(36));
                             assert_eq!(value[1], MawuValue::String("string".to_string()));
                             assert_eq!(value[2], MawuValue::String("discworld".to_string()));
                         }
                         _ => match entry {
                             MawuValue::Int(_) => assert!(true),
+                            MawuValue::Uint(_) => assert!(true),
                             MawuValue::Float(_) => assert!(true),
                             MawuValue::String(_) => assert!(true),
                             MawuValue::Bool(_) => assert!(true),
