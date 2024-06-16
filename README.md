@@ -43,7 +43,7 @@ The difference is slight however, as only the `array` and `object` are different
 
 ### An exhaustive list of all `MawuValue`'s
 - General types
-    - `MawuValue::Null`
+    - `MawuValue::None`
     - `MawuValue::Bool`
     - `MawuValue::Int`
     - `MawuValue::Float`
@@ -65,7 +65,7 @@ Calling `as_null` will return `None` instead when the value is none, and `Some()
 
 match mawu_value {
     // General types
-    MawuValue::Null => None,
+    MawuValue::None => None,
     MawuValue::Bool(b) => b.as_bool(),
     MawuValue::Uint(u) => u.as_uint(),
     MawuValue::Int(i) => i.as_int(),

@@ -11,13 +11,13 @@ pub enum MawuValue {
     Float(f64),
     String(String),
     Bool(bool),
-    Null,
+    None,
 }
 
 impl From<String> for MawuValue {
     fn from(value: String) -> Self {
         if value.is_empty() {
-            MawuValue::Null
+            MawuValue::None
         } else if value.parse::<u64>().is_ok() {
             MawuValue::Uint(value.parse().unwrap())
         } else if value.parse::<i64>().is_ok() {
@@ -35,7 +35,7 @@ impl From<String> for MawuValue {
 impl From<&String> for MawuValue {
     fn from(value: &String) -> Self {
          if value.is_empty() {
-            MawuValue::Null
+            MawuValue::None
         } else if value.parse::<u64>().is_ok() {
             MawuValue::Uint(value.parse().unwrap())
         } else if value.parse::<i64>().is_ok() {
@@ -53,7 +53,7 @@ impl From<&String> for MawuValue {
 impl From<&str> for MawuValue {
     fn from(value: &str) -> Self {
          if value.is_empty() {
-            MawuValue::Null
+            MawuValue::None
         } else if value.parse::<u64>().is_ok() {
             MawuValue::Uint(value.parse().unwrap())
         } else if value.parse::<i64>().is_ok() {
@@ -132,9 +132,31 @@ impl MawuValue {
         }
     }
 
-    pub fn is_null(&self) -> bool {
+    /// Simple convenience method to check if the value is a boolean and `true`.
+    pub fn is_true(&self) -> bool {
         match self {
-            MawuValue::Null => true,
+            MawuValue::Bool(v) => match v {
+                true => true,
+                false => false,
+            },
+            _ => false,
+        }
+    }
+
+    /// Simple convenience method to check if the value is a boolean and `false`.
+    pub fn is_false(&self) -> bool {
+        match self {
+            MawuValue::Bool(v) => match v {
+                true => false,
+                false => true,
+            },
+            _ => false,
+        }
+    }
+
+    pub fn is_none(&self) -> bool {
+        match self {
+            MawuValue::None => true,
             _ => false,
         }
     }
@@ -209,9 +231,9 @@ impl MawuValue {
         }
     }
 
-    pub fn as_null(&self) -> Option<()> {
+    pub fn as_none(&self) -> Option<()> {
         match self {
-            MawuValue::Null => None,
+            MawuValue::None => None,
             _ => Some(()),
         }
     }
@@ -345,27 +367,7 @@ impl MawuValue {
         }
     }
 
-    /// Simple convenience method to check if the value is a boolean and `true`.
-    pub fn is_true(&self) -> bool {
-        match self {
-            MawuValue::Bool(v) => match v {
-                true => true,
-                false => false,
-            },
-            _ => false,
-        }
-    }
-
-    /// Simple convenience method to check if the value is a boolean and `false`.
-    pub fn is_false(&self) -> bool {
-        match self {
-            MawuValue::Bool(v) => match v {
-                true => false,
-                false => true,
-            },
-            _ => false,
-        }
-    }
+    
 
 }
 
@@ -477,9 +479,9 @@ fn test_mawu_value_from_string() {
     assert_eq!(mawu_bool_false_value.as_bool(), Some(&false));
 
     let mawu_null_value = MawuValue::from("");
-    assert_eq!(mawu_null_value, MawuValue::Null);
-    assert_eq!(mawu_null_value.is_null(), true);
-    assert_eq!(mawu_null_value.as_null(), None);
+    assert_eq!(mawu_null_value, MawuValue::None);
+    assert_eq!(mawu_null_value.is_none(), true);
+    assert_eq!(mawu_null_value.as_none(), None);
 }
 
 #[test]

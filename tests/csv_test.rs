@@ -50,11 +50,11 @@ mod csv_tests {
                 } else
                 if *id == 27 {
                     assert_eq!(types, &MawuValue::String("none".to_string()));
-                    assert_eq!(content, &MawuValue::Null);
+                    assert_eq!(content, &MawuValue::None);
                 } else
                 if *id == 28 {
-                    assert_eq!(types, &MawuValue::Null);
-                    assert_eq!(content, &MawuValue::Null);
+                    assert_eq!(types, &MawuValue::None);
+                    assert_eq!(content, &MawuValue::None);
                 } else
                 if *id == 31 {
                     assert_eq!(types, &MawuValue::String("string".to_string()));
@@ -443,12 +443,12 @@ mod csv_tests {
                         26 => {
                             assert_eq!(value[0], MawuValue::Uint(27));
                             assert_eq!(value[1], MawuValue::String("none".to_string()));
-                            assert_eq!(value[2], MawuValue::Null);
+                            assert_eq!(value[2], MawuValue::None);
                         }
                         27 => {
                             assert_eq!(value[0], MawuValue::Uint(28));
-                            assert_eq!(value[1], MawuValue::Null);
-                            assert_eq!(value[2], MawuValue::Null);
+                            assert_eq!(value[1], MawuValue::None);
+                            assert_eq!(value[2], MawuValue::None);
                         }
                         35 => {
                             assert_eq!(value[0], MawuValue::Uint(36));
@@ -461,7 +461,7 @@ mod csv_tests {
                             MawuValue::Float(_) => assert!(true),
                             MawuValue::String(_) => assert!(true),
                             MawuValue::Bool(_) => assert!(true),
-                            MawuValue::Null => assert!(true),
+                            MawuValue::None => assert!(true),
                             _ => assert!(false),
                         },
                     }
