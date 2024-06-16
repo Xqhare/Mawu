@@ -6,8 +6,9 @@ pub enum MawuValue {
     CSVArray(Vec<Vec<MawuValue>>),
     Object(HashMap<String, MawuValue>),
     Array(Vec<MawuValue>),
-    Int(i32),
-    Float(f32),
+    Uint(u64),
+    Int(i64),
+    Float(f64),
     String(String),
     Bool(bool),
     Null,
@@ -17,9 +18,11 @@ impl From<String> for MawuValue {
     fn from(value: String) -> Self {
         if value.is_empty() {
             MawuValue::Null
-        } else if value.parse::<i32>().is_ok() {
+        } else if value.parse::<u64>().is_ok() {
+            MawuValue::Uint(value.parse().unwrap())
+        } else if value.parse::<i64>().is_ok() {
             MawuValue::Int(value.parse().unwrap())
-        } else if value.parse::<f32>().is_ok() {
+        } else if value.parse::<f64>().is_ok() {
             MawuValue::Float(value.parse().unwrap())
         } else if value.parse::<bool>().is_ok() {
             MawuValue::Bool(value.parse().unwrap())
@@ -31,11 +34,13 @@ impl From<String> for MawuValue {
 
 impl From<&String> for MawuValue {
     fn from(value: &String) -> Self {
-        if value.is_empty() {
+         if value.is_empty() {
             MawuValue::Null
-        } else if value.parse::<i32>().is_ok() {
+        } else if value.parse::<u64>().is_ok() {
+            MawuValue::Uint(value.parse().unwrap())
+        } else if value.parse::<i64>().is_ok() {
             MawuValue::Int(value.parse().unwrap())
-        } else if value.parse::<f32>().is_ok() {
+        } else if value.parse::<f64>().is_ok() {
             MawuValue::Float(value.parse().unwrap())
         } else if value.parse::<bool>().is_ok() {
             MawuValue::Bool(value.parse().unwrap())
@@ -77,6 +82,13 @@ impl MawuValue {
     pub fn is_string(&self) -> bool {
         match self {
             MawuValue::String(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_uint(&self) -> bool {
+        match self {
+            MawuValue::Uint(_) => true,
             _ => false,
         }
     }
@@ -144,14 +156,21 @@ impl MawuValue {
         }
     }
 
-    pub fn as_int(&self) -> Option<&i32> {
+    pub fn as_uint(&self) -> Option<&u64> {
+        match self {
+            MawuValue::Uint(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn as_int(&self) -> Option<&i64> {
         match self {
             MawuValue::Int(v) => Some(v),
             _ => None,
         }
     }
 
-    pub fn as_float(&self) -> Option<&f32> {
+    pub fn as_float(&self) -> Option<&f64> {
         match self {
             MawuValue::Float(v) => Some(v),
             _ => None,
@@ -181,9 +200,14 @@ fn test_mawu_value_from_string() {
     assert_eq!(mawu_string_value.as_string(), Some(&"test".to_string()));
 
     let mawu_int_value = MawuValue::from("123".to_string());
-    assert_eq!(mawu_int_value, MawuValue::Int(123));
+    assert_eq!(mawu_int_value, MawuValue::Uint(123));
+    assert_eq!(mawu_int_value.is_uint(), true);
+    assert_eq!(mawu_int_value.as_uint(), Some(&123));
+
+    let mawu_int_value = MawuValue::from("-123".to_string());
+    assert_eq!(mawu_int_value, MawuValue::Int(-123));
     assert_eq!(mawu_int_value.is_int(), true);
-    assert_eq!(mawu_int_value.as_int(), Some(&123));
+    assert_eq!(mawu_int_value.as_int(), Some(&-123));
 
     let mawu_float_value = MawuValue::from("123.456".to_string());
     assert_eq!(mawu_float_value, MawuValue::Float(123.456));
