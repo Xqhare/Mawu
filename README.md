@@ -61,6 +61,7 @@ Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned i
 ### An exhaustive list of all `MawuValue`'s
 - Primitive types
     - `MawuValue::None`
+        - can only ever be none, is wrapping nothing
     - `MawuValue::Bool`
         - wrapping a `bool`
     - `MawuValue::Uint`
@@ -82,13 +83,16 @@ Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned i
     - `MawuValue::CsvObject`
         - wrapping a `Vec<HashMap<String, Vec<MawuValue>>>`
 
-Again, convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
-When you call any `as_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
-Calling `as_null` will return `None` instead when the value is none, and `Some()` otherwise.
-`is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, and if the value is `None`, respectively.
+Convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
+When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
+
+Calling `as_null` will return `None` instead when the value is none, and `Some()` wrapping nothing otherwise.
+
+`is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
 
 > [!TIP] 
-> Calling `as_{MawuValue}` vs `to_{MawuValue}` for primitive types
+> *Calling `as_{MawuValue}` vs `to_{MawuValue}` for primitive types:*
+>
 > All `as_{MawuValue}` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_{MawuValue}`, and will only return a value if it was parsed as such.
 > The `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
 > If you want fine-grained control over what type you get and what to do with its data directly, you can call `as_{MawuValue}`. 
