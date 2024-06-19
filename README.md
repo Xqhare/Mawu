@@ -58,6 +58,24 @@ The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as ret
 
 Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
 
+Convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
+When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
+
+Calling `as_null` will return `None` instead when the value is none, and `Some()` wrapping nothing otherwise.
+
+`is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
+
+ *Calling `as_{MawuValue}` vs `to_{MawuValue}` for primitive types:*
+
+ All `as_{MawuValue}` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_{MawuValue}`, and will only return a value if it was parsed as such.
+
+ The `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
+ If you want fine-grained control over what type you get and what to do with its data directly, you can call `as_{MawuValue}`.
+
+ If you are going to clone the data anyway, you can call `to_{MawuValue}` directly. Should you call the right `to_{MawuValue}` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again.
+
+
+
 ### An exhaustive list of all `MawuValue`'s
 - Primitive types
     - `MawuValue::None`
@@ -82,21 +100,6 @@ Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned i
         - wrapping a `Vec<Vec<MawuValue>>`
     - `MawuValue::CsvObject`
         - wrapping a `Vec<HashMap<String, Vec<MawuValue>>>`
-
-Convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
-When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
-
-Calling `as_null` will return `None` instead when the value is none, and `Some()` wrapping nothing otherwise.
-
-`is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
-
-> [!TIP] 
-> *Calling `as_{MawuValue}` vs `to_{MawuValue}` for primitive types:*
->
-> All `as_{MawuValue}` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_{MawuValue}`, and will only return a value if it was parsed as such.
-> The `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
-> If you want fine-grained control over what type you get and what to do with its data directly, you can call `as_{MawuValue}`. 
-> If you are going to clone the data anyway, you can call `to_{MawuValue}` directly. Should you call the right `to_{MawuValue}` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again.
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
 
