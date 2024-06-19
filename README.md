@@ -65,11 +65,9 @@ Calling `as_null` will return `None` instead when the value is none, and `Some()
 
 `is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
 
- *Calling `as_{MawuValue}` vs `to_{MawuValue}` for primitive types:*
-
  All `as_{MawuValue}` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_{MawuValue}`, and will only return a value if it was parsed as such.
 
- The `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
+ All `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
  If you want fine-grained control over what type you get and what to do with its data directly, you can call `as_{MawuValue}`.
 
  If you are going to clone the data anyway, you can call `to_{MawuValue}` directly. Should you call the right `to_{MawuValue}` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again.
