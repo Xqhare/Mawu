@@ -1,18 +1,26 @@
 # Mawu
-A simple JSON and CSV parsing library written in rust.
+A simple JSON and CSV parsing rust library.
 
-Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. It is not a zero dependency library, its only dependency is `unicode-segmentation`. Mawu only supports 64bit systems.
+Mawu supports 64bit systems only.
 
-Also, it should be said that this is a hobbyist repo and is probably not ready for production use.
+Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. 
+While not a zero dependency library, its only dependency is `unicode-segmentation`.
+
+> [!IMPORTANT]
+> This is a hobbyist repo reinventing the wheel and probably not ready for production use.
 
 ## Features
-- Simple and fast
+- Simple
 - Type aware
 - Supports both CSV and JSON
     - CSV
         - With or without header, and data shift is more likely to occur
         - settable delimiter
 - Supports missing or not provided values
+- Fully documented
+    - Handling of edge cases is explained in the documentation
+- Tries to stay as close to the rfc4180, rfc8259 and ECMA-404 standard as possible for maximum interoperability
+- Actually written by a human
 
 ## Overview
 - [Mawu](#mawu)
@@ -21,6 +29,7 @@ Also, it should be said that this is a hobbyist repo and is probably not ready f
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
     - [`MawuValue`](#mawuvalue)
         - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
+        - [Example of getting a `MawuValue` if its type is not known or different in the same field] (#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
     - [CSV](#csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
