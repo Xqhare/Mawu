@@ -191,24 +191,23 @@ To get to your data, you will need to iterate over the contents of the `MawuValu
 Reading a CSV file and just printing out the values:
 
 ```rust
-use mawu::Mawu::*;
 
 fn main() {
     // for a csv file with header
-    let mawu: Vec<HashMap<String, MawuValue>> = Mawu::read_csv_headed("/path/to/file.csv");
+    let mawu: Vec<HashMap<String, MawuValue>> = mawu::csv::read_csv_headed("/path/to/file.csv").unwrap();
 
     // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu.unwrap().as_csv_object().unwrap() {
+    for entry in mawu.as_csv_object().unwrap() {
         for (key, value) in &entry {
             println!("{}: {}", key, value);
         }
     }
 
     // for a csv file without header
-    let mawu_headless: Vec<Vec<MawuValue>> = Mawu::read_csv_headless("/path/to/file.csv");
+    let mawu_headless: Vec<Vec<MawuValue>> = mawu::csv::read_csv_headless("/path/to/file.csv").unwrap();
 
     // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu_headless.unwrap().as_csv_array().unwrap() {
+    for entry in mawu_headless.as_csv_array().unwrap() {
         for value in entry {
             println!("{}", value);
         }
@@ -243,3 +242,7 @@ Ordering of arrays is kept.
 
 The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64 bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 Should Mawu encounter a number not representable in 64 bits, it will return an error.
+
+#### Structure
+
+
