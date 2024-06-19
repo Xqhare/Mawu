@@ -129,7 +129,7 @@ if mawu_value.is_none() {
 
 ```
 
-> [!ABSTRACT]
+> [!note]
 > Chads use `as_{MawuValue}`, just know what kind of data they are getting and know what to do with a reference.
 > Normie Kernel devs use `to_{MawuValue}`, need to check what kind of data they are getting and have to clone it anyway.
 
