@@ -281,7 +281,7 @@ impl MawuValue {
         }
     }
 
-    /// Returns `Some(())` if the value is not `None`, `None` otherwise.
+    /// Returns `None` if the value is `None` and `Some(())` otherwise.
     pub fn as_none(&self) -> Option<()> {
         match self {
             MawuValue::None => None,
@@ -460,7 +460,13 @@ impl MawuValue {
         }
     }
 
-    
+    /// Returns `None` if the value is `None` and `Some(())` otherwise.
+    pub fn to_none(&self) -> Option<()> {
+        match self {
+            MawuValue::None => None,
+            _ => Some(()),
+        }
+    }
 
 }
 
