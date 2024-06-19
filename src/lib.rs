@@ -11,6 +11,7 @@ pub mod csv {
         errors::MawuError, lexers::csv_lexer, mawu_values::MawuValue, utils::file_handling,
     };
 
+    /// Takes in a path to a CSV file with a header at the beginning of the file and returns a parsed MawuValue in the format of `Vec<Vec<HashMap<String, MawuValue>>>`.
     pub fn read_csv_headed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headed(
             file_handling::read_file(path)?
@@ -19,6 +20,7 @@ pub mod csv {
         )
     }
 
+    /// Takes in a path to a CSV file with no header at the beginning of the file and returns a parsed MawuValue in the format of `Vec<Vec<MawuValue>>`.
     pub fn read_csv_headless<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headless(
             file_handling::read_file(path)?
