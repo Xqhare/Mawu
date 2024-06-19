@@ -37,19 +37,26 @@ While not a zero dependency library, its only dependency is `unicode-segmentatio
         - [CSV Return value](#csv-return-value)
         - [CSV Usage](#csv-usage)
     - [JSON](#json)
+        - [Edge cases](#edge-cases)
+            - [Objects](#objects)
+            - [Arrays](#arrays)
+            - [Numbers](#numbers)
+            - [Structure](#structure)
 
 ## Naming the creation: A Legacy of the Divine
 The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
-There's a long and rich human tradition of naming significant things after deities. Mawu embodies this tradition perfectly.
+Mawu follows the long tradition of naming things after deities.
 
 Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
 
 ## `MawuValue`
-Mawu uses the `MawuValue` enum to represent the different types of values that can be found in both JSON and CSV files, in one, the other, or exclusively.
+Mawu uses the `MawuValue` enum to represent the different types of values that can be found in JSON and CSV files.
 
 Both the CSV parser and the JSON parser use a different subset of this enum to represent the different types of values.
 The difference is slight however, as only the `array` and `object` are different at all, and are represented as `MawuValue::CsvArray` and `MawuValue::CsvObject` for the CSV parser, and `Mawu::Array` and `Mawu::Object` for the JSON parser.
-Mawu supports only 64 bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
+The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as return values. `CsvArray` is used to return a headless CSV file, and `CsvObject` is used to return a headed CSV file.
+
+Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
 
 ### An exhaustive list of all `MawuValue`'s
 - Primitive types
