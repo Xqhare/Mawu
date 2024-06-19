@@ -29,7 +29,7 @@ While not a zero dependency library, its only dependency is `unicode-segmentatio
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
     - [`MawuValue`](#mawuvalue)
         - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
-        - [Example of getting a `MawuValue` if its type is not known or different in the same field] (#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
+        - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
     - [CSV](#csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
