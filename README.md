@@ -71,7 +71,8 @@ When you call any `as_` function on a `MawuValue` you are returned a `Option()` 
 Calling `as_null` will return `None` instead when the value is none, and `Some()` otherwise.
 `is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, and if the value is `None`, respectively.
 
-> [!TIP] `as_{MawuValue}` vs `to_{MawuValue}` for primitive types
+> [!TIP] 
+> Calling `as_{MawuValue}` vs `to_{MawuValue}` for primitive types
 > All `as_{MawuValue}` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_{MawuValue}`, and will only return a value if it was parsed as such.
 > The `to_{MawuValue}` functions however return a `Option<MawuValue>`, a freshly cloned copy of the underlying data. These functions are less strict than `as_{MawuValue}`, and will return a value if it was parsed as such OR can be converted into one. So calling `to_string` on any other type will return a String, built from the underlying data. They only return `None` if the value could not be represented as that type.
 > If you want fine-grained control over what type you get and what to do with its data directly, you can call `as_{MawuValue}`. 
@@ -128,7 +129,7 @@ if mawu_value.is_none() {
 
 ```
 
-> [!ABSTRACT] `MawuValue`
+> [!ABSTRACT]
 > Chads use `as_{MawuValue}`, just know what kind of data they are getting and know what to do with a reference.
 > Normie Kernel devs use `to_{MawuValue}`, need to check what kind of data they are getting and have to clone it anyway.
 
