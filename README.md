@@ -29,6 +29,7 @@ While not a zero dependency library, its only dependency is `unicode-segmentatio
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
     - [`MawuValue`](#mawuvalue)
         - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
+        - [Convenience functions](#convenience-functions)
         - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
     - [CSV](#csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
@@ -58,8 +59,12 @@ The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as ret
 
 Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
 
+### Convenience Functions
+
 Convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
+
 Calling `is_` will return `true` if the value is the type requested, and `false` otherwise. This can be useful if you have different data-types in the same array for example.
+
 When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
 
 Calling `as_null` will return `None` instead when the value is none, and `Some()` wrapping nothing otherwise.
