@@ -30,3 +30,13 @@ pub fn unescape_unicode(s: &[u8]) -> Result<String, Box<dyn Error>> {
 
     Ok(String::from_utf8(output)?)
 }
+
+pub fn is_digit(c: &str) -> bool {
+    let charr = c.chars().next();
+    if charr.is_some() {
+        charr.unwrap().is_digit(10)
+    } else {
+        false
+    }
+}
+
