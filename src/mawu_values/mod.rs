@@ -14,6 +14,12 @@ pub enum MawuValue {
     None,
 }
 
+impl Default for MawuValue {
+    fn default() -> Self {
+        MawuValue::None
+    }
+}
+
 impl From<String> for MawuValue {
     fn from(value: String) -> Self {
         if value.is_empty() {
