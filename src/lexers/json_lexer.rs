@@ -19,5 +19,13 @@ pub fn json_lexer(file_contents: &mut VecDeque<&str>) -> Result<MawuValue, MawuE
 }
 
 fn json_value_lexer(file_contents: &mut VecDeque<&str>) -> Result<MawuValue, MawuError> {
-    
+    while file_contents.front().is_some() {
+        let character = file_contents.pop_front().unwrap();
+        match character {
+            "{" => ,
+            "[" => ,
+            "t" => ,
+            "f" => ,
+            "n" => ,
+            "}" || "]" || "," || ":" => MawuError::
 }
