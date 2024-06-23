@@ -8,3 +8,4 @@ pub fn read_file<T: AsRef<Path>>(path: T) -> Result<String, MawuError> {
     let contents = read_to_string(path.as_ref()).map_err(|e| MawuError::IoError(e))?;
     Ok(contents)
 }
+
