@@ -6,6 +6,8 @@ Mawu supports 64bit systems only.
 Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. 
 While not a zero dependency library, its only dependency is `unicode-segmentation`.
 
+A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON parser, this results in a bloat of almost 8kb!
+
 > [!IMPORTANT]
 > This is a hobbyist repo reinventing the wheel and probably not ready for production use.
 
@@ -60,7 +62,6 @@ The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as ret
 Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
 
 ### Convenience Functions
-
 Convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
 
 Calling `is_` will return `true` if the value is the type requested, and `false` otherwise. This can be useful if you have different data-types in the same array.
@@ -103,52 +104,54 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
         - wrapping a `Vec<HashMap<String, Vec<MawuValue>>>`
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
-
 ```rust
 // These are the primitive types
 if mawu_value.is_none() {
     let value: Option<()> = mawu_value.as_none().unwrap();
-    assert_eq!(value, None);
     // Do something with `value`
+    assert_eq!(value, None);
 } else if mawu_value.is_bool() {
     let value: &bool = mawu_value.as_bool().unwrap();
-    assert_eq!(value, &true);
     // Do something with `value`
+    assert_eq!(value, &true);
 } else if mawu_value.is_uint() {
     let value: &u64 = mawu_value.as_uint().unwrap();
-    assert_eq!(value, &1);
     // Do something with `value`
+    assert_eq!(value, &1);
 } else if mawu_value.is_int() {
     let value: &i64 = mawu_value.as_int().unwrap();
-    assert_eq!(value, &-1);
     // Do something with `value`
+    assert_eq!(value, &-1);
 } else if mawu_value.is_float() {
     let value: &f64 = mawu_value.as_float().unwrap();
-    assert_eq!(value, &-1.0);
     // Do something with `value`
+    assert_eq!(value, &-1.0);
 } else if mawu_value.is_string() {
-    let _alternate_value: &String = mawu_value.as_string().unwrap();
     let value: &str = value.as_str().unwrap();
+    let owned_value: String = mawu_value.to_string().unwrap();
+    let referenced_value: &String = mawu_value.as_string().unwrap();
+    // Do something with `value`, `owned_value` or `referenced_value`
     assert_eq!(value, "hello");
-    // Do something with `value` or `alternate_value`
+    assert_eq!(owned_value, "hello".to_string());
+    assert_eq!(referenced_value, &"hello".to_string());
 // These are the JSON exclusive types
 } else if mawu_value.is_array() {
     let array: &Vec<MawuValue> = mawu_value.as_array().unwrap();
-    assert_eq!(array.len(), 1);
     // Do something with `array`
+    assert_eq!(array.len(), 1);
 } else if mawu_value.is_object() {
     let object: &HashMap<String, MawuValue> = mawu_value.as_object().unwrap();
-    assert_eq!(object.len(), 1);
     // Do something with `object`
+    assert_eq!(object.len(), 1);
 // These are the CSV exclusive return types
 } else if mawu_value.is_csv_array() {
     let csv_array: &Vec<Vec<MawuValue>> = mawu_value.as_csv_array().unwrap();
-    assert_eq!(csv_array.len(), 1);
     // Do something with `csv_array`
+    assert_eq!(csv_array.len(), 1);
 } else if mawu_value.is_csv_object() {
     let csv_object: &Vec<HashMap<String, MawuValue>> = mawu_value.as_csv_object().unwrap();
-    assert_eq!(csv_object.len(), 1);
     // Do something with `csv_object`
+    assert_eq!(csv_object.len(), 1);
 }
 
 ```
@@ -179,7 +182,6 @@ Mawu handles CSV files with an empty or filled last row.
 > [Learn more.](#usage)
 
 ### Handling missing or not provided values
-
 The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are many different ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
 So while Mawu does handle missing or not provided values, it is, and cannot ever be, 100% reliable.
 Exactly how this is handled is explained in the following paragraphs.
@@ -253,22 +255,28 @@ Most edge cases and the way they are handled are explained in the following para
 
 ### Edge cases
 
-#### Objects
+#### Files
+If a file should be empty, Mawu will return a `None` value.
 
+#### Objects
 In the rfc8259 standard, a JSON object is a set of key-value pairs where the keys should be unique. As this is not a hard requirement however, JSON parsers have handled this in a number of ways.
 Mawu will parse JSON objects as a `HashMap<String, MawuValue>` and uses the same behavior for duplicate keys, in that they are replaced with the last value.
 Because of the same behavior, Mawu will return JSON objects not in the same order as the JSON file.
 
 #### Arrays
-
 Ordering of arrays is kept.
 
 #### Numbers
-
 `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all.
 
-The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64 bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
+The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 Should Mawu encounter a number not representable in 64 bits, it will return an error.
+As any implementor of the standards is free to set its own limits on the range and precision of numbers, Mawu chooses to use the same limits and behaviour of the rust standard library `String.parse()` function.
+This can be the case for large numbers expressed in exponent notation. For example, `123.456e+350` is not representable in 64-bits (and will return an error) while `123.456e300` is representable.
+In the case of `123.456e-350`, the parser of the rust standard library will approximate to `0` and Mawu return `0`.
+
+#### Strings
+UTF-16 surrogate pairs are permitted by the standards but usage of them has proven unreliable in the past. So you could try your luck I guess, but Mawu makes no guarantees.
 
 #### Structure
 
