@@ -27,12 +27,14 @@ impl fmt::Display for MawuError {
 #[derive(Debug)]
 pub enum MawuInternalError {
     UnableToLockMasterMutex,
+    StringWithNoChars(String),
 }
 
 impl fmt::Display for MawuInternalError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             MawuInternalError::UnableToLockMasterMutex => write!(f, "Unable to lock mutex"),
+            MawuInternalError::StringWithNoChars(ref s) => write!(f, "String with no chars: {}", s),
         }
     }
 }
