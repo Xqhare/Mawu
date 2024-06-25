@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{char, error::Error};
 
 use crate::errors::{MawuError, MawuInternalError};
 
@@ -13,29 +13,42 @@ pub fn is_newline(s: &str) -> bool {
     s == "\n" || s == "\r\n" || s == "\r"
 }
 
-pub fn unescape_unicode(s: &[u8]) -> Result<String, Box<dyn Error>> {
-    let mut output = Vec::new();
-    let mut i = 0;
+/// Takes in a `&str` and unescapes unicode characters
+/// Expects `\` and `u` to be included
+pub fn unescape_unicode(s: &str) -> Result<String, MawuError> {
+    let out = my_unescape_unicode_handler(s.to_string());
+    if out.is_err() {
+        return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+    } else {
+        return Ok(out.unwrap());
+    }
+}
+
+#[allow(unused_assignments)]
+fn my_unescape_unicode_handler(s: String) -> Result<String, MawuError> {
+    // To consider: Surrogate pairs - too much work for now; maybe in an actual unicode library in the future
     
-    while i < s.len() {
-        match s[i] {
-            b'\\' => {
-                i += 1;
-                match s[i] {
-                    b'u' => {
-                        let num = u8::from_str_radix(std::str::from_utf8(&s[i+1..][..4])?, 16)?;
-                        output.push(num);
-                        i += 4;
-                    }
-                    byte => output.push(byte),
+    // This value is read, I don't know what the compiler is on about
+    let mut unicode_value = 0u32;
+    unicode_value = 0;
+    for char in s.chars() {
+        let digit = char.to_digit(0x10);
+        match digit {
+            Some(d) => {
+                unicode_value = (unicode_value << 4) + d;
+                if unicode_value > 0x10FFFF {
+                    return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
                 }
             },
-            byte => output.push(byte),
+            None => return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string()))),
         }
-        i += 1;
     }
-
-    Ok(String::from_utf8(output)?)
+    let possible_char = char::from_u32(unicode_value);
+    if possible_char.is_none() {
+        return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+    } else {
+        return Ok(possible_char.unwrap().to_string());
+    }
 }
 
 /// Takes in a `&str` and checks the very first character to see if it is a digit
@@ -66,4 +79,11 @@ pub fn is_end_of_primitive_value(c: &str) -> bool {
 
 pub fn is_whitespace(c: &str) -> bool {
     is_newline(c) || c == " " || c == "\t"
+}
+
+/// Returns true if the given character is a json string terminator (':','}',']')
+/// Do not forget to check for end of file!
+/// Uses `\n` as end of file making it compatible with modern windows, linux and some OSX versions.
+pub fn is_json_string_terminator_token(c: &str) -> bool {
+    c == ":" || c == "," || c == "}" || c == "]" || c == "\n"
 }
