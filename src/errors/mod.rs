@@ -28,6 +28,7 @@ impl fmt::Display for MawuError {
 pub enum MawuInternalError {
     UnableToLockMasterMutex,
     StringWithNoChars(String),
+    UnableToUnescapeUnicode(String),
 }
 
 impl fmt::Display for MawuInternalError {
@@ -35,6 +36,7 @@ impl fmt::Display for MawuInternalError {
         match *self {
             MawuInternalError::UnableToLockMasterMutex => write!(f, "Unable to lock mutex"),
             MawuInternalError::StringWithNoChars(ref s) => write!(f, "String with no chars: {}", s),
+            MawuInternalError::UnableToUnescapeUnicode(ref s) => write!(f, "Unable to unescape unicode: {}", s),
         }
     }
 }
