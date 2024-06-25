@@ -93,7 +93,7 @@ fn json_string_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
             let character = this_char.unwrap();
             // End of string
             // Or part checks for end of file
-            if character == "\"" && is_json_string_terminator_token(character) || file_contents.len() <= 1 {
+            if character == "\"" && is_json_string_terminator_token(character) || file_contents.len() == 0 || file_contents.front() == Some(&"\n") && file_contents.len() <= 1 {
                 return Ok(MawuValue::String(string));
             }
             // Escape character
@@ -133,10 +133,14 @@ fn json_string_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
                         Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::InvalidEscapeSequence(format!("{}{}", character, next_char)))))?
                     }
 
+                } else {
+                    Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::UnexpectedEndOfFile)))?
                 }
             // Only space is accepted as whitespace in json, the rest has to be escaped
             } else if character == " " {
                 string.push(' ');
+            } else if character == "\"" {
+                return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::InvalidEscapeSequence(format!("{}", character)))));
             } else {
                 string.push_str(character);
             }
@@ -148,10 +152,35 @@ fn json_string_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
 
 #[test]
 fn string_lexer() {
-    let input = json_lexer(&mut read_file("test.json").unwrap().graphemes(true).collect::<VecDeque<&str>>(),);
-    println!("{:?}", input);
+    let double_quotes = vec!["\"", "\\", "\"", "\""];
+    let parsed_quotes = json_lexer(&mut double_quotes.clone().into_iter().collect());
+    assert!(parsed_quotes.is_ok());
+    assert!(parsed_quotes.unwrap() == MawuValue::String("\"".to_string()));
+    
+    let unicode = vec!["\"", "\\", "u", "2", "6", "0", "3", "\""];
+    let parsed_unicode = json_lexer(&mut unicode.into());
+    assert!(parsed_unicode.is_ok());
+    assert!(parsed_unicode.unwrap() == MawuValue::String("\u{2603}".to_string()));
+
+    let backslash = vec!["\"", "\\", "\\", "\""];
+    let parsed_backslash = json_lexer(&mut backslash.into());
+    assert!(parsed_backslash.is_ok());
+    assert!(parsed_backslash.unwrap() == MawuValue::String("\\".to_string()));
+
+    let slash = vec!["\"", "\\", "/", "\""];
+    let parsed_slash = json_lexer(&mut slash.into());
+    assert!(parsed_slash.is_ok());
+    assert!(parsed_slash.unwrap() == MawuValue::String("/".to_string()));
+
+    let mut tmp = "\"backspace\"".to_string();
+    tmp.insert_str(4, r"\b");
+    let mut backspace = tmp.graphemes(true).collect::<VecDeque<&str>>();
+    let parsed_backspace = json_lexer(&mut backspace);
+    assert!(parsed_backspace.is_ok());
+    assert!(parsed_backspace.unwrap().as_str().unwrap() == "bac\u{0008}kspace");
+
+    let input = json_lexer(&mut read_file("test.json").unwrap().graphemes(true).collect::<VecDeque<&str>>());
     assert!(input.is_ok());
-    println!("{}", input.unwrap().as_str().unwrap());
 }
 
 fn json_number_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>, is_negative: bool, first_digit: Option<&str>) -> Result<MawuValue, MawuError> {
