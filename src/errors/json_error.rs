@@ -28,6 +28,7 @@ pub enum JsonParseError {
     UnexpectedEndOfFile,
     InvalidStructuralToken(String),
     InvalidCharacter(String),
+    InvalidEscapeSequence(String),
 }
 
 impl fmt::Display for JsonParseError {
@@ -42,6 +43,7 @@ impl fmt::Display for JsonParseError {
             JsonParseError::InvalidStructuralToken(ref s) => write!(f, "Invalid structural token: {}", s),
             JsonParseError::UnexpectedEndOfFile => write!(f, "Unexpected end of file"),
             JsonParseError::InvalidCharacter(ref s) => write!(f, "Invalid character: {}", s),
+            JsonParseError::InvalidEscapeSequence(ref s) => write!(f, "Invalid escape sequence: {}", s),
         }
     }
 }
