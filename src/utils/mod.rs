@@ -30,20 +30,23 @@ fn my_unescape_unicode_handler(s: String) -> Result<String, MawuError> {
     
     // This value is read, I don't know what the compiler is on about
     let mut unicode_value = 0u32;
-    unicode_value = 0;
     for char in s.chars() {
         let digit = char.to_digit(0x10);
         match digit {
             Some(d) => {
+                // Just a casual bit-shift and a bitwise OR to build the unicode value
                 unicode_value = (unicode_value << 4) + d;
+                // Check if the unicode value is above 0x10FFFF (the maximum value of a unicode codepoint)
                 if unicode_value > 0x10FFFF {
                     return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
                 }
             },
+            // If the character is not a digit, it is an error!
             None => return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string()))),
         }
     }
     let possible_char = char::from_u32(unicode_value);
+    // user supplied data always needs to be checked, invalid data can always be supplied
     if possible_char.is_none() {
         return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
     } else {
