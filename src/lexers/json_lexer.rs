@@ -157,10 +157,10 @@ fn string_lexer() {
     assert!(parsed_quotes.is_ok());
     assert!(parsed_quotes.unwrap() == MawuValue::String("\"".to_string()));
     
-    let unicode = vec!["\"", "\\", "u", "2", "6", "0", "3", "\""];
+    let unicode = vec!["\"", "\\", "u", "2", "6", "0", "3", "\\", "u", "0", "0", "2", "6", "\\", "u", "0", "0", "E", "A", "\\", "u", "F", "B", "2", "0", "\""];
     let parsed_unicode = json_lexer(&mut unicode.into());
     assert!(parsed_unicode.is_ok());
-    assert!(parsed_unicode.unwrap() == MawuValue::String("\u{2603}".to_string()));
+    assert!(parsed_unicode.unwrap() == MawuValue::String("\u{2603}\u{0026}\u{00EA}\u{FB20}".to_string()));
 
     let backslash = vec!["\"", "\\", "\\", "\""];
     let parsed_backslash = json_lexer(&mut backslash.into());
@@ -178,6 +178,26 @@ fn string_lexer() {
     let parsed_backspace = json_lexer(&mut backspace);
     assert!(parsed_backspace.is_ok());
     assert!(parsed_backspace.unwrap().as_str().unwrap() == "bac\u{0008}kspace");
+
+    let formfeed = vec!["\"", "\\", "f", "f", "\""];
+    let parsed_formfeed = json_lexer(&mut formfeed.into());
+    assert!(parsed_formfeed.is_ok());
+    assert!(parsed_formfeed.unwrap() == MawuValue::String("\u{000C}f".to_string()));
+
+    let newline = vec!["\"", "\\", "n", "n", "\""];
+    let parsed_newline = json_lexer(&mut newline.into());
+    assert!(parsed_newline.is_ok());
+    assert!(parsed_newline.unwrap() == MawuValue::String("\nn".to_string()));
+
+    let return_test = vec!["\"", "\\", "r", "r", "\""];
+    let parsed_return = json_lexer(&mut return_test.into());
+    assert!(parsed_return.is_ok());
+    assert!(parsed_return.unwrap() == MawuValue::String("\rr".to_string()));
+
+    let tab = vec!["\"", "\\", "t", "t", "\""];
+    let parsed_tab = json_lexer(&mut tab.into());
+    assert!(parsed_tab.is_ok());
+    assert!(parsed_tab.unwrap() == MawuValue::String("\tt".to_string()));
 
     let input = json_lexer(&mut read_file("test.json").unwrap().graphemes(true).collect::<VecDeque<&str>>());
     assert!(input.is_ok());
