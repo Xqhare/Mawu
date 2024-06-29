@@ -76,8 +76,35 @@ fn json_value_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<Ma
 }
 
 fn json_object_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<MawuValue, MawuError> {
-    Ok(MawuValue::default())
-}
+    let mut binding_object: HashMap<String, MawuValue> = Default::default();
+    while file_contents.front() != Some(&"}") && file_contents.front().is_some() {
+        if file_contents.front() == Some(&",") {
+            let _ = file_contents.pop_front();
+            continue;
+        }
+        if file_contents.front() == Some(&"\n") && file_contents.len() <= 1 {
+            let _ = file_contents.pop_front();
+            return Ok(MawuValue::from(binding_object));
+        }
+        let key = json_value_lexer(file_contents)?.to_string();
+        if key.is_none() {
+            return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::ExpectedKey)));
+        }
+        if file_contents.front() == Some(&":") {
+            let _ = file_contents.pop_front();
+            let value = json_value_lexer(file_contents)?;
+            binding_object.insert(key.unwrap(), value);
+        } else {
+            return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::ExpectedColon)));
+        }
+        if file_contents.front() == Some(&"}") {
+            break;
+        }
+    }
+    if file_contents.front() == Some(&"}") {
+        let _ = file_contents.pop_front();
+    }
+    Ok(MawuValue::from(binding_object))}
 
 fn json_array_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<MawuValue, MawuError> {
     let mut binding_array: Vec<MawuValue> = Default::default();
@@ -100,7 +127,7 @@ fn json_array_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<Ma
 }
 
 #[test]
-fn array_lexer() {
+fn object_lexer() {
     let input = json_lexer(&mut read_file("test.json").unwrap().graphemes(true).collect::<VecDeque<&str>>());
     println!("{:?}", input);
     assert!(input.is_ok());
@@ -244,6 +271,7 @@ fn json_number_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>, first_digit
                 return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::InvalidCharacter(this_char.to_string()))));
             }
         } else if is_end_of_primitive_value(this_char) {
+            file_contents.push_front(this_char);
             break;
         } else {
             return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::InvalidCharacter(this_char.to_string()))));
