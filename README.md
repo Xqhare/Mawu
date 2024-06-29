@@ -16,8 +16,7 @@ A little technical note: While Mawu uses the same return value types for both CS
 - Type aware
 - Supports both CSV and JSON
     - CSV
-        - With or without header, and data shift is more likely to occur
-        - settable delimiter
+        - With or without header
 - Supports missing or not provided values
 - Fully documented
     - Handling of edge cases is explained in the documentation
@@ -267,7 +266,7 @@ Because of the same behavior, Mawu will return JSON objects not in the same orde
 Ordering of arrays is kept.
 
 #### Numbers
-`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all.
+`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will be returned as `MawuValue::None`.
 
 The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 Should Mawu encounter a number not representable in 64 bits, it will return an error.
