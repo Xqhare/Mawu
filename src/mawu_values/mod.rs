@@ -20,6 +20,102 @@ impl Default for MawuValue {
     }
 }
 
+impl<K, V> From<HashMap<K, V>> for MawuValue 
+where 
+    K: Into<String>, V: Into<MawuValue> 
+{
+    fn from(value: HashMap<K, V>) -> Self {
+        MawuValue::Object(value.into_iter().map(|(k, v)| (k.into(), v.into())).collect())
+    }
+}
+
+impl<T> From<Vec<T>> for MawuValue
+where
+    T: Into<MawuValue>,
+{
+    fn from(value: Vec<T>) -> Self {
+        MawuValue::Array(value.into_iter().map(|x| x.into()).collect())
+    }
+}
+
+impl From<usize> for MawuValue {
+    fn from(value: usize) -> Self {
+        MawuValue::Uint(value as u64)
+    }
+}
+
+impl From<u64> for MawuValue {
+    fn from(value: u64) -> Self {
+        MawuValue::Uint(value)
+    }
+}
+
+impl From<u32> for MawuValue {
+    fn from(value: u32) -> Self {
+        MawuValue::Uint(value as u64)
+    }
+}
+
+impl From<u16> for MawuValue {
+    fn from(value: u16) -> Self {
+        MawuValue::Uint(value as u64)
+    }
+}
+
+impl From<u8> for MawuValue {
+    fn from(value: u8) -> Self {
+        MawuValue::Uint(value as u64)
+    }
+}
+
+impl From<isize> for MawuValue {
+    fn from(value: isize) -> Self {
+        MawuValue::Int(value as i64)
+    }
+}
+
+impl From<i64> for MawuValue {
+    fn from(value: i64) -> Self {
+        MawuValue::Int(value)
+    }
+}
+
+impl From<i32> for MawuValue {
+    fn from(value: i32) -> Self {
+        MawuValue::Int(value as i64)
+    }
+}
+
+impl From<i16> for MawuValue {
+    fn from(value: i16) -> Self {
+        MawuValue::Int(value as i64)
+    }
+}
+
+impl From<i8> for MawuValue {
+    fn from(value: i8) -> Self {
+        MawuValue::Int(value as i64)
+    }
+}
+
+impl From<f64> for MawuValue {
+    fn from(value: f64) -> Self {
+        MawuValue::Float(value)
+    }
+}
+
+impl From<f32> for MawuValue {
+    fn from(value: f32) -> Self {
+        MawuValue::Float(value as f64)
+    }
+}
+
+impl From<bool> for MawuValue {
+    fn from(value: bool) -> Self {
+        MawuValue::Bool(value)
+    }
+}
+
 impl From<String> for MawuValue {
     fn from(value: String) -> Self {
         if value.is_empty() {
@@ -29,7 +125,12 @@ impl From<String> for MawuValue {
         } else if value.parse::<i64>().is_ok() {
             MawuValue::Int(value.parse().unwrap())
         } else if value.parse::<f64>().is_ok() {
-            MawuValue::Float(value.parse().unwrap())
+            let test_bind = value.parse::<f64>().unwrap();
+            if test_bind.is_nan() || test_bind.is_infinite() {
+                MawuValue::None
+            } else {
+                MawuValue::Float(value.parse().unwrap())
+            }
         } else if value.parse::<bool>().is_ok() {
             MawuValue::Bool(value.parse().unwrap())
         } else {
@@ -47,7 +148,12 @@ impl From<&String> for MawuValue {
         } else if value.parse::<i64>().is_ok() {
             MawuValue::Int(value.parse().unwrap())
         } else if value.parse::<f64>().is_ok() {
-            MawuValue::Float(value.parse().unwrap())
+            let test_bind = value.parse::<f64>().unwrap();
+            if test_bind.is_nan() || test_bind.is_infinite() {
+                MawuValue::None
+            } else {
+                MawuValue::Float(value.parse().unwrap())
+            }        
         } else if value.parse::<bool>().is_ok() {
             MawuValue::Bool(value.parse().unwrap())
         } else {
@@ -65,7 +171,12 @@ impl From<&str> for MawuValue {
         } else if value.parse::<i64>().is_ok() {
             MawuValue::Int(value.parse().unwrap())
         } else if value.parse::<f64>().is_ok() {
-            MawuValue::Float(value.parse().unwrap())
+            let test_bind = value.parse::<f64>().unwrap();
+            if test_bind.is_nan() || test_bind.is_infinite() {
+                MawuValue::None
+            } else {
+                MawuValue::Float(value.parse().unwrap())
+            }
         } else if value.parse::<bool>().is_ok() {
             MawuValue::Bool(value.parse().unwrap())
         } else {
@@ -479,7 +590,7 @@ impl MawuValue {
 // While not 100% test coverage, it's a decent sanity check
 
 #[test]
-fn test_convenience_boolean_methods() {
+fn convenience_boolean_methods() {
     let bool_true = MawuValue::Bool(true);
     assert!(bool_true.is_true());
     assert!(!bool_true.is_false());
@@ -494,7 +605,18 @@ fn test_convenience_boolean_methods() {
 }
 
 #[test]
-fn test_to_primitive() {
+fn from_vec_and_hashmap() {
+    let vec = vec!["test", "test2", "test3"];
+    let mawu_vec = MawuValue::from(vec);
+    assert_eq!(mawu_vec, MawuValue::Array(vec!["test".into(), "test2".into(), "test3".into()]));
+
+    let hashmap = std::collections::HashMap::from([("test", "test2")]);
+    let mawu_hashmap = MawuValue::from(hashmap);
+    assert_eq!(mawu_hashmap, MawuValue::Object(HashMap::from([("test".into(), "test2".into())])));
+}
+
+#[test]
+fn to_primitive() {
     let mawu = MawuValue::from("test").to_string().unwrap();
     assert_eq!(mawu, "test".to_string());
     let bool_true = MawuValue::from("true").to_bool().unwrap();
@@ -504,7 +626,7 @@ fn test_to_primitive() {
 }
 
 #[test]
-fn test_as_primitive() {
+fn as_primitive() {
     let tmp = MawuValue::from("test");
     let mawu_str = tmp.as_str().unwrap();
     assert_eq!(mawu_str, "test");
@@ -513,7 +635,13 @@ fn test_as_primitive() {
 }
 
 #[test]
-fn test_number_conversion() {
+fn float_inf() {
+    let float_inf = MawuValue::from("1.0e500000");
+    assert!(float_inf.is_none());
+}
+
+#[test]
+fn number_conversion() {
     let mawu_int = MawuValue::Int(-123);
     let mawu_uint = MawuValue::Uint(123);
     let mawu_float = MawuValue::Float(123.123);
@@ -552,7 +680,7 @@ fn test_number_conversion() {
 }
 
 #[test]
-fn test_mawu_value_from_string() {
+fn mawu_value_from_string() {
     let mawu_string_value = MawuValue::from("test");
     assert_eq!(mawu_string_value, MawuValue::String("test".to_string()));
     assert_eq!(mawu_string_value.is_string(), true);
@@ -590,7 +718,7 @@ fn test_mawu_value_from_string() {
 }
 
 #[test]
-fn test_mawu_value_constructed() {
+fn mawu_value_constructed() {
     let mawu_object_value = MawuValue::Object(HashMap::new());
     let mawu_array_value = MawuValue::Array(vec![]);
     let mawu_csv_object_value = MawuValue::CSVObject(vec![HashMap::new()]);
