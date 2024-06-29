@@ -1,8 +1,5 @@
 #[cfg(test)]
 mod csv_tests {
-    use json::*;
-    use mawu::mawu_values::MawuValue;
-    use pretty_assertions::{assert_eq, assert_ne, assert_str_eq};
 
     mod headed {
         use mawu::mawu_values::MawuValue;
