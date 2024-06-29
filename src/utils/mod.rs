@@ -1,4 +1,4 @@
-use std::{char, error::Error};
+use std::char;
 
 use crate::errors::{MawuError, MawuInternalError};
 
@@ -35,6 +35,10 @@ fn my_unescape_unicode_handler(s: String) -> Result<String, MawuError> {
         match digit {
             Some(d) => {
                 // Just a casual bit-shift and a bitwise OR to build the unicode value
+                // I can Invoke the ancient inscriptions, and think I know what they are doing:
+                // I have a value of 32 0s, and each char is 4 bits long.
+                // To make space for the next char, I just shift the current value by 4 along, and
+                // then, as the shifted value is all 0s again, I just copy the char into it with a bitwise OR (0,0 == 0, 0,1 == 1)
                 unicode_value = (unicode_value << 4) + d;
                 // Check if the unicode value is above 0x10FFFF (the maximum value of a unicode codepoint)
                 if unicode_value > 0x10FFFF {
@@ -87,6 +91,10 @@ pub fn is_whitespace(c: &str) -> bool {
 /// Returns true if the given character is a json string terminator (':','}',']')
 /// Do not forget to check for end of file!
 /// Uses `\n` as end of file making it compatible with modern windows, linux and some OSX versions.
-pub fn is_json_string_terminator_token(c: &str) -> bool {
-    c == ":" || c == "," || c == "}" || c == "]" || c == "\n"
+pub fn is_json_string_terminator_token(c: Option<&&str>) -> bool {
+    if c.is_none() {
+        return false;
+    }
+    let c = c.unwrap();
+    *c == ":" || *c == "," || *c == "}" || *c == "]" || *c == "\n"
 }
