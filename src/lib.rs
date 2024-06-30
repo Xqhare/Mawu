@@ -3,7 +3,7 @@ mod lexers;
 pub mod mawu_values;
 mod utils;
 
-pub mod csv {
+pub mod read {
     use core::str;
     use std::{collections::VecDeque, path::Path};
     use unicode_segmentation::UnicodeSegmentation;
