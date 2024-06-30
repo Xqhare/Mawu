@@ -24,36 +24,28 @@ mod csv_tests {
                 if *id == 1 {
                     assert_eq!(types, &MawuValue::String("uint".to_string()));
                     assert_eq!(content, &MawuValue::Uint(0));
-                } else
-                if *id == 2 {
+                } else if *id == 2 {
                     assert_eq!(types, &MawuValue::String("uint".to_string()));
                     assert_eq!(content, &MawuValue::Uint(100));
-                } else
-                if *id == 10 {
+                } else if *id == 10 {
                     assert_eq!(types, &MawuValue::String("sint".to_string()));
                     assert_eq!(content, &MawuValue::Int(-42));
-                } else
-                if *id == 20 {
+                } else if *id == 20 {
                     assert_eq!(types, &MawuValue::String("float".to_string()));
                     assert_eq!(content, &MawuValue::Float(-185911.8114191311414));
-                } else
-                if *id == 25 {
+                } else if *id == 25 {
                     assert_eq!(types, &MawuValue::String("bool".to_string()));
                     assert_eq!(content, &MawuValue::Bool(true));
-                } else
-                if *id == 26 {
+                } else if *id == 26 {
                     assert_eq!(types, &MawuValue::String("bool".to_string()));
                     assert_eq!(content, &MawuValue::Bool(false));
-                } else
-                if *id == 27 {
+                } else if *id == 27 {
                     assert_eq!(types, &MawuValue::String("none".to_string()));
                     assert_eq!(content, &MawuValue::None);
-                } else
-                if *id == 28 {
+                } else if *id == 28 {
                     assert_eq!(types, &MawuValue::None);
                     assert_eq!(content, &MawuValue::None);
-                } else
-                if *id == 31 {
+                } else if *id == 31 {
                     assert_eq!(types, &MawuValue::String("string".to_string()));
                     assert_eq!(
                         content,
