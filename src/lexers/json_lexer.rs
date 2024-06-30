@@ -78,6 +78,10 @@ fn json_value_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<Ma
 fn json_object_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<MawuValue, MawuError> {
     let mut binding_object: HashMap<String, MawuValue> = Default::default();
     while file_contents.front() != Some(&"}") && file_contents.front().is_some() {
+        if is_whitespace(file_contents.front().unwrap()) {
+            let _ = file_contents.pop_front();
+            continue;
+        }
         if file_contents.front() == Some(&",") {
             let _ = file_contents.pop_front();
             continue;
@@ -97,9 +101,6 @@ fn json_object_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
         } else {
             return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::ExpectedColon)));
         }
-        if file_contents.front() == Some(&"}") {
-            break;
-        }
     }
     if file_contents.front() == Some(&"}") {
         let _ = file_contents.pop_front();
@@ -109,6 +110,10 @@ fn json_object_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
 fn json_array_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<MawuValue, MawuError> {
     let mut binding_array: Vec<MawuValue> = Default::default();
     while file_contents.front() != Some(&"]") && file_contents.front().is_some() {
+        if is_whitespace(file_contents.front().unwrap()) {
+            let _ = file_contents.pop_front();
+            continue;
+        }
         if file_contents.front() == Some(&",") {
             let _ = file_contents.pop_front();
             continue;
@@ -259,6 +264,9 @@ fn json_number_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>, first_digit
     }
     while file_contents.len() > 0 {
         let this_char = file_contents.pop_front().unwrap();
+        if is_whitespace(this_char) {
+            continue;
+        }
         if this_char == "." || is_digit(this_char)? {
             out.push_str(this_char);
         } else if this_char == "e" || this_char == "E" {
