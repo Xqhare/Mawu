@@ -274,6 +274,19 @@ impl MawuValue {
         }
     }
 
+    /// Check if the value is a number
+    ///
+    /// ## Returns
+    /// `true` if the value is a number, `false` otherwise.
+    pub fn is_number(&self) -> bool {
+        match self {
+            MawuValue::Uint(_) => true,
+            MawuValue::Int(_) => true,
+            MawuValue::Float(_) => true,
+            _ => false,
+        }
+    }
+
     /// Check if the value is a boolean
     ///
     /// ## Returns
