@@ -7,7 +7,7 @@ mod csv_tests {
 
         #[test]
         fn my_own_random_data_all_types() {
-            let mawu_result = mawu::csv::read_csv_headed(
+            let mawu_result = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv",
             );
             assert!(mawu_result.is_ok());
@@ -71,7 +71,7 @@ mod csv_tests {
 
         #[test]
         fn random_data_no_license_customers100() {
-            let mawu_result = mawu::csv::read_csv_headed(
+            let mawu_result = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/random-data-no-license/customers-100.csv",
             );
             assert_eq!(mawu_result.is_ok(), true);
@@ -158,7 +158,7 @@ mod csv_tests {
         #[test]
         #[ignore]
         fn random_data_no_license_customers100000() {
-            let mawu_result = mawu::csv::read_csv_headed(
+            let mawu_result = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/random-data-no-license/customers-100000.csv",
             );
             assert_eq!(mawu_result.is_ok(), true);
@@ -358,7 +358,7 @@ mod csv_tests {
 
         #[test]
         fn random_data_no_license_organizations100() {
-            let mawu = mawu::csv::read_csv_headed(
+            let mawu = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/random-data-no-license/organizations-100.csv",
             );
             assert_eq!(mawu.is_ok(), true);
@@ -369,7 +369,7 @@ mod csv_tests {
         #[test]
         #[ignore]
         fn random_data_no_license_organizations100000() {
-            let mawu = mawu::csv::read_csv_headed(
+            let mawu = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/random-data-no-license/organizations-100000.csv",
             );
             assert_eq!(mawu.is_ok(), true);
@@ -382,7 +382,7 @@ mod csv_tests {
 
         #[test]
         fn random_data_no_license_people100() {
-            let mawu = mawu::csv::read_csv_headed(
+            let mawu = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/random-data-no-license/people-100.csv",
             );
             assert_eq!(mawu.is_ok(), true);
@@ -393,7 +393,7 @@ mod csv_tests {
         #[test]
         #[ignore]
         fn random_data_no_license_people100000() {
-            let mawu = mawu::csv::read_csv_headed(
+            let mawu = mawu::read::read_csv_headed(
                 "data/csv/csv-test-data/headed/random-data-no-license/people-100000.csv",
             );
             assert_eq!(mawu.is_ok(), true);
@@ -410,7 +410,7 @@ mod csv_tests {
 
         #[test]
         fn my_own_random_data_all_types() {
-            let mawu_result = mawu::csv::read_csv_headless(
+            let mawu_result = mawu::read::read_csv_headless(
                 "data/csv/csv-test-data/headless/my-own-random-data/all-types.csv",
             );
             assert_eq!(mawu_result.is_ok(), true);
