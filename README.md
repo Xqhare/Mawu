@@ -254,6 +254,9 @@ Most edge cases and the way they are handled are explained in the following para
 
 ### Edge cases
 
+#### BOM
+Mawu does not recognize or produce a `BOM` or similar at the beginning of the file at all and will error out if it encounters one.
+
 #### Files
 If a file should be empty, Mawu will return a `None` value.
 
@@ -271,11 +274,19 @@ Ordering of arrays is kept the same as in the JSON file.
 The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 Should Mawu encounter a number not representable in 64 bits, it will return an error.
 As any implementor of the standards is free to set its own limits on the range and precision of numbers, Mawu chooses to use the same limits and behaviour of the rust standard library `String.parse()` function.
-This can be the case for large numbers expressed in exponent notation. For example, `123.456e+350` is not representable in 64-bits (and will return an error) while `123.456e300` is representable.
+This can be the case for large numbers expressed in exponent notation. For example, `123.456e+350` is not representable in 64-bits (and will return `MawuValue::None`) while `123.456e300` is representable.
 In the case of `123.456e-350`, the parser of the rust standard library will approximate to `0` and Mawu return `0`.
 
+Some numbers supplied as integers, eg `123456789e29`, can be converted into `f64` numbers should they be too large to be represented as `u64` but a `f64` can still hold them.
+As a result of using the rust standard library, precision can be lost.
+
+> [!IMPORTANT]
+> Any overflow will result in a `MawuValue::None`.
+> Any underflow will result in a `0`.
+
 #### Strings
-UTF-16 surrogate pairs are permitted by the standards and are parsed correctly.
+Mawu accepts only UTF-8 encoded files.
+Escaped UTF-16 surrogate pairs are permitted by the standards and are parsed correctly.
 
 #### Structure
 
