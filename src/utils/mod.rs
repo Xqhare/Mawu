@@ -13,7 +13,12 @@ pub fn is_newline(s: &str) -> bool {
     s == "\n" || s == "\r\n" || s == "\r"
 }
 
-/// Takes in a `&str` and unescapes unicode characters
+/// Takes in two `&str` and unescapes unicode characters
+/// 
+/// ## Arguments
+/// * `s` - The string to unescape
+/// * `next_codepoint` - The next codepoint to unescape in the case of a surrogate pair, can be
+/// left empty if the string is guaranteed to be not a surrogate pair
 /// 
 /// ## Returns
 /// `Ok((String, bool))` if the string is successfully unescaped, `Err(MawuError)` otherwise
