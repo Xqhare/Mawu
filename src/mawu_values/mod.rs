@@ -1,3 +1,4 @@
+use core::fmt;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -12,6 +13,23 @@ pub enum MawuValue {
     String(String),
     Bool(bool),
     None,
+}
+
+impl fmt::Display for MawuValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            MawuValue::CSVObject(ref v) => write!(f, "{:?}", v),
+            MawuValue::CSVArray(ref v) => write!(f, "{:?}", v),
+            MawuValue::Object(ref v) => write!(f, "{}", v.iter().map(|(k, v)| (k.to_string(), v.to_string().expect("Unable to convert MawuValue to String"))).map(|(k, v) | {format!("{}: {}", k, v)}).collect::<Vec<String>>().join(",")),
+            MawuValue::Array(ref v) => write!(f, "{}", v.iter().map(|v| {if v.is_none() {String::from("None")} else {v.to_string().expect("Unable to convert MawuValue to String")}}).collect::<Vec<String>>().join(",")),
+            MawuValue::Uint(ref v) => write!(f, "{}", v),
+            MawuValue::Int(ref v) => write!(f, "{}", v),
+            MawuValue::Float(ref v) => write!(f, "{}", v),
+            MawuValue::String(ref v) => write!(f, "{}", v),
+            MawuValue::Bool(ref v) => write!(f, "{}", v),
+            MawuValue::None => write!(f, "None"),
+        }
+    }
 }
 
 impl Default for MawuValue {
