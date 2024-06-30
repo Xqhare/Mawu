@@ -1,4 +1,4 @@
-use std::char;
+use std::char::{self, decode_utf16};
 
 use crate::errors::{MawuError, MawuInternalError};
 
@@ -14,21 +14,33 @@ pub fn is_newline(s: &str) -> bool {
 }
 
 /// Takes in a `&str` and unescapes unicode characters
-/// Expects `\` and `u` to be included
-pub fn unescape_unicode(s: &str) -> Result<String, MawuError> {
+/// 
+/// ## Returns
+/// `Ok((String, bool))` if the string is successfully unescaped, `Err(MawuError)` otherwise
+/// the boolean is `true` if the next_codepoint was used, `false` otherwise
+pub fn unescape_unicode(s: &str, next_codepoint: &str) -> Result<(String, bool), MawuError> {
     let out = my_unescape_unicode_handler(s.to_string());
     if out.is_err() {
-        return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+        if next_codepoint.is_empty() {
+            return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+        } else {
+            let mut tmp: Vec<u16> = Default::default();
+            tmp.push(u16::from_str_radix(s, 16).unwrap());
+            tmp.push(u16::from_str_radix(next_codepoint, 16).unwrap());
+            let out = decode_utf16(tmp.iter().copied()).next().unwrap();
+            if out.is_err() {
+                return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+            } else {
+                return Ok((out.unwrap().to_string(), true));
+            }
+
+        }
     } else {
-        return Ok(out.unwrap());
+        return Ok((out.unwrap(), false));
     }
 }
 
-#[allow(unused_assignments)]
 fn my_unescape_unicode_handler(s: String) -> Result<String, MawuError> {
-    // To consider: Surrogate pairs - too much work for now; maybe in an actual unicode library in the future
-    
-    // This value is read, I don't know what the compiler is on about
     let mut unicode_value = 0u32;
     for char in s.chars() {
         let digit = char.to_digit(0x10);
@@ -96,5 +108,5 @@ pub fn is_json_string_terminator_token(c: Option<&&str>) -> bool {
         return false;
     }
     let c = c.unwrap();
-    *c == ":" || *c == "," || *c == "}" || *c == "]" || *c == "\n"
+    *c == ":" || *c == "," || *c == "}" || *c == "]"
 }
