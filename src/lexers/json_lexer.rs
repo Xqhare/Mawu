@@ -1,3 +1,5 @@
+// the 'unused_imports' warning is a false positive, they are needed for the tests
+#![allow(unused_imports)]
 use std::{collections::{HashMap, VecDeque}, rc::Rc, sync::{Mutex, MutexGuard}};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -104,8 +106,11 @@ fn json_object_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
     }
     if file_contents.front() == Some(&"}") {
         let _ = file_contents.pop_front();
+        Ok(MawuValue::from(binding_object))
+    } else {
+        Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::ExpectedEndOfObject)))
     }
-    Ok(MawuValue::from(binding_object))}
+}
 
 fn json_array_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<MawuValue, MawuError> {
     let mut binding_array: Vec<MawuValue> = Default::default();
@@ -133,8 +138,13 @@ fn json_array_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<Ma
 
 #[test]
 fn object_lexer() {
-    let input = json_lexer(&mut read_file("test.json").unwrap().graphemes(true).collect::<VecDeque<&str>>());
-    println!("{:?}", input);
+    let input = json_lexer(&mut read_file("data/json/json-test-data/rfc8259-test-data/object.json").unwrap().graphemes(true).collect::<VecDeque<&str>>());
+    assert!(input.is_ok());
+}
+
+#[test]
+fn array_lexer() {
+    let input = json_lexer(&mut read_file("data/json/json-test-data/rfc8259-test-data/array.json").unwrap().graphemes(true).collect::<VecDeque<&str>>());
     assert!(input.is_ok());
 }
 
@@ -150,10 +160,27 @@ fn json_string_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
             if character == "\"" && is_json_string_terminator_token(next_char) || file_contents.len() == 0 || file_contents.front() == Some(&"\n") && file_contents.len() <= 1 {
                 return Ok(MawuValue::String(string));
             }
+            // the two nested if statements are joined, meaning that only if `\"` is encountered
+            // AND the next char is whitespace the logic is executed
+            if character == "\"" && next_char.is_some() {
+                let next_char = file_contents.pop_front().unwrap();
+                if is_whitespace(next_char) {
+
+                    while is_whitespace(file_contents.front().unwrap()) {
+                        let _ = file_contents.pop_front().unwrap();
+                    }
+
+                    if is_json_string_terminator_token(file_contents.front()) {
+                        return Ok(MawuValue::String(string));
+                    } else {
+                        return Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::UnexpectedCharacter(file_contents.front().unwrap().to_string()))));
+                    }
+                }
+            }
             // Escape character
             // remember, some characters have two chars of escape sequence (`\"` being represented
             // as ["\\", "\""])
-            if character == "\\" {
+            else if character == "\\" {
                 if next_char.is_some() {
                     let next_char = file_contents.pop_front().unwrap();
                     if next_char == "u" {
@@ -163,7 +190,35 @@ fn json_string_lexer(file_contents: &mut MutexGuard<VecDeque<&str>>) -> Result<M
                             let hex2 = file_contents.pop_front().unwrap();
                             let hex3 = file_contents.pop_front().unwrap();
                             let hex4 = file_contents.pop_front().unwrap();
-                            string.push_str(&unescape_unicode(&format!("{}{}{}{}", hex1, hex2, hex3, hex4))?);
+                            let next_codepoint = {
+                                if file_contents.len() >= 6 {
+                                    let mut out: String = Default::default();
+                                    out.push_str(file_contents.get(2).unwrap());
+                                    out.push_str(file_contents.get(3).unwrap());
+                                    out.push_str(file_contents.get(4).unwrap());
+                                    out.push_str(file_contents.get(5).unwrap());
+                                    out
+                                } else {
+                                    String::default()
+                                }
+                            };
+                            let tmp = unescape_unicode(&format!("{}{}{}{}", hex1, hex2, hex3, hex4), &next_codepoint);
+                            if tmp.is_err() {
+                                Err(MawuError::JsonError(JsonError::ParseError(JsonParseError::InvalidEscapeSequence(format!("{}{}", character, next_char)))))?;
+                            } else {
+                                // next codepoint was used
+                                // so we pop it off, including the skipped `\u`
+                                let (out, codepointused) = tmp.unwrap();
+                                if codepointused {
+                                    let _ = file_contents.pop_front();
+                                    let _ = file_contents.pop_front();
+                                    let _ = file_contents.pop_front();
+                                    let _ = file_contents.pop_front();
+                                    let _ = file_contents.pop_front();
+                                    let _ = file_contents.pop_front();
+                                }
+                                string.push_str(&out);
+                            }
                             continue;
                         }
                     } else if next_char == "/" {
