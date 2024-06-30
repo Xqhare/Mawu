@@ -43,7 +43,22 @@ A little technical note: While Mawu uses the same return value types for both CS
             - [Objects](#objects)
             - [Arrays](#arrays)
             - [Numbers](#numbers)
+            - [Strings](#strings)
             - [Structure](#structure)
+        - [JSON Usage](#json-usage)
+
+## Using Mawu
+To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions in the documentation below.
+```toml
+[dependencies]
+mawu = { git = "https://github.com/Xqhare/mawu" }
+```
+Then simply run a quick:
+```shell
+cargo update
+```
+
+Mawu is now ready to go!
 
 ## Naming the creation: A Legacy of the Divine
 The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
@@ -289,5 +304,71 @@ Mawu accepts only UTF-8 encoded files.
 Escaped UTF-16 surrogate pairs are permitted by the standards and are parsed correctly.
 
 #### Structure
+Mawu accepts any amount of nested structures.
 
+### JSON Usage
+```rust
+use mawu::read::read_json;
 
+let json_value = read_json("path/to_file.json").unwrap();
+for (key, value) in json_value.as_object().unwrap() {
+    println!("{}: {}", key, value);
+}
+
+```
+
+Given the object:
+```json
+{
+    "key1": "value1",
+    "key2": 1,
+    "key3": -1,
+    "key4": true,
+    "key5": null
+}
+```
+You can iterate over it as follows:
+```rust
+use mawu::read::read_json;
+
+let json_value = read_json("path/to_file.json").unwrap().as_object().unwrap();
+let key1: &str = json_value.get("key1").unwrap().as_str().unwrap();
+let key2: &u64 = json_value.get("key2").unwrap().as_uint().unwrap();
+let key3: &i64 = json_value.get("key3").unwrap().as_int().unwrap();
+let key4: &bool = json_value.get("key4").unwrap().as_bool().unwrap();
+if json_value.get("key5").unwrap().is_none() {
+    // Do something
+}
+```
+
+A more complex example:
+```json
+{
+    "key1": {
+        "key2": {
+            "key3": "value3"
+        }
+    },
+    "key4": "value4",
+    "key5": null,
+    "key6": 6,
+    "key7": true,
+    "key8": -8,
+    "key9": [1, 2, 3]
+}
+```
+```rust
+use mawu::read::read_json;
+
+let json_value = read_json("path/to_file.json").unwrap().as_object().unwrap();
+let key3: &str = json_value.get("key1").unwrap().as_object().unwrap().get("key2").unwrap().as_object().unwrap().get("key3").unwrap().as_str().unwrap();
+let key4: &str = json_value.get("key4").unwrap().as_str().unwrap();
+let key5: &MawuValue = json_value.get("key5").unwrap();
+let key6: &u64 = json_value.get("key6").unwrap().as_uint().unwrap();
+let key7: &bool = json_value.get("key7").unwrap().as_bool().unwrap();
+let key8: &i64 = json_value.get("key8").unwrap().as_int().unwrap();
+let key9: &Vec<MawuValue> = json_value.get("key9").unwrap().as_array().unwrap();
+for value in key9 {
+    println!("{}", value);
+}
+```
