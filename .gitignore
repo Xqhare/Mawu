@@ -21,3 +21,4 @@ Cargo.lock
 # Added by Me
 *.vim
 rfc*.*
+test.json
