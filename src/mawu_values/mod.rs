@@ -20,8 +20,34 @@ impl fmt::Display for MawuValue {
         match *self {
             MawuValue::CSVObject(ref v) => write!(f, "{:?}", v),
             MawuValue::CSVArray(ref v) => write!(f, "{:?}", v),
-            MawuValue::Object(ref v) => write!(f, "{}", v.iter().map(|(k, v)| (k.to_string(), v.to_string().expect("Unable to convert MawuValue to String"))).map(|(k, v) | {format!("{}: {}", k, v)}).collect::<Vec<String>>().join(",")),
-            MawuValue::Array(ref v) => write!(f, "{}", v.iter().map(|v| {if v.is_none() {String::from("None")} else {v.to_string().expect("Unable to convert MawuValue to String")}}).collect::<Vec<String>>().join(",")),
+            MawuValue::Object(ref v) => write!(
+                f,
+                "{}",
+                v.iter()
+                    .map(|(k, v)| (
+                        k.to_string(),
+                        v.to_string()
+                            .expect("Unable to convert MawuValue to String")
+                    ))
+                    .map(|(k, v)| { format!("{}: {}", k, v) })
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ),
+            MawuValue::Array(ref v) => write!(
+                f,
+                "{}",
+                v.iter()
+                    .map(|v| {
+                        if v.is_none() {
+                            String::from("None")
+                        } else {
+                            v.to_string()
+                                .expect("Unable to convert MawuValue to String")
+                        }
+                    })
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ),
             MawuValue::Uint(ref v) => write!(f, "{}", v),
             MawuValue::Int(ref v) => write!(f, "{}", v),
             MawuValue::Float(ref v) => write!(f, "{}", v),
@@ -38,12 +64,18 @@ impl Default for MawuValue {
     }
 }
 
-impl<K, V> From<HashMap<K, V>> for MawuValue 
-where 
-    K: Into<String>, V: Into<MawuValue> 
+impl<K, V> From<HashMap<K, V>> for MawuValue
+where
+    K: Into<String>,
+    V: Into<MawuValue>,
 {
     fn from(value: HashMap<K, V>) -> Self {
-        MawuValue::Object(value.into_iter().map(|(k, v)| (k.into(), v.into())).collect())
+        MawuValue::Object(
+            value
+                .into_iter()
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
+        )
     }
 }
 
@@ -159,7 +191,7 @@ impl From<String> for MawuValue {
 
 impl From<&String> for MawuValue {
     fn from(value: &String) -> Self {
-         if value.is_empty() {
+        if value.is_empty() {
             MawuValue::None
         } else if value.parse::<u64>().is_ok() {
             MawuValue::Uint(value.parse().unwrap())
@@ -171,7 +203,7 @@ impl From<&String> for MawuValue {
                 MawuValue::None
             } else {
                 MawuValue::Float(value.parse().unwrap())
-            }        
+            }
         } else if value.parse::<bool>().is_ok() {
             MawuValue::Bool(value.parse().unwrap())
         } else {
@@ -182,7 +214,7 @@ impl From<&String> for MawuValue {
 
 impl From<&str> for MawuValue {
     fn from(value: &str) -> Self {
-         if value.is_empty() {
+        if value.is_empty() {
             MawuValue::None
         } else if value.parse::<u64>().is_ok() {
             MawuValue::Uint(value.parse().unwrap())
@@ -282,7 +314,7 @@ impl MawuValue {
     }
 
     /// Check if the value is a float
-    /// 
+    ///
     /// ## Returns
     /// `true` if the value is a float, `false` otherwise.
     pub fn is_float(&self) -> bool {
@@ -512,7 +544,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
             MawuValue::Float(v) => {
                 if v.is_normal() {
                     let tmp = v.to_string().parse::<u64>();
@@ -524,7 +556,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
         }
     }
@@ -542,7 +574,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
             MawuValue::Float(v) => {
                 if v.is_normal() {
                     let tmp = v.to_string().parse::<i64>();
@@ -554,7 +586,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
         }
     }
@@ -572,7 +604,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
             MawuValue::Uint(v) => {
                 let tmp = v.to_string().parse::<f64>();
                 if tmp.is_ok() {
@@ -580,7 +612,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
         }
     }
@@ -604,7 +636,7 @@ impl MawuValue {
                 } else {
                     None
                 }
-            },
+            }
         }
     }
 
@@ -615,7 +647,6 @@ impl MawuValue {
             _ => Some(()),
         }
     }
-
 }
 
 // While not 100% test coverage, it's a decent sanity check
@@ -639,11 +670,17 @@ fn convenience_boolean_methods() {
 fn from_vec_and_hashmap() {
     let vec = vec!["test", "test2", "test3"];
     let mawu_vec = MawuValue::from(vec);
-    assert_eq!(mawu_vec, MawuValue::Array(vec!["test".into(), "test2".into(), "test3".into()]));
+    assert_eq!(
+        mawu_vec,
+        MawuValue::Array(vec!["test".into(), "test2".into(), "test3".into()])
+    );
 
     let hashmap = std::collections::HashMap::from([("test", "test2")]);
     let mawu_hashmap = MawuValue::from(hashmap);
-    assert_eq!(mawu_hashmap, MawuValue::Object(HashMap::from([("test".into(), "test2".into())])));
+    assert_eq!(
+        mawu_hashmap,
+        MawuValue::Object(HashMap::from([("test".into(), "test2".into())]))
+    );
 }
 
 #[test]
@@ -707,7 +744,6 @@ fn number_conversion() {
     assert!(mawu_uint_f64.unwrap() == 123.0);
     assert!(mawu_float_f64.unwrap() == 123.123);
     assert!(mawu_short_float_f64.unwrap() == 123.0);
-
 }
 
 #[test]

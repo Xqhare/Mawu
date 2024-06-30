@@ -9,7 +9,10 @@ pub mod read {
     use unicode_segmentation::UnicodeSegmentation;
 
     use crate::{
-        errors::MawuError, lexers::{csv_lexer, json_lexer}, mawu_values::MawuValue, utils::file_handling,
+        errors::MawuError,
+        lexers::{csv_lexer, json_lexer},
+        mawu_values::MawuValue,
+        utils::file_handling,
     };
 
     /// Takes in a path to a CSV file with a header at the beginning of the file and returns a parsed MawuValue in the format of `Vec<Vec<HashMap<String, MawuValue>>>`.

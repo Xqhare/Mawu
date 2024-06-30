@@ -14,12 +14,12 @@ pub fn is_newline(s: &str) -> bool {
 }
 
 /// Takes in two `&str` and unescapes unicode characters
-/// 
+///
 /// ## Arguments
 /// * `s` - The string to unescape
 /// * `next_codepoint` - The next codepoint to unescape in the case of a surrogate pair, can be
 /// left empty if the string is guaranteed to be not a surrogate pair
-/// 
+///
 /// ## Returns
 /// `Ok((String, bool))` if the string is successfully unescaped, `Err(MawuError)` otherwise
 /// the boolean is `true` if the next_codepoint was used, `false` otherwise
@@ -27,18 +27,21 @@ pub fn unescape_unicode(s: &str, next_codepoint: &str) -> Result<(String, bool),
     let out = my_unescape_unicode_handler(s.to_string());
     if out.is_err() {
         if next_codepoint.is_empty() {
-            return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+            return Err(MawuError::InternalError(
+                MawuInternalError::UnableToUnescapeUnicode(s.to_string()),
+            ));
         } else {
             let mut tmp: Vec<u16> = Default::default();
             tmp.push(u16::from_str_radix(s, 16).unwrap());
             tmp.push(u16::from_str_radix(next_codepoint, 16).unwrap());
             let out = decode_utf16(tmp.iter().copied()).next().unwrap();
             if out.is_err() {
-                return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+                return Err(MawuError::InternalError(
+                    MawuInternalError::UnableToUnescapeUnicode(s.to_string()),
+                ));
             } else {
                 return Ok((out.unwrap().to_string(), true));
             }
-
         }
     } else {
         return Ok((out.unwrap(), false));
@@ -59,17 +62,25 @@ fn my_unescape_unicode_handler(s: String) -> Result<String, MawuError> {
                 unicode_value = (unicode_value << 4) + d;
                 // Check if the unicode value is above 0x10FFFF (the maximum value of a unicode codepoint)
                 if unicode_value > 0x10FFFF {
-                    return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+                    return Err(MawuError::InternalError(
+                        MawuInternalError::UnableToUnescapeUnicode(s.to_string()),
+                    ));
                 }
-            },
+            }
             // If the character is not a digit, it is an error!
-            None => return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string()))),
+            None => {
+                return Err(MawuError::InternalError(
+                    MawuInternalError::UnableToUnescapeUnicode(s.to_string()),
+                ))
+            }
         }
     }
     let possible_char = char::from_u32(unicode_value);
     // user supplied data always needs to be checked, invalid data can always be supplied
     if possible_char.is_none() {
-        return Err(MawuError::InternalError(MawuInternalError::UnableToUnescapeUnicode(s.to_string())));
+        return Err(MawuError::InternalError(
+            MawuInternalError::UnableToUnescapeUnicode(s.to_string()),
+        ));
     } else {
         return Ok(possible_char.unwrap().to_string());
     }
@@ -93,7 +104,9 @@ pub fn is_digit(c: &str) -> Result<bool, MawuError> {
             Ok(false)
         }
     } else {
-        Err(MawuError::InternalError(MawuInternalError::StringWithNoChars(c.to_string())))
+        Err(MawuError::InternalError(
+            MawuInternalError::StringWithNoChars(c.to_string()),
+        ))
     }
 }
 

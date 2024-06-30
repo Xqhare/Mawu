@@ -63,8 +63,7 @@ fn parse_csv_body(
                 }
             };
             if is_newline(h) {
-                if is_next_newline
-                {
+                if is_next_newline {
                     let _ = csv_body.pop_front();
                 }
                 out.push(row_data.iter().map(|s| MawuValue::from(s)).collect());
@@ -97,7 +96,8 @@ fn parse_csv_body(
                 row_data.push(value);
             } else {
                 let mut value: String = h.to_string();
-                while csv_body.front() != Some(&",") && !is_newline(csv_body.front().ok_or_else(|| {
+                while csv_body.front() != Some(&",")
+                    && !is_newline(csv_body.front().ok_or_else(|| {
                         MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline))
                     })?)
                 {
@@ -156,7 +156,8 @@ fn make_head(
                     head_out.push(value);
                 } else {
                     let mut value: String = content.to_string();
-                    while file_contents.front() != Some(&",") && !is_newline(file_contents.front().ok_or_else(|| {
+                    while file_contents.front() != Some(&",")
+                        && !is_newline(file_contents.front().ok_or_else(|| {
                             MawuError::CsvError(CsvError::ParseError(
                                 CsvParseError::UnexpectedNewline,
                             ))
@@ -164,7 +165,8 @@ fn make_head(
                     {
                         if let Some(t) = file_contents.pop_front() {
                             let mut entry = t.to_string();
-                            while file_contents.front() != Some(&",") && !is_newline(file_contents.front().ok_or_else(|| {
+                            while file_contents.front() != Some(&",")
+                                && !is_newline(file_contents.front().ok_or_else(|| {
                                     MawuError::CsvError(CsvError::UnrecognizedHeader(
                                         "".to_string(),
                                     ))

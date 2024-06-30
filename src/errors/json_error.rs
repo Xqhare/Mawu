@@ -45,10 +45,14 @@ impl fmt::Display for JsonParseError {
             JsonParseError::ExtraValue(ref s) => write!(f, "Extra value: {}", s),
             JsonParseError::MissingValue(ref s) => write!(f, "Missing value: {}", s),
             JsonParseError::UnexpectedNewline => write!(f, "Unexpected newline"),
-            JsonParseError::InvalidStructuralToken(ref s) => write!(f, "Invalid structural token: {}", s),
+            JsonParseError::InvalidStructuralToken(ref s) => {
+                write!(f, "Invalid structural token: {}", s)
+            }
             JsonParseError::UnexpectedEndOfFile => write!(f, "Unexpected end of file"),
             JsonParseError::InvalidCharacter(ref s) => write!(f, "Invalid character: {}", s),
-            JsonParseError::InvalidEscapeSequence(ref s) => write!(f, "Invalid escape sequence: {}", s),
+            JsonParseError::InvalidEscapeSequence(ref s) => {
+                write!(f, "Invalid escape sequence: {}", s)
+            }
             JsonParseError::ExpectedColon => write!(f, "Expected colon"),
             JsonParseError::ExpectedKey => write!(f, "Expected key"),
             JsonParseError::ExpectedValue => write!(f, "Expected value"),
