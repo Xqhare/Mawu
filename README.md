@@ -61,10 +61,10 @@ The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as ret
 Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
 
 ### Convenience Functions
-Convenience functions for all types are provided by Mawu, in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
+Mawu provides convenience functions for all types in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
 
 Calling `is_` will return `true` if the value is the type requested, and `false` otherwise. This can be useful if you have different data-types in the same array.
-`is_true`, `is_false` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
+`is_true`, `is_false`, `is_number` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, if the value is a number (either a float, integer or signed integer) or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
 
 When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
 Calling `as_null` or `to_null` will return `None` instead when the value is none, and `Some()` wrapping nothing otherwise.
@@ -260,10 +260,10 @@ If a file should be empty, Mawu will return a `None` value.
 #### Objects
 In the rfc8259 standard, a JSON object is a set of key-value pairs where the keys should be unique. As this is not a hard requirement however, JSON parsers have handled this in a number of ways.
 Mawu will parse JSON objects as a `HashMap<String, MawuValue>` and uses the same behavior for duplicate keys, in that they are replaced with the last value.
-Because of the same behavior, Mawu will return JSON objects not in the same order as the JSON file.
+Because of the same behavior of `HashMap`, Mawu will return JSON objects not in the same order as the JSON file.
 
 #### Arrays
-Ordering of arrays is kept.
+Ordering of arrays is kept the same as in the JSON file.
 
 #### Numbers
 `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will be returned as `MawuValue::None`.
@@ -275,7 +275,7 @@ This can be the case for large numbers expressed in exponent notation. For examp
 In the case of `123.456e-350`, the parser of the rust standard library will approximate to `0` and Mawu return `0`.
 
 #### Strings
-UTF-16 surrogate pairs are permitted by the standards but usage of them has proven unreliable in the past. So you could try your luck I guess, but Mawu makes no guarantees.
+UTF-16 surrogate pairs are permitted by the standards and are parsed correctly.
 
 #### Structure
 
