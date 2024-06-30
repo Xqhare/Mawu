@@ -26,12 +26,14 @@ pub enum JsonParseError {
     MissingValue(String),
     UnexpectedNewline,
     UnexpectedEndOfFile,
+    UnexpectedCharacter(String),
     InvalidStructuralToken(String),
     InvalidCharacter(String),
     InvalidEscapeSequence(String),
     ExpectedColon,
     ExpectedKey,
     ExpectedValue,
+    ExpectedEndOfObject,
 }
 
 impl fmt::Display for JsonParseError {
@@ -50,6 +52,8 @@ impl fmt::Display for JsonParseError {
             JsonParseError::ExpectedColon => write!(f, "Expected colon"),
             JsonParseError::ExpectedKey => write!(f, "Expected key"),
             JsonParseError::ExpectedValue => write!(f, "Expected value"),
+            JsonParseError::UnexpectedCharacter(ref s) => write!(f, "Unexpected character: {}", s),
+            JsonParseError::ExpectedEndOfObject => write!(f, "Expected end of object"),
         }
     }
 }
