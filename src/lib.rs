@@ -119,9 +119,17 @@
 //!
 //! #### Example of getting a `MawuValue` if its type is not known or different in the same field
 //! ```rust
+//! use mawu::mawu_values::MawuValue;
+//! use mawu::read::json;
+//!
+//! use std::collections::HashMap;
+//!
+//! let path_to_file = "data/json/json-test-data/simple-json.json";
 //! // These are the primitive types
+//!
+//! let mawu_value = json(path_to_file).unwrap();
 //! if mawu_value.is_none() {
-//! let value: Option<()> = mawu_value.as_none().unwrap();
+//! let value: Option<()> = mawu_value.as_none();
 //! // Do something with `value`
 //! assert_eq!(value, None);
 //! } else if mawu_value.is_bool() {
@@ -141,7 +149,7 @@
 //! // Do something with `value`
 //! assert_eq!(value, &-1.0);
 //! } else if mawu_value.is_string() {
-//! let value: &str = value.as_str().unwrap();
+//! let value: &str = mawu_value.as_str().unwrap();
 //! let owned_value: String = mawu_value.to_string().unwrap();
 //! let referenced_value: &String = mawu_value.as_string().unwrap();
 //! // Do something with `value`, `owned_value` or `referenced_value`
@@ -234,20 +242,22 @@
 //! Reading a CSV file and just printing out the values:
 //!
 //! ```rust
+//! use mawu::MawuValue;
+//! use std::collections::HashMap;
+//! use mawu::read::{csv_headed, csv_headless};
 //!
-//! fn main() {
+//! let path_to_file = "data/json/json-test-data/simple-json.json";
 //! // for a csv file with header
-//! let mawu: Vec<HashMap<String, MawuValue>> = mawu::csv::read_csv_headed("/path/to/file.csv").unwrap();
+//! let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap();
 //!
 //! // mawu will return a Result<MawuResult, MawuError>
 //! for entry in mawu.as_csv_object().unwrap() {
 //! for (key, value) in &entry {
 //! println!("{}: {}", key, value);
 //! }
-//! }
 //!
 //! // for a csv file without header
-//! let mawu_headless: Vec<Vec<MawuValue>> = mawu::csv::read_csv_headless("/path/to/file.csv").unwrap();
+//! let mawu_headless: Vec<Vec<MawuValue>> = csv_headless(path_to_file).unwrap();
 //!
 //! // mawu will return a Result<MawuResult, MawuError>
 //! for entry in mawu_headless.as_csv_array().unwrap() {
@@ -256,7 +266,6 @@
 //! }
 //! }
 //!
-//! }
 //! ```
 //!
 //! ## JSON
@@ -308,9 +317,10 @@
 //!
 //! ### JSON Usage
 //! ```rust
-//! use mawu::read::read_json;
+//! use mawu::read::json;
 //!
-//! let json_value = read_json("path/to_file.json").unwrap();
+//! let path_to_file = "data/json/json-test-data/simple-json.json";
+//! let json_value = json(path_to_file).unwrap();
 //! for (key, value) in json_value.as_object().unwrap() {
 //! println!("{}: {}", key, value);
 //! }
@@ -329,9 +339,10 @@
 //! ```
 //! You can iterate over it as follows:
 //! ```rust
-//! use mawu::read::read_json;
+//! use mawu::read::json;
 //!
-//! let json_value = read_json("path/to_file.json").unwrap().as_object().unwrap();
+//! let path_to_file = "data/json/json-test-data/simple-object.json";
+//! let json_value = json(path_to_file).unwrap().as_object().unwrap();
 //! let key1: &str = json_value.get("key1").unwrap().as_str().unwrap();
 //! let key2: &u64 = json_value.get("key2").unwrap().as_uint().unwrap();
 //! let key3: &i64 = json_value.get("key3").unwrap().as_int().unwrap();
@@ -358,9 +369,11 @@
 //! }
 //! ```
 //! ```rust
-//! use mawu::read::read_json;
+//! use mawu::read::json;
+//! use mawu::mawu_values::MawuValue;
 //!
-//! let json_value = read_json("path/to_file.json").unwrap().as_object().unwrap();
+//! let path_to_file = "data/json/json-test-data/complex-object.json";
+//! let json_value = json(path_to_file).unwrap().as_object().unwrap();
 //! let key3: &str = json_value.get("key1").unwrap().as_object().unwrap().get("key2").unwrap().as_object().unwrap().get("key3").unwrap().as_str().unwrap();
 //! let key4: &str = json_value.get("key4").unwrap().as_str().unwrap();
 //! let key5: &MawuValue = json_value.get("key5").unwrap();
@@ -390,7 +403,7 @@ pub mod read {
     };
 
     /// Takes in a path to a CSV file with a header at the beginning of the file and returns a parsed MawuValue in the format of `Vec<Vec<HashMap<String, MawuValue>>>`.
-    pub fn read_csv_headed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
+    pub fn csv_headed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headed(
             file_handling::read_file(path)?
                 .graphemes(true)
@@ -399,7 +412,7 @@ pub mod read {
     }
 
     /// Takes in a path to a CSV file with no header at the beginning of the file and returns a parsed MawuValue in the format of `Vec<Vec<MawuValue>>`.
-    pub fn read_csv_headless<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
+    pub fn csv_headless<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headless(
             file_handling::read_file(path)?
                 .graphemes(true)
@@ -407,7 +420,7 @@ pub mod read {
         )
     }
 
-    pub fn read_json<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
+    pub fn json<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         json_lexer::json_lexer(
             &mut file_handling::read_file(path)?
                 .graphemes(true)
