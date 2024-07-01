@@ -57,9 +57,44 @@
 //! ```shell
 //! cargo update
 //! ```
-//!
 //! Mawu is now ready to go!
+//! 
+//! After opening your IDE of choice, I recommend importing everything in the `mawu` module, at least as you get to know it.
+//! ```rust
+//! use mawu::*;
+//! 
+//! // most of the time you will ever only need
+//! use mawu::read::json;
+//! // or one of these two
+//! use mawu::read::{csv_headed, csv_headless};
+//! 
+//! // if you want to work with `MawuValue`'s you will need
+//! use mawu::mawu_value::MawuValue;
 //!
+//! // You could then continue with one of the examples in the chapters on CSV and JSON, or just do the good old `println!()` on anything you see!
+//!
+//! // any path to a file in the documentation points to a real file in this repo under the same path
+//! let path_to_file = "data/json/json-test-data/simple-object.json";
+//! let mawu_value = json(path_to_file).unwrap();
+//! println!("{}", mawu_value);
+//! for (key, value) in mawu_value.as_object().unwrap() {
+//! println!("{}: {}", key, value);
+//! }
+//! ```
+//! This would print out the following (the order of the key-value-pairs may differ):
+//! ```shell
+//! $ cargo run
+//! {"key1": String("value1"), "key2": UInt(1), "key3": Int(-1), "key4": Bool(true), "key5": None}
+//! key1: value1
+//! key2: 1
+//! key3: -1
+//! key4: true
+//! key5: None
+//! ```
+//! 
+//! In the first printed line in the code example above, is a perfect example of the `MawuValue` enum.
+//! Because Mawu only returns `MawuValue`'s, and you will be interacting with them a lot, I really recommend reading the chapter on `MawuValue`'s.
+//! 
 //! ## Naming the creation: A Legacy of the Divine
 //! The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
 //! Mawu follows the long tradition of naming things after deities.
@@ -126,7 +161,6 @@
 //!
 //! let path_to_file = "data/json/json-test-data/simple-json.json";
 //! // These are the primitive types
-//!
 //! let mawu_value = json(path_to_file).unwrap();
 //! if mawu_value.is_none() {
 //! let value: Option<()> = mawu_value.as_none();
@@ -175,7 +209,6 @@
 //! // Do something with `csv_object`
 //! assert_eq!(csv_object.len(), 1);
 //! }
-//!
 //! ```
 //!
 //! > [!note]
@@ -248,24 +281,24 @@
 //!
 //! let path_to_file = "data/json/json-test-data/simple-json.json";
 //! // for a csv file with header
-//! let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap();
+//! let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap().to_csv_object().unwrap();
 //!
 //! // mawu will return a Result<MawuResult, MawuError>
-//! for entry in mawu.as_csv_object().unwrap() {
-//! for (key, value) in &entry {
-//! println!("{}: {}", key, value);
+//! for entry in mawu {
+//!     for (key, value) in &entry {
+//!         println!("{}: {}", key, value);
+//!     }
 //! }
 //!
 //! // for a csv file without header
-//! let mawu_headless: Vec<Vec<MawuValue>> = csv_headless(path_to_file).unwrap();
+//! let mawu_headless: Vec<Vec<MawuValue>> = csv_headless(path_to_file).unwrap().to_csv_array().unwrap();
 //!
 //! // mawu will return a Result<MawuResult, MawuError>
-//! for entry in mawu_headless.as_csv_array().unwrap() {
+//! for entry in mawu_headless {
 //! for value in entry {
 //! println!("{}", value);
 //! }
 //! }
-//!
 //! ```
 //!
 //! ## JSON
@@ -342,7 +375,8 @@
 //! use mawu::read::json;
 //!
 //! let path_to_file = "data/json/json-test-data/simple-object.json";
-//! let json_value = json(path_to_file).unwrap().as_object().unwrap();
+//! let binding = json(path_to_file).unwrap();
+//! let json_value = binding.as_object().unwrap();
 //! let key1: &str = json_value.get("key1").unwrap().as_str().unwrap();
 //! let key2: &u64 = json_value.get("key2").unwrap().as_uint().unwrap();
 //! let key3: &i64 = json_value.get("key3").unwrap().as_int().unwrap();
@@ -373,7 +407,8 @@
 //! use mawu::mawu_value::MawuValue;
 //!
 //! let path_to_file = "data/json/json-test-data/complex-object.json";
-//! let json_value = json(path_to_file).unwrap().as_object().unwrap();
+//! let binding = json(path_to_file).unwrap();
+//! let json_value = binding.as_object().unwrap();
 //! let key3: &str = json_value.get("key1").unwrap().as_object().unwrap().get("key2").unwrap().as_object().unwrap().get("key3").unwrap().as_str().unwrap();
 //! let key4: &str = json_value.get("key4").unwrap().as_str().unwrap();
 //! let key5: &MawuValue = json_value.get("key5").unwrap();

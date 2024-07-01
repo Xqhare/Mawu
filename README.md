@@ -27,6 +27,7 @@ A little technical note: While Mawu uses the same return value types for both CS
 - [Mawu](#mawu)
     - [Features](#features)
     - [Overview](#overview)
+    - [Using Mawu](#using-mawu)
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
     - [`MawuValue`](#mawuvalue)
         - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
@@ -57,8 +58,43 @@ Then simply run a quick:
 ```shell
 cargo update
 ```
-
 Mawu is now ready to go!
+
+After opening your IDE of choice, I recommend importing everything in the `mawu` module, at least as you get to know it.
+```rust
+use mawu::*;
+
+// most of the time you will ever only need
+use mawu::read::json;
+// or one of these two
+use mawu::read::{csv_headed, csv_headless};
+
+// if you want to work with `MawuValue`'s you will need
+use mawu::mawu_value::MawuValue;
+```
+You could then continue with one of the examples in the chapters on CSV and JSON, or just do the good old `println!()` on anything you see!
+```rust
+// any path to a file in the documentation points to a real file in this repo under the same path
+let path_to_file = "data/json/json-test-data/simple-object.json";
+let mawu_value = json(path_to_file).unwrap();
+println!("{}", mawu_value);
+for (key, value) in mawu_value.as_object().unwrap() {
+println!("{}: {}", key, value);
+}
+```
+This would print out the following (the order of the key-value-pairs may differ):
+```shell
+$ cargo run
+{"key1": String("value1"), "key2": UInt(1), "key3": Int(-1), "key4": Bool(true), "key5": None}
+key1: value1
+key2: 1
+key3: -1
+key4: true
+key5: None
+```
+
+In the first printed line in the code example above, is a perfect example of the `MawuValue` enum.
+Because Mawu only returns `MawuValue`'s, and you will be interacting with them a lot, I really recommend reading the chapter on `MawuValue`'s.
 
 ## Naming the creation: A Legacy of the Divine
 The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
@@ -74,6 +110,8 @@ The difference is slight however, as only the `array` and `object` are different
 The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as return values. `CsvArray` is used to return a headless CSV file, and `CsvObject` is used to return a headed CSV file.
 
 Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
+
+`MawuValue` implements the `std::fmt::Display` trait, which allows you to print the value by using `{}`.
 
 ### Convenience Functions
 Mawu provides convenience functions for all types in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
@@ -115,59 +153,65 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
     - `MawuValue::CsvArray`
         - wrapping a `Vec<Vec<MawuValue>>`
     - `MawuValue::CsvObject`
-        - wrapping a `Vec<HashMap<String, Vec<MawuValue>>>`
+        - wrapping a `Vec<HashMap<String, MawuValue>>`
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
 ```rust
+use mawu::mawu_value::MawuValue;
+use mawu::read::json;
+
+use std::collections::HashMap;
+
+let path_to_file = "data/json/json-test-data/simple-json.json";
 // These are the primitive types
+let mawu_value = json(path_to_file).unwrap();
 if mawu_value.is_none() {
-    let value: Option<()> = mawu_value.as_none().unwrap();
-    // Do something with `value`
-    assert_eq!(value, None);
+let value: Option<()> = mawu_value.as_none();
+// Do something with `value`
+assert_eq!(value, None);
 } else if mawu_value.is_bool() {
-    let value: &bool = mawu_value.as_bool().unwrap();
-    // Do something with `value`
-    assert_eq!(value, &true);
+let value: &bool = mawu_value.as_bool().unwrap();
+// Do something with `value`
+assert_eq!(value, &true);
 } else if mawu_value.is_uint() {
-    let value: &u64 = mawu_value.as_uint().unwrap();
-    // Do something with `value`
-    assert_eq!(value, &1);
+let value: &u64 = mawu_value.as_uint().unwrap();
+// Do something with `value`
+assert_eq!(value, &1);
 } else if mawu_value.is_int() {
-    let value: &i64 = mawu_value.as_int().unwrap();
-    // Do something with `value`
-    assert_eq!(value, &-1);
+let value: &i64 = mawu_value.as_int().unwrap();
+// Do something with `value`
+assert_eq!(value, &-1);
 } else if mawu_value.is_float() {
-    let value: &f64 = mawu_value.as_float().unwrap();
-    // Do something with `value`
-    assert_eq!(value, &-1.0);
+let value: &f64 = mawu_value.as_float().unwrap();
+// Do something with `value`
+assert_eq!(value, &-1.0);
 } else if mawu_value.is_string() {
-    let value: &str = value.as_str().unwrap();
-    let owned_value: String = mawu_value.to_string().unwrap();
-    let referenced_value: &String = mawu_value.as_string().unwrap();
-    // Do something with `value`, `owned_value` or `referenced_value`
-    assert_eq!(value, "hello");
-    assert_eq!(owned_value, "hello".to_string());
-    assert_eq!(referenced_value, &"hello".to_string());
+let value: &str = mawu_value.as_str().unwrap();
+let owned_value: String = mawu_value.to_string().unwrap();
+let referenced_value: &String = mawu_value.as_string().unwrap();
+// Do something with `value`, `owned_value` or `referenced_value`
+assert_eq!(value, "hello");
+assert_eq!(owned_value, "hello".to_string());
+assert_eq!(referenced_value, &"hello".to_string());
 // These are the JSON exclusive types
 } else if mawu_value.is_array() {
-    let array: &Vec<MawuValue> = mawu_value.as_array().unwrap();
-    // Do something with `array`
-    assert_eq!(array.len(), 1);
+let array: &Vec<MawuValue> = mawu_value.as_array().unwrap();
+// Do something with `array`
+assert_eq!(array.len(), 1);
 } else if mawu_value.is_object() {
-    let object: &HashMap<String, MawuValue> = mawu_value.as_object().unwrap();
-    // Do something with `object`
-    assert_eq!(object.len(), 1);
+let object: &HashMap<String, MawuValue> = mawu_value.as_object().unwrap();
+// Do something with `object`
+assert_eq!(object.len(), 1);
 // These are the CSV exclusive return types
 } else if mawu_value.is_csv_array() {
-    let csv_array: &Vec<Vec<MawuValue>> = mawu_value.as_csv_array().unwrap();
-    // Do something with `csv_array`
-    assert_eq!(csv_array.len(), 1);
+let csv_array: &Vec<Vec<MawuValue>> = mawu_value.as_csv_array().unwrap();
+// Do something with `csv_array`
+assert_eq!(csv_array.len(), 1);
 } else if mawu_value.is_csv_object() {
-    let csv_object: &Vec<HashMap<String, MawuValue>> = mawu_value.as_csv_object().unwrap();
-    // Do something with `csv_object`
-    assert_eq!(csv_object.len(), 1);
+let csv_object: &Vec<HashMap<String, MawuValue>> = mawu_value.as_csv_object().unwrap();
+// Do something with `csv_object`
+assert_eq!(csv_object.len(), 1);
 }
-
 ```
 
 > [!note]
@@ -234,28 +278,29 @@ To get to your data, you will need to iterate over the contents of the `MawuValu
 Reading a CSV file and just printing out the values:
 
 ```rust
+use mawu::mawu_value::MawuValue;
+use std::collections::HashMap;
+use mawu::read::{csv_headed, csv_headless};
 
-fn main() {
-    // for a csv file with header
-    let mawu: Vec<HashMap<String, MawuValue>> = mawu::csv::read_csv_headed("/path/to/file.csv").unwrap();
+let path_to_file = "data/json/json-test-data/simple-json.json";
+// for a csv file with header
+let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap().to_csv_object().unwrap();
 
-    // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu.as_csv_object().unwrap() {
-        for (key, value) in &entry {
-            println!("{}: {}", key, value);
-        }
-    }
+// mawu will return a Result<MawuResult, MawuError>
+for entry in mawu {
+ for (key, value) in &entry {
+     println!("{}: {}", key, value);
+ }
+}
 
-    // for a csv file without header
-    let mawu_headless: Vec<Vec<MawuValue>> = mawu::csv::read_csv_headless("/path/to/file.csv").unwrap();
+// for a csv file without header
+let mawu_headless: Vec<Vec<MawuValue>> = csv_headless(path_to_file).unwrap().to_csv_array().unwrap();
 
-    // mawu will return a Result<MawuResult, MawuError>
-    for entry in mawu_headless.as_csv_array().unwrap() {
-        for value in entry {
-            println!("{}", value);
-        }
-    }
-
+// mawu will return a Result<MawuResult, MawuError>
+for entry in mawu_headless {
+for value in entry {
+println!("{}", value);
+}
 }
 ```
 
@@ -308,11 +353,12 @@ Mawu accepts any amount of nested structures.
 
 ### JSON Usage
 ```rust
-use mawu::read::read_json;
+use mawu::read::json;
 
-let json_value = read_json("path/to_file.json").unwrap();
+let path_to_file = "data/json/json-test-data/simple-json.json";
+let json_value = json(path_to_file).unwrap();
 for (key, value) in json_value.as_object().unwrap() {
-    println!("{}: {}", key, value);
+println!("{}: {}", key, value);
 }
 
 ```
@@ -320,47 +366,52 @@ for (key, value) in json_value.as_object().unwrap() {
 Given the object:
 ```json
 {
-    "key1": "value1",
-    "key2": 1,
-    "key3": -1,
-    "key4": true,
-    "key5": null
+"key1": "value1",
+"key2": 1,
+"key3": -1,
+"key4": true,
+"key5": null
 }
 ```
 You can iterate over it as follows:
 ```rust
-use mawu::read::read_json;
+use mawu::read::json;
 
-let json_value = read_json("path/to_file.json").unwrap().as_object().unwrap();
+let path_to_file = "data/json/json-test-data/simple-object.json";
+let binding = json(path_to_file).unwrap();
+let json_value = binding.as_object().unwrap();
 let key1: &str = json_value.get("key1").unwrap().as_str().unwrap();
 let key2: &u64 = json_value.get("key2").unwrap().as_uint().unwrap();
 let key3: &i64 = json_value.get("key3").unwrap().as_int().unwrap();
 let key4: &bool = json_value.get("key4").unwrap().as_bool().unwrap();
 if json_value.get("key5").unwrap().is_none() {
-    // Do something
+// Do something
 }
 ```
 
 A more complex example:
 ```json
 {
-    "key1": {
-        "key2": {
-            "key3": "value3"
-        }
-    },
-    "key4": "value4",
-    "key5": null,
-    "key6": 6,
-    "key7": true,
-    "key8": -8,
-    "key9": [1, 2, 3]
+"key1": {
+"key2": {
+"key3": "value3"
+}
+},
+"key4": "value4",
+"key5": null,
+"key6": 6,
+"key7": true,
+"key8": -8,
+"key9": [1, 2, 3]
 }
 ```
 ```rust
-use mawu::read::read_json;
+use mawu::read::json;
+use mawu::mawu_value::MawuValue;
 
-let json_value = read_json("path/to_file.json").unwrap().as_object().unwrap();
+let path_to_file = "data/json/json-test-data/complex-object.json";
+let binding = json(path_to_file).unwrap();
+let json_value = binding.as_object().unwrap();
 let key3: &str = json_value.get("key1").unwrap().as_object().unwrap().get("key2").unwrap().as_object().unwrap().get("key3").unwrap().as_str().unwrap();
 let key4: &str = json_value.get("key4").unwrap().as_str().unwrap();
 let key5: &MawuValue = json_value.get("key5").unwrap();
@@ -369,6 +420,6 @@ let key7: &bool = json_value.get("key7").unwrap().as_bool().unwrap();
 let key8: &i64 = json_value.get("key8").unwrap().as_int().unwrap();
 let key9: &Vec<MawuValue> = json_value.get("key9").unwrap().as_array().unwrap();
 for value in key9 {
-    println!("{}", value);
+println!("{}", value);
 }
 ```
