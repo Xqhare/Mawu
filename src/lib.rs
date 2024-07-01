@@ -387,7 +387,7 @@
 //! ```
 pub mod errors;
 mod lexers;
-pub mod mawu_values;
+pub mod mawu_value;
 mod utils;
 
 pub mod read {
