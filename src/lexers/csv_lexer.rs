@@ -5,7 +5,7 @@ use crate::{
         csv_error::{CsvError, CsvParseError},
         MawuError,
     },
-    mawu_values::MawuValue,
+    mawu_value::MawuValue,
     utils::is_newline,
 };
 

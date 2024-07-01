@@ -12,7 +12,7 @@ use crate::{
         json_error::{JsonError, JsonParseError},
         MawuError, MawuInternalError,
     },
-    mawu_values::MawuValue,
+    mawu_value::MawuValue,
     utils::{
         file_handling::read_file, is_digit, is_end_of_primitive_value,
         is_json_string_terminator_token, is_whitespace, unescape_unicode,

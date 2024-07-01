@@ -119,7 +119,7 @@
 //!
 //! #### Example of getting a `MawuValue` if its type is not known or different in the same field
 //! ```rust
-//! use mawu::mawu_values::MawuValue;
+//! use mawu::mawu_value::MawuValue;
 //! use mawu::read::json;
 //!
 //! use std::collections::HashMap;
@@ -242,7 +242,7 @@
 //! Reading a CSV file and just printing out the values:
 //!
 //! ```rust
-//! use mawu::MawuValue;
+//! use mawu::mawu_value::MawuValue;
 //! use std::collections::HashMap;
 //! use mawu::read::{csv_headed, csv_headless};
 //!
@@ -370,7 +370,7 @@
 //! ```
 //! ```rust
 //! use mawu::read::json;
-//! use mawu::mawu_values::MawuValue;
+//! use mawu::mawu_value::MawuValue;
 //!
 //! let path_to_file = "data/json/json-test-data/complex-object.json";
 //! let json_value = json(path_to_file).unwrap().as_object().unwrap();
@@ -398,7 +398,7 @@ pub mod read {
     use crate::{
         errors::MawuError,
         lexers::{csv_lexer, json_lexer},
-        mawu_values::MawuValue,
+        mawu_value::MawuValue,
         utils::file_handling,
     };
 

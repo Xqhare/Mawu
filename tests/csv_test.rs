@@ -2,7 +2,7 @@
 mod csv_tests {
 
     mod headed {
-        use mawu::mawu_values::MawuValue;
+        use mawu::mawu_value::MawuValue;
         use pretty_assertions::assert_eq;
 
         #[test]
@@ -396,8 +396,9 @@ mod csv_tests {
             assert_eq!(mawu.as_ref().unwrap().as_csv_object().unwrap()[0].len(), 9);
         }
     }
+
     mod headless {
-        use mawu::mawu_values::MawuValue;
+        use mawu::mawu_value::MawuValue;
         use pretty_assertions::assert_eq;
 
         #[test]
