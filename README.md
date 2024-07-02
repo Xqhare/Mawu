@@ -30,9 +30,10 @@ A little technical note: While Mawu uses the same return value types for both CS
     - [Using Mawu](#using-mawu)
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
     - [`MawuValue`](#mawuvalue)
-        - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
         - [Convenience functions](#convenience-functions)
+        - [An exhaustive list of all `MawuValue` types and functions](#an-exhaustive-list-of-all-mawuvalue-types-and-functions)
         - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
+    - [`MawuError`](#mawuerror)
     - [CSV](#csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
@@ -130,30 +131,51 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
 
 
 
-### An exhaustive list of all `MawuValue`'s
+### An exhaustive list of all `MawuValue` types and functions
 - Primitive types
     - `MawuValue::None`
         - can only ever be none, is wrapping nothing
+        - `as_null` and `to_null` return `None`
+        - `is_null` returns `true`
     - `MawuValue::Bool`
         - wrapping a `bool`
+        - `as_bool` and `to_bool` return `Option<bool>`
+        - `is_true` and `is_false` return `true` or `false` respectively
     - `MawuValue::Uint`
         - wrapping a `u64`
+        - `as_uint` and `to_uint` return `Option<u64>`
+        - `is_number` and `is_uint` return `true`
     - `MawuValue::Int`
         - wrapping a `i64`
+        - `as_int` and `to_int` return `Option<i64>`
+        - `is_number` and `is_int` return `true`
     - `MawuValue::Float`
         - wrapping a `f64`
+        - `as_float` and `to_float` return `Option<f64>`
+        - `is_number` and `is_float` return `true`
     - `MawuValue::String`
         - wrapping a `String`
+        - `as_string` and `to_string` return `Option<String>`
+        - `as_str` returns `Option<&str>`
+        - `is_string` returns `true`
 - JSON exclusive types
     - `MawuValue::Array`
         - wrapping a `Vec<MawuValue>`
+        - `as_array` and `to_array` return `Option<Vec<MawuValue>>`
+        - `is_array` returns `true`
     - `MawuValue::Object`
         - wrapping a `HashMap<String, MawuValue>`
+        - `as_object` and `to_object` return `Option<HashMap<String, MawuValue>>`
+        - `is_object` returns `true`
 - CSV exclusive types
     - `MawuValue::CsvArray`
         - wrapping a `Vec<Vec<MawuValue>>`
+        - `as_csv_array` and `to_csv_array` return `Option<Vec<Vec<MawuValue>>>`
+        - `is_csv_array` returns `true`
     - `MawuValue::CsvObject`
         - wrapping a `Vec<HashMap<String, MawuValue>>`
+        - `as_csv_object` and `to_csv_object` return `Option<Vec<HashMap<String, MawuValue>>>`
+        - `is_csv_object` returns `true`
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
 ```rust
@@ -218,6 +240,9 @@ assert_eq!(csv_object.len(), 1);
 > Chads use `as_{MawuValue}`, just know what kind of data they are getting and know what to do with a reference.
 >
 > Normie Kernel devs use `to_{MawuValue}`, need to check what kind of data they are getting and have to clone it anyway.
+
+## `MawuError`
+TODO
 
 ## CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.

@@ -25,27 +25,29 @@
 //!
 //! ## Overview
 //! - [Mawu](#mawu)
-//! - [Features](#features)
-//! - [Overview](#overview)
-//! - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
-//! - [`MawuValue`](#mawuvalue)
-//!     - [An exhaustive list of all `MawuValue`'s](#an-exhaustive-list-of-all-mawuvalue's)
-//!     - [Convenience functions](#convenience-functions)
-//!     - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
-//! - [CSV](#csv)
-//!     - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
-//!     - [With header](#with-header)
-//!     - [Without header](#without-header)
-//!     - [CSV Return value](#csv-return-value)
-//!     - [CSV Usage](#csv-usage)
-//! - [JSON](#json)
-//!     - [Edge cases](#edge-cases)
-//!      - [Objects](#objects)
-//!      - [Arrays](#arrays)
-//!      - [Numbers](#numbers)
-//!      - [Strings](#strings)
-//!      - [Structure](#structure)
-//!     - [JSON Usage](#json-usage)
+//!     - [Features](#features)
+//!     - [Overview](#overview)
+//!     - [Using Mawu](#using-mawu)
+//!     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
+//!     - [`MawuValue`](#mawuvalue)
+//!         - [Convenience functions](#convenience-functions)
+//!         - [An exhaustive list of all `MawuValue` types and functions](#an-exhaustive-list-of-all-mawuvalue-types-and-functions)
+//!         - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
+//!     - [`MawuError`](#mawuerror)
+//!     - [CSV](#csv)
+//!         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
+//!             - [With header](#with-header)
+//!             - [Without header](#without-header)
+//!         - [CSV Return value](#csv-return-value)
+//!         - [CSV Usage](#csv-usage)
+//!     - [JSON](#json)
+//!         - [Edge cases](#edge-cases)
+//!             - [Objects](#objects)
+//!             - [Arrays](#arrays)
+//!             - [Numbers](#numbers)
+//!             - [Strings](#strings)
+//!             - [Structure](#structure)
+//!         - [JSON Usage](#json-usage)
 //!
 //! ## Using Mawu
 //! To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions in the documentation below.
@@ -127,30 +129,53 @@
 //!
 //!
 //!
-//! ### An exhaustive list of all `MawuValue`'s
+//! ### An exhaustive list of all `MawuValue` types and functions
 //! - Primitive types
 //!     - `MawuValue::None`
-//!      - can only ever be none, is wrapping nothing
+//!         - can only ever be none, is wrapping nothing
+//!         - `as_null` and `to_null` return `None`
+//!         - `is_null` returns `true`
 //!     - `MawuValue::Bool`
-//!      - wrapping a `bool`
+//!         - wrapping a `bool`
+//!         - `as_bool` and `to_bool` return `Option<bool>`
+//!         - `is_true` and `is_false` return `true` or `false` respectively
 //!     - `MawuValue::Uint`
-//!      - wrapping a `u64`
+//!         - wrapping a `u64`
+//!         - `as_uint` and `to_uint` return `Option<u64>`
+//!         - `is_number` and `is_uint` return `true`
 //!     - `MawuValue::Int`
-//!      - wrapping a `i64`
+//!         - wrapping a `i64`
+//!         - `as_int` and `to_int` return `Option<i64>`
+//!         - `is_number` and `is_int` return `true`
 //!     - `MawuValue::Float`
-//!      - wrapping a `f64`
+//!         - wrapping a `f64`
+//!         - `as_float` and `to_float` return `Option<f64>`
+//!         - `is_number` and `is_float` return `true`
 //!     - `MawuValue::String`
-//!      - wrapping a `String`
+//!         - wrapping a `String`
+//!         - `as_string` and `to_string` return `Option<String>`
+//!         - `as_str` returns `Option<&str>`
+//!         - `is_string` returns `true`
 //! - JSON exclusive types
 //!     - `MawuValue::Array`
-//!      - wrapping a `Vec<MawuValue>`
+//!         - wrapping a `Vec<MawuValue>`
+//!         - `as_array` and `to_array` return `Option<Vec<MawuValue>>`
+//!         - `is_array` returns `true`
 //!     - `MawuValue::Object`
-//!      - wrapping a `HashMap<String, MawuValue>`
+//!         - wrapping a `HashMap<String, MawuValue>`
+//!         - `as_object` and `to_object` return `Option<HashMap<String, MawuValue>>`
+//!         - `is_object` returns `true`
 //! - CSV exclusive types
 //!     - `MawuValue::CsvArray`
-//!      - wrapping a `Vec<Vec<MawuValue>>`
+//!         - wrapping a `Vec<Vec<MawuValue>>`
+//!         - `as_csv_array` and `to_csv_array` return `Option<Vec<Vec<MawuValue>>>`
+//!         - `is_csv_array` returns `true`
 //!     - `MawuValue::CsvObject`
-//!      - wrapping a `Vec<HashMap<String, Vec<MawuValue>>>`
+//!         - wrapping a `Vec<HashMap<String, MawuValue>>`
+//!         - `as_csv_object` and `to_csv_object` return `Option<Vec<HashMap<String, MawuValue>>>`
+//!         - `is_csv_object` returns `true`
+
+
 //!
 //! #### Example of getting a `MawuValue` if its type is not known or different in the same field
 //! ```rust
@@ -215,6 +240,9 @@
 //! > Chads use `as_{MawuValue}`, just know what kind of data they are getting and know what to do with a reference.
 //! >
 //! > Normie Kernel devs use `to_{MawuValue}`, need to check what kind of data they are getting and have to clone it anyway.
+//!
+//! ## `MawuError`
+//! TODO
 //!
 //! ## CSV
 //! This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
@@ -437,7 +465,23 @@ pub mod read {
         utils::file_handling,
     };
 
-    /// Takes in a path to a CSV file with a header at the beginning of the file and returns a parsed MawuValue in the format of `Vec<Vec<HashMap<String, MawuValue>>>`.
+    /// Reads a headed CSV file and returns a `MawuValue::CSVObject` or an error
+    /// if the file could not be read or parsed.
+    /// 
+    /// Call `as_csv_object` or `to_csv_object` on the result to get the `Vec<HashMap<String, MawuValue>>`
+    /// 
+    /// # Arguments
+    /// * `path` - The path to the CSV file, relative or absolute
+    ///
+    /// # Example
+    /// ```rust
+    /// use mawu::read::csv_headed;
+    /// let path_to_file = "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv";
+    /// let csv_value = csv_headed(path_to_file).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Only returns `MawuError`'s. See MawuError chapter in the documentation for details.
     pub fn csv_headed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headed(
             file_handling::read_file(path)?
