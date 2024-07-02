@@ -2,6 +2,10 @@ use core::fmt;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
+/// MawuValue wraps all data types supported by Mawu.
+/// It can be constructed using the `MawuValue::from` function on almost any basic rust type,
+/// including Option's, Vector's and HashMap's.
+/// Using the `MawuValue::default` or `MawuValue::new` function will return an `MawuValue::None`.
 pub enum MawuValue {
     CSVObject(Vec<HashMap<String, MawuValue>>),
     CSVArray(Vec<Vec<MawuValue>>),
@@ -89,6 +93,18 @@ impl Default for MawuValue {
     }
 }
 
+impl<V> From<Option<V>> for MawuValue
+where
+    V: Into<MawuValue>,
+{
+    fn from(value: Option<V>) -> Self {
+        match value {
+            Some(v) => v.into(),
+            None => MawuValue::None,
+        }
+    }
+}
+
 impl<K, V> From<HashMap<K, V>> for MawuValue
 where
     K: Into<String>,
@@ -111,6 +127,40 @@ where
     fn from(value: Vec<T>) -> Self {
         MawuValue::Array(value.into_iter().map(|x| x.into()).collect())
     }
+}
+
+impl MawuValue {
+    /// Creates a new MawuValue::CSVObject with the first vector and hashmap inside initialized and
+    /// empty.
+    pub fn new_csv_object() -> MawuValue {
+        MawuValue::CSVObject(vec![HashMap::new()])
+    }
+
+    /// Creates a new MawuValue::CSVArray with the first vector and vector inside initialized and empty.
+    pub fn new_csv_array() -> MawuValue {
+        MawuValue::CSVArray(vec![Vec::new()])
+    }
+
+    /// Creates a new MawuValue::Object with an empty hashmap
+    pub fn new_object() -> MawuValue {
+        MawuValue::Object(HashMap::new())
+    }
+
+    /// Creates a new MawuValue::Array with an empty vector
+    pub fn new_array() -> MawuValue {
+        MawuValue::Array(Vec::new())
+    }
+}
+#[test]
+fn new_array_object() {
+    let array = MawuValue::new_array();
+    let object = MawuValue::new_object();
+    let csv_array = MawuValue::new_csv_array();
+    let csv_object = MawuValue::new_csv_object();
+    assert_eq!(array, MawuValue::Array(vec![]));
+    assert_eq!(object, MawuValue::Object(HashMap::new()));
+    assert_eq!(csv_array, MawuValue::CSVArray(vec![vec![]]));
+    assert_eq!(csv_object, MawuValue::CSVObject(vec![HashMap::new()]));
 }
 
 impl From<usize> for MawuValue {
@@ -261,6 +311,12 @@ impl From<&str> for MawuValue {
 }
 
 impl MawuValue {
+    /// To create a new `MawuValue`, please use the `MawuValue::from` function. It works on almost any basic rust type,
+    /// including Option's, Vector's and HashMap's.
+    /// Using the `MawuValue::default` or `MawuValue::new` function will return an `MawuValue::None`.
+    pub fn new() -> Self {
+        MawuValue::None
+    }
     /// Check if the value is an `CSV-Object`
     ///
     /// ## Returns
