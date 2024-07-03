@@ -7,15 +7,25 @@ use std::collections::HashMap;
 /// including Option's, Vector's and HashMap's.
 /// Using the `MawuValue::default` or `MawuValue::new` function will return an `MawuValue::None`.
 pub enum MawuValue {
+    /// Only used to hold a headed CSV file
     CSVObject(Vec<HashMap<String, MawuValue>>),
+    /// Only used to hold a headless CSV file
     CSVArray(Vec<Vec<MawuValue>>),
+    /// Represents a JSON Object, with string keys and values made of `MawuValue`'s
     Object(HashMap<String, MawuValue>),
+    /// Represents a JSON Array, made of `MawuValue`'s
     Array(Vec<MawuValue>),
+    /// Represents an unsigned integer
     Uint(u64),
+    /// Represents a signed integer
     Int(i64),
+    /// Represents a floating point number
     Float(f64),
+    /// Represents a string
     String(String),
+    /// Represents a bool
     Bool(bool),
+    /// Represents an empty or null value
     None,
 }
 
@@ -33,8 +43,7 @@ impl fmt::Display for MawuValue {
                         if v.is_none() {
                             format!("\"None\"")
                         } else {
-                            let tmp = v.to_string().expect("Unable to convert MawuValue to String");
-                            format!("\"{}\"", tmp)
+                            format!("\"{}\"", v)
                         }
                     })
                     .collect::<Vec<String>>()
@@ -78,7 +87,10 @@ fn mawu_value_display_needs_nocapture() {
     );
     println!("OBJECT: {}", mawu_object);
 
-    let mawu_csv_object = MawuValue::CSVObject(vec![vec![("hello".to_string(), MawuValue::Uint(1))].into_iter().collect()]);
+    let mawu_csv_object =
+        MawuValue::CSVObject(vec![vec![("hello".to_string(), MawuValue::Uint(1))]
+            .into_iter()
+            .collect()]);
     println!("CSV_OBJECT: {}", mawu_csv_object);
 
     let mawu_csv_array = MawuValue::CSVArray(vec![vec![MawuValue::Uint(1)]]);
@@ -127,40 +139,6 @@ where
     fn from(value: Vec<T>) -> Self {
         MawuValue::Array(value.into_iter().map(|x| x.into()).collect())
     }
-}
-
-impl MawuValue {
-    /// Creates a new MawuValue::CSVObject with the first vector and hashmap inside initialized and
-    /// empty.
-    pub fn new_csv_object() -> MawuValue {
-        MawuValue::CSVObject(vec![HashMap::new()])
-    }
-
-    /// Creates a new MawuValue::CSVArray with the first vector and vector inside initialized and empty.
-    pub fn new_csv_array() -> MawuValue {
-        MawuValue::CSVArray(vec![Vec::new()])
-    }
-
-    /// Creates a new MawuValue::Object with an empty hashmap
-    pub fn new_object() -> MawuValue {
-        MawuValue::Object(HashMap::new())
-    }
-
-    /// Creates a new MawuValue::Array with an empty vector
-    pub fn new_array() -> MawuValue {
-        MawuValue::Array(Vec::new())
-    }
-}
-#[test]
-fn new_array_object() {
-    let array = MawuValue::new_array();
-    let object = MawuValue::new_object();
-    let csv_array = MawuValue::new_csv_array();
-    let csv_object = MawuValue::new_csv_object();
-    assert_eq!(array, MawuValue::Array(vec![]));
-    assert_eq!(object, MawuValue::Object(HashMap::new()));
-    assert_eq!(csv_array, MawuValue::CSVArray(vec![vec![]]));
-    assert_eq!(csv_object, MawuValue::CSVObject(vec![HashMap::new()]));
 }
 
 impl From<usize> for MawuValue {
@@ -314,13 +292,160 @@ impl MawuValue {
     /// To create a new `MawuValue`, please use the `MawuValue::from` function. It works on almost any basic rust type,
     /// including Option's, Vector's and HashMap's.
     /// Using the `MawuValue::default` or `MawuValue::new` function will return an `MawuValue::None`.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::default();
+    /// assert_eq!(mawu_value, MawuValue::None);
+    /// ```
     pub fn new() -> Self {
         MawuValue::None
     }
+
+    /// Used only to create a new `MawuValue::CSVObject` you want to fill yourself
+    ///
+    /// Creates a new `MawuValue::CSVObject` with the first vector and hashmap inside initialized and
+    /// empty.
+    ///
+    /// To unwrap, use `.to_csv_object()`
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_csv_object();
+    /// let mut csv_object = mawu_value.to_csv_object().unwrap();
+    /// csv_object[0].insert("hello".to_string(), MawuValue::Uint(1));
+    /// assert_eq!(
+    ///     csv_object[0].get("hello").unwrap(),
+    ///     &MawuValue::Uint(1)
+    /// );
+    /// ```
+    pub fn new_csv_object() -> MawuValue {
+        MawuValue::CSVObject(vec![HashMap::new()])
+    }
+
+    /// Used only to create a new `MawuValue::CSVArray` you want to fill yourself
+    ///
+    /// Creates a new `MawuValue::CSVArray` with the first vector and vector inside initialized and empty.
+    ///
+    /// To unwrap, use `.to_csv_array()`
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_csv_array();
+    /// let mut csv_array = mawu_value.to_csv_array().unwrap();
+    /// csv_array[0].push(MawuValue::Uint(1));
+    /// assert_eq!(
+    ///     csv_array[0][0],
+    ///     MawuValue::Uint(1)
+    /// );
+    /// ```
+    pub fn new_csv_array() -> MawuValue {
+        MawuValue::CSVArray(vec![Vec::new()])
+    }
+
+    /// Used only to create a new object you want to fill yourself
+    ///
+    /// Creates a new `MawuValue::Object` with an empty hashmap
+    ///
+    /// To unwrap, use `.to_object()`
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_object();
+    /// let mut object = mawu_value.to_object().unwrap();
+    /// object.insert("hello".to_string(), MawuValue::Uint(1));
+    /// assert_eq!(
+    ///     object.get("hello").unwrap(),
+    ///     &MawuValue::Uint(1)
+    /// );
+    /// ```
+    pub fn new_object() -> MawuValue {
+        MawuValue::Object(HashMap::new())
+    }
+
+    /// Used only to create a new array you want to fill yourself
+    ///
+    /// Creates a new `MawuValue::Array` with an empty vector
+    ///
+    /// To unwrap, use `.to_array()`
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_array();
+    /// let mut array = mawu_value.to_array();
+    /// array.push(MawuValue::Uint(1));
+    /// assert_eq!(
+    ///     array[0],
+    ///     MawuValue::Uint(1)
+    /// );
+    /// ```
+    pub fn new_array() -> MawuValue {
+        MawuValue::Array(Vec::new())
+    }
+}
+
+#[test]
+fn new_array_object() {
+    let array = MawuValue::new_array();
+    let object = MawuValue::new_object();
+    let csv_array = MawuValue::new_csv_array();
+    let csv_object = MawuValue::new_csv_object();
+    assert_eq!(array, MawuValue::Array(vec![]));
+    assert_eq!(object, MawuValue::Object(HashMap::new()));
+    assert_eq!(csv_array, MawuValue::CSVArray(vec![vec![]]));
+    assert_eq!(csv_object, MawuValue::CSVObject(vec![HashMap::new()]));
+}
+
+#[test]
+fn from_hashmap() {
+    let mawu_value = MawuValue::Object(HashMap::from([("key".to_string(), MawuValue::from(u8::MAX))]));
+    println!("{:?}", mawu_value);
+    assert!(mawu_value.is_object());
+}
+
+#[test]
+fn creating_csv_object() {
+    use std::collections::HashMap;
+
+    let a_hashmap = HashMap::from([
+        ("key1".to_string(), MawuValue::from(u8::MAX)),
+    ]);
+    let mawu_value = MawuValue::CSVObject(vec![a_hashmap]);
+    println!("{:?}", mawu_value);
+    assert!(mawu_value.is_csv_object());
+}
+
+#[test]
+fn creating_csv_array() {
+    let mawu_value = MawuValue::CSVArray(vec![vec![MawuValue::from(u8::MAX)]]);
+    println!("{:?}", mawu_value);
+    assert!(mawu_value.is_csv_array());
+}
+
+impl MawuValue {
+    
     /// Check if the value is an `CSV-Object`
     ///
     /// ## Returns
     /// `true` if the value is an `CSV-Object`, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_csv_object();
+    /// assert!(mawu_value.is_csv_object());
+    /// ```
     pub fn is_csv_object(&self) -> bool {
         match self {
             MawuValue::CSVObject(_) => true,
@@ -332,6 +457,14 @@ impl MawuValue {
     ///
     /// ## Returns
     /// `true` if the value is an `CSV-Array`, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_csv_array();
+    /// assert!(mawu_value.is_csv_array());
+    /// ```
     pub fn is_csv_array(&self) -> bool {
         match self {
             MawuValue::CSVArray(_) => true,
@@ -343,6 +476,14 @@ impl MawuValue {
     ///
     /// ## Returns
     /// `true` if the value is an object, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_object();
+    /// assert!(mawu_value.is_object());
+    /// ```
     pub fn is_object(&self) -> bool {
         match self {
             MawuValue::Object(_) => true,
@@ -354,6 +495,14 @@ impl MawuValue {
     ///
     /// ## Returns
     /// `true` if the value is an array, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::new_array();
+    /// assert!(mawu_value.is_array());
+    /// ```
     pub fn is_array(&self) -> bool {
         match self {
             MawuValue::Array(_) => true,
@@ -365,6 +514,13 @@ impl MawuValue {
     ///
     /// ## Returns
     /// `true` if the value is a string, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::from("test");
+    /// assert!(mawu_value.is_string());
     pub fn is_string(&self) -> bool {
         match self {
             MawuValue::String(_) => true,
@@ -373,9 +529,18 @@ impl MawuValue {
     }
 
     /// Check if the value is an unsigned integer
+    /// To check if the value is any kind of number, use `is_number`
     ///
     /// ## Returns
     /// `true` if the value is an unsigned integer, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Uint(1);
+    /// assert!(mawu_value.is_uint());
+    /// ```
     pub fn is_uint(&self) -> bool {
         match self {
             MawuValue::Uint(_) => true,
@@ -384,9 +549,18 @@ impl MawuValue {
     }
 
     /// Check if the value is an integer
+    /// To check if the value is any kind of number, use `is_number`
     ///
     /// ## Returns
     /// `true` if the value is an integer, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Int(-1);
+    /// assert!(mawu_value.is_int());
+    /// ```
     pub fn is_int(&self) -> bool {
         match self {
             MawuValue::Int(_) => true,
@@ -395,9 +569,18 @@ impl MawuValue {
     }
 
     /// Check if the value is a float
+    /// To check if the value is any kind of number, use `is_number`
     ///
     /// ## Returns
     /// `true` if the value is a float, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Float(1.0);
+    /// assert!(mawu_value.is_float());
+    /// ```
     pub fn is_float(&self) -> bool {
         match self {
             MawuValue::Float(_) => true,
@@ -406,9 +589,20 @@ impl MawuValue {
     }
 
     /// Check if the value is a number
+    /// To check if the value is a specific kind of number, use `is_uint`, `is_int`, or `is_float` respectively
     ///
     /// ## Returns
     /// `true` if the value is a number, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_values = vec![MawuValue::Uint(1), MawuValue::Int(-1), MawuValue::Float(1.0)];
+    /// for mawu_value in mawu_values {
+    ///     assert!(mawu_value.is_number());
+    /// }
+    /// ```
     pub fn is_number(&self) -> bool {
         match self {
             MawuValue::Uint(_) => true,
@@ -422,6 +616,14 @@ impl MawuValue {
     ///
     /// ## Returns
     /// `true` if the value is a boolean, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Bool(true);
+    /// assert!(mawu_value.is_bool());
+    /// ```
     pub fn is_bool(&self) -> bool {
         match self {
             MawuValue::Bool(_) => true,
@@ -429,7 +631,15 @@ impl MawuValue {
         }
     }
 
-    /// Simple convenience method to check if the value is a boolean and `true`.
+    /// Convenience method to check if the value is a boolean and `true`.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Bool(true);
+    /// assert!(mawu_value.is_true());
+    /// ```
     pub fn is_true(&self) -> bool {
         match self {
             MawuValue::Bool(v) => match v {
@@ -440,7 +650,15 @@ impl MawuValue {
         }
     }
 
-    /// Simple convenience method to check if the value is a boolean and `false`.
+    /// Convenience method to check if the value is a boolean and `false`.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Bool(false);
+    /// assert!(mawu_value.is_false());
+    /// ```
     pub fn is_false(&self) -> bool {
         match self {
             MawuValue::Bool(v) => match v {
@@ -451,10 +669,20 @@ impl MawuValue {
         }
     }
 
-    /// Simple convenience method to check if the value is `None`.
+    /// Convenience method to check if the value is `None`.
     ///
     /// ## Returns
     /// `true` if the value is `None`, `false` otherwise.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::None;
+    /// assert!(mawu_value.is_none());
+    /// let any_mawu_value = MawuValue::Int(1);
+    /// assert!(!any_mawu_value.is_none());
+    /// ```
     pub fn is_none(&self) -> bool {
         match self {
             MawuValue::None => true,
@@ -463,6 +691,18 @@ impl MawuValue {
     }
 
     /// Returns `Some(&Vec<HashMap<String, MawuValue>>)` if the value is an `CSV-Object`, `None` otherwise.
+    ///
+    /// Consider using `to_csv_object` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    /// 
+    /// let csv_object = MawuValue::CSVObject(vec![HashMap::from([("a".to_string(), MawuValue::Int(-1))])]);
+    /// let mawu_value = csv_object.as_csv_object().unwrap();
+    /// assert_eq!(mawu_value[0].get("a").unwrap(), &MawuValue::Int(-1));
+    /// ```
     pub fn as_csv_object(&self) -> Option<&Vec<HashMap<String, MawuValue>>> {
         match self {
             MawuValue::CSVObject(v) => Some(v),
@@ -470,7 +710,20 @@ impl MawuValue {
         }
     }
 
+    
+
     /// Returns `Some(&Vec<Vec<MawuValue>>)` if the value is an `CSV-Array`, `None` otherwise.
+    ///
+    /// Consider using `to_csv_array` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let csv_array = MawuValue::CSVArray(vec![vec![MawuValue::Int(-1)]]);
+    /// let mawu_value = csv_array.as_csv_array().unwrap();
+    /// assert_eq!(mawu_value[0][0], MawuValue::Int(-1));
+    /// ```
     pub fn as_csv_array(&self) -> Option<&Vec<Vec<MawuValue>>> {
         match self {
             MawuValue::CSVArray(v) => Some(v),
@@ -479,6 +732,18 @@ impl MawuValue {
     }
 
     /// Returns `Some(&HashMap<String, MawuValue>)` if the value is an object, `None` otherwise.
+    ///
+    /// Consider using `to_object` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let object = MawuValue::Object(HashMap::from([("a".to_string(), MawuValue::Int(-1))]));
+    /// let mawu_value = object.as_object().unwrap();
+    /// assert_eq!(mawu_value.get("a").unwrap(), &MawuValue::Int(-1));
+    /// ```
     pub fn as_object(&self) -> Option<&HashMap<String, MawuValue>> {
         match self {
             MawuValue::Object(v) => Some(v),
@@ -487,6 +752,17 @@ impl MawuValue {
     }
 
     /// Returns `Some(&Vec<MawuValue>)` if the value is an array, `None` otherwise.
+    ///
+    /// Consider using `to_array` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let array = MawuValue::Array(vec![MawuValue::Int(-1)]);
+    /// let mawu_value = array.as_array().unwrap();
+    /// assert_eq!(mawu_value[0], MawuValue::Int(-1));
+    /// ```
     pub fn as_array(&self) -> Option<&Vec<MawuValue>> {
         match self {
             MawuValue::Array(v) => Some(v),
@@ -495,6 +771,18 @@ impl MawuValue {
     }
 
     /// Returns `Some(&String)` if the value is a String, `None` otherwise.
+    /// Please pay attention to the string type of `&String`
+    ///
+    /// Consider using `to_string` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let string = MawuValue::String("test".to_string());
+    /// let mawu_value = string.as_string().unwrap();
+    /// assert_eq!(mawu_value, &"test".to_string());
+    /// ```
     pub fn as_string(&self) -> Option<&String> {
         match self {
             MawuValue::String(v) => Some(v),
@@ -503,6 +791,16 @@ impl MawuValue {
     }
 
     /// Returns `Some(&str)` if the value is a String, `None` otherwise.
+    /// Please pay attention to the string type of `&str`
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let string = MawuValue::String("test".to_string());
+    /// let mawu_value = string.as_str().unwrap();
+    /// assert_eq!(mawu_value, "test");
+    /// ```
     pub fn as_str(&self) -> Option<&str> {
         match self {
             MawuValue::String(v) => Some(v.as_str()),
@@ -511,6 +809,17 @@ impl MawuValue {
     }
 
     /// Returns `Some(&u64)` if the value is an integer, `None` otherwise.
+    ///
+    /// Consider using `to_uint` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let unsigned_integer = MawuValue::Uint(1);
+    /// let mawu_value = unsigned_integer.as_uint().unwrap();
+    /// assert_eq!(mawu_value, &1);
+    /// ```
     pub fn as_uint(&self) -> Option<&u64> {
         match self {
             MawuValue::Uint(v) => Some(v),
@@ -519,6 +828,17 @@ impl MawuValue {
     }
 
     /// Returns `Some(&i64)` if the value is an integer, `None` otherwise.
+    ///
+    /// Consider using `to_int` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let integer = MawuValue::Int(-1);
+    /// let mawu_value = integer.as_int().unwrap();
+    /// assert_eq!(mawu_value, &-1);
+    /// ```
     pub fn as_int(&self) -> Option<&i64> {
         match self {
             MawuValue::Int(v) => Some(v),
@@ -527,6 +847,17 @@ impl MawuValue {
     }
 
     /// Returns `Some(&f64)` if the value is a float, `None` otherwise.
+    ///
+    /// Consider using `to_float` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let float = MawuValue::Float(1.0);
+    /// let mawu_value = float.as_float().unwrap();
+    /// assert_eq!(mawu_value, &1.0);
+    /// ```
     pub fn as_float(&self) -> Option<&f64> {
         match self {
             MawuValue::Float(v) => Some(v),
@@ -535,6 +866,17 @@ impl MawuValue {
     }
 
     /// Returns `Some(&bool)` if the value is a boolean, `None` otherwise.
+    ///
+    /// Consider using `to_bool` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let boolean = MawuValue::Bool(true);
+    /// let mawu_value = boolean.as_bool().unwrap();
+    /// assert_eq!(mawu_value, &true);
+    /// ```
     pub fn as_bool(&self) -> Option<&bool> {
         match self {
             MawuValue::Bool(v) => Some(v),
@@ -543,6 +885,17 @@ impl MawuValue {
     }
 
     /// Returns `None` if the value is `None` and `Some(())` otherwise.
+    ///
+    /// Consider using `to_none` instead if you prefer to get an owned value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let none = MawuValue::None;
+    /// let mawu_value = none.as_none();
+    /// assert!(mawu_value.is_none());
+    /// ```
     pub fn as_none(&self) -> Option<()> {
         match self {
             MawuValue::None => None,
@@ -552,6 +905,19 @@ impl MawuValue {
 
     /// Returns a owned copy of the value as an `Vec<HashMap<String, MawuValue>>`.
     /// Returns `None` if the value is not an `CSV-Object`.
+    /// In contrast to the rest of the `to_*` methods, this method does not cast any non
+    /// `MawuValue::CSVObject` values to `MawuValue::CSVObject`.
+    ///
+    /// Consider using `as_csv_array` instead if you prefer to get a borrowed value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let csv_object = MawuValue::CSVObject(vec![HashMap::from([("key".to_string(), MawuValue::from("value"))])]);
+    /// let mawu_value = csv_object.to_csv_object().unwrap();
+    /// assert_eq!(mawu_value[0].get("key").unwrap(), &MawuValue::String("value".to_string()));
     pub fn to_csv_object(&self) -> Option<Vec<HashMap<String, MawuValue>>> {
         match self {
             MawuValue::CSVObject(v) => Some(v.clone()),
@@ -561,6 +927,19 @@ impl MawuValue {
 
     /// Returns a owned copy of the value as an `Vec<Vec<MawuValue>>`.
     /// Returns `None` if the value is not a `CSV-Array`.
+    /// In contrast to the rest of the `to_*` methods, this method does not cast any non
+    /// `MawuValue::CSVArray` values to `MawuValue::CSVArray`.
+    ///
+    /// Consider using `as_csv_array` instead if you prefer to get a borrowed value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let csv_array = MawuValue::CSVArray(vec![vec![MawuValue::from("value")]]);
+    /// let mawu_value = csv_array.to_csv_array().unwrap();
+    /// assert_eq!(mawu_value[0][0], MawuValue::String("value".to_string()));
+    /// ```
     pub fn to_csv_array(&self) -> Option<Vec<Vec<MawuValue>>> {
         match self {
             MawuValue::CSVArray(v) => Some(v.clone()),
@@ -570,6 +949,20 @@ impl MawuValue {
 
     /// Returns a owned copy of the value as an `HashMap<String, MawuValue>`.
     /// Returns `None` if the value is not an `Object`.
+    /// In contrast to the rest of the `to_*` methods, this method does not cast any non
+    /// `MawuValue::Object` values to `MawuValue::Object`.
+    ///
+    /// Consider using `as_object` instead if you prefer to get a borrowed value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let object = MawuValue::Object(HashMap::from([("key".to_string(), MawuValue::from("value"))]));
+    /// let mawu_value = object.to_object().unwrap();
+    /// assert_eq!(mawu_value.get("key").unwrap(), &MawuValue::String("value".to_string()));
+    /// ```
     pub fn to_object(&self) -> Option<HashMap<String, MawuValue>> {
         match self {
             MawuValue::Object(v) => Some(v.clone()),
@@ -578,39 +971,127 @@ impl MawuValue {
     }
 
     /// Returns a owned copy of the value as an `Vec<MawuValue>`.
-    /// Casts any primitive type representable as an `Array` to an `Array`.
-    /// Returns `None` if the value is not a primitive type.
-    pub fn to_array(&self) -> Option<Vec<MawuValue>> {
+    /// Also casts any other `MawuValue` to an `Vec<MawuValue>`, with the first element being the `MawuValue` you called this function on itself.
+    /// This function and `to_string` are the only `to_*` functions that cannot fail.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let array = MawuValue::Array(vec![MawuValue::from("value")]);
+    /// let mawu_value = array.to_array();
+    /// assert_eq!(mawu_value[0], MawuValue::String("value".to_string()));
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let string = MawuValue::from("value");
+    /// let mawu_value = string.to_array();
+    /// assert_eq!(mawu_value[0], MawuValue::String("value".to_string()));
+    /// ```
+    pub fn to_array(&self) -> Vec<MawuValue> {
         match self {
-            MawuValue::Array(v) => Some(v.clone()),
-            MawuValue::String(v) => Some(vec![MawuValue::String(v.clone())]),
-            MawuValue::None => Some(vec![MawuValue::None]),
-            MawuValue::Int(v) => Some(vec![MawuValue::Int(*v)]),
-            MawuValue::Uint(v) => Some(vec![MawuValue::Uint(*v)]),
-            MawuValue::Float(v) => Some(vec![MawuValue::Float(*v)]),
-            MawuValue::Bool(v) => Some(vec![MawuValue::Bool(*v)]),
-            _ => None,
+            MawuValue::Array(v) => v.clone(),
+            MawuValue::String(v) => vec![MawuValue::String(v.clone())],
+            MawuValue::None => vec![MawuValue::None],
+            MawuValue::Int(v) => vec![MawuValue::Int(*v)],
+            MawuValue::Uint(v) => vec![MawuValue::Uint(*v)],
+            MawuValue::Float(v) => vec![MawuValue::Float(*v)],
+            MawuValue::Bool(v) => vec![MawuValue::Bool(*v)],
+            MawuValue::CSVObject(v) => vec![MawuValue::CSVObject(v.clone())],
+            MawuValue::CSVArray(v) => vec![MawuValue::CSVArray(v.clone())],
+            MawuValue::Object(v) => vec![MawuValue::Object(v.clone())],
         }
     }
 
     /// Returns a owned copy of the value as a `String`.
-    /// Casts any other primitive type representable as a `String` to a `String`.
-    /// Returns `None` if the value is not a primitive type.
-    pub fn to_string(&self) -> Option<String> {
+    /// Also casts any other `MawuValue` to a `String`
+    /// This function and `to_array` are the only `to_*` functions that cannot fail.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let string = MawuValue::String("value".to_string());
+    /// let mawu_value = string.to_string();
+    /// assert_eq!(mawu_value, "value".to_string());
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let none = MawuValue::None;
+    /// let mawu_value = none.to_string();
+    /// assert_eq!(mawu_value, "".to_string());
+    /// ```
+    pub fn to_string(&self) -> String {
+        // I implemented display so I'll use display!
         match self {
-            MawuValue::String(v) => Some(v.to_string()),
-            MawuValue::None => Some("".to_string()),
-            MawuValue::Int(v) => Some(v.to_string()),
-            MawuValue::Uint(v) => Some(v.to_string()),
-            MawuValue::Float(v) => Some(v.to_string()),
-            MawuValue::Bool(v) => Some(v.to_string()),
-            _ => None,
+            MawuValue::String(_) => {
+                format!("{}", self)
+            },
+            MawuValue::Int(_) => {
+                format!("{}", self)
+            },
+            MawuValue::Uint(_) => {
+                format!("{}", self)
+            },
+            MawuValue::Float(_) => {
+                format!("{}", self)
+            },
+            MawuValue::Bool(_) => {
+                format!("{}", self)
+            },
+            MawuValue::CSVObject(_) => {
+                format!("{}", self)
+            },
+            MawuValue::CSVArray(_) => {
+                format!("{}", self)
+            },
+            MawuValue::Object(_) => {
+                format!("{}", self)
+            },
+            MawuValue::Array(_) => {
+                format!("{}", self)
+            },
+            MawuValue::None => {
+                format!("")
+            },
         }
     }
 
-    /// Returns a owned copy of the value as a `u64`.
-    /// Casts any other primitive type representable as a `u64` to a `u64`.
+    /// Returns a owned copy of the value as a `u64`
+    /// Also casts any other `MawuValue` containing a number to a `u64`, however only some
+    /// `MawuValue::Int` and `MawuValue::Float` can be represented as a `u64`
+    /// a failure will be returned as `None`
+    /// Please note that converting a float to a `u64` will lose the decimal part.
     /// Returns `None` if the value is not a number.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let uint = MawuValue::Uint(42);
+    /// let mawu_value = uint.to_uint().unwrap();
+    /// assert_eq!(mawu_value, 42);
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let int = MawuValue::Int(42);
+    /// let mawu_value = int.to_uint();
+    /// assert_eq!(mawu_value.unwrap(), 42);
+    /// 
+    /// let float = MawuValue::Float(42.0);
+    /// let mawu_value = float.to_uint();
+    /// assert_eq!(mawu_value.unwrap(), 42);
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let neg_int = MawuValue::Int(-42);
+    /// let mawu_value = neg_int.to_uint();
+    /// assert!(mawu_value.is_none());
+    /// ```
     pub fn to_uint(&self) -> Option<u64> {
         match self {
             MawuValue::Uint(v) => Some(*v),
@@ -627,6 +1108,7 @@ impl MawuValue {
                 }
             }
             MawuValue::Float(v) => {
+                // INF and NaN check
                 if v.is_normal() {
                     let tmp = v.to_string().parse::<u64>();
                     if tmp.is_ok() {
@@ -643,8 +1125,31 @@ impl MawuValue {
     }
 
     /// Returns a owned copy of the value as an `i64`.
-    /// Casts any other primitive type representable as an `i64` to an `i64`.
+    /// Also casts any other `MawuValue` containing a number to an `i64`, however only some
+    /// `MawuValue::Uint` and `MawuValue::Float` can be represented as an `i64`
+    /// a failure will be returned as `None`.
+    /// Please note that converting a float to an `i64` will lose the decimal part.
     /// Returns `None` if the value is not a number.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let int = MawuValue::Int(-42);
+    /// let mawu_value = int.to_int().unwrap();
+    /// assert_eq!(mawu_value, -42);
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let uint = MawuValue::Uint(42);
+    /// let mawu_value = uint.to_int();
+    /// assert_eq!(mawu_value.unwrap(), 42);
+    /// 
+    /// let float = MawuValue::Float(42.0);
+    /// let mawu_value = float.to_int();
+    /// assert_eq!(mawu_value.unwrap(), 42);
+    /// ```
     pub fn to_int(&self) -> Option<i64> {
         match self {
             MawuValue::Int(v) => Some(*v),
@@ -673,8 +1178,37 @@ impl MawuValue {
     }
 
     /// Returns a owned copy of the value as a `f64`.
-    /// Casts any other primitive type representable as a `f64` to a `f64`.
+    /// Also casts any other `MawuValue` containing a number to a `f64`, however only some
+    /// `MawuValue::Uint` and `MawuValue::Float` can be represented as a `f64`
+    /// a failure will be returned as `None`.
     /// Returns `None` if the value is not a number.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let float = MawuValue::Float(4.2);
+    /// let mawu_value = float.to_float().unwrap();
+    /// assert_eq!(mawu_value, 4.2);
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let int = MawuValue::Int(-42);
+    /// let mawu_value = int.to_float();
+    /// assert_eq!(mawu_value.unwrap(), -42.0);
+    /// 
+    /// let uint = MawuValue::Uint(42);
+    /// let mawu_value = uint.to_float();
+    /// assert_eq!(mawu_value.unwrap(), 42.0);
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let string = MawuValue::String("Value".to_string());
+    /// let mawu_value = string.to_float();
+    /// assert!(mawu_value.is_none());
+    /// ```
     pub fn to_float(&self) -> Option<f64> {
         match self {
             MawuValue::Float(v) => Some(*v),
@@ -699,16 +1233,33 @@ impl MawuValue {
     }
 
     /// Returns a owned copy of the value as a `bool`.
+    /// Also tries to cast any other `MawuValue` to a `bool`.
+    /// Returns `None` if the value is not a boolean and could not be represented as one.
     ///
-    /// ## Returns
-    /// A owned copy of the value as a `bool`.
-    /// `None` if the value is not a boolean and could not be represented as one.
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let bool = MawuValue::Bool(true);
+    /// let mawu_value = bool.to_bool().unwrap();
+    /// assert_eq!(mawu_value, true);
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let int = MawuValue::Int(-42);
+    /// let mawu_value = int.to_bool();
+    /// assert!(mawu_value.is_none());
+    /// ```
     pub fn to_bool(&self) -> Option<bool> {
         match self {
             MawuValue::Bool(v) => Some(*v),
             // I don't think that this code will ever actually return anything besides `None`
+            // I have tried to pass in a lot of data and it always returns `None`, maybe remove it
+            // for performance reasons?
+            // I'll leave it here for now and completeness sake
             _ => {
-                let tmp = self.to_string();
+                let tmp = self.as_string();
                 if tmp.is_some() {
                     let tmp2 = tmp.unwrap().parse::<bool>();
                     if tmp2.is_ok() {
@@ -725,6 +1276,22 @@ impl MawuValue {
 
     /// Returns `None` if the value is `None` and `Some(())` otherwise.
     /// Consider using `is_none` instead.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let none = MawuValue::None;
+    /// let mawu_value = none.to_none();
+    /// assert!(mawu_value.is_none());
+    /// ```
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let int = MawuValue::Int(-42);
+    /// let mawu_value = int.to_none();
+    /// assert!(mawu_value.is_some());
+    /// ```
     pub fn to_none(&self) -> Option<()> {
         match self {
             MawuValue::None => None,
@@ -753,7 +1320,10 @@ fn general_as_all_types() {
     let mut hashmap = HashMap::new();
     hashmap.insert("test".to_string(), MawuValue::from(123));
     let object = MawuValue::Object(hashmap);
-    assert_eq!(object.as_object().unwrap().get("test").unwrap(), &MawuValue::from(123));
+    assert_eq!(
+        object.as_object().unwrap().get("test").unwrap(),
+        &MawuValue::from(123)
+    );
 
     let string = MawuValue::from("test");
     assert_eq!(string.as_string().unwrap(), &"test");
@@ -801,7 +1371,7 @@ fn from_vec_and_hashmap() {
 
 #[test]
 fn to_primitive() {
-    let mawu = MawuValue::from("test").to_string().unwrap();
+    let mawu = MawuValue::from("test").to_string();
     assert_eq!(mawu, "test".to_string());
     let bool_true = MawuValue::from("true").to_bool().unwrap();
     assert_eq!(bool_true, true);
