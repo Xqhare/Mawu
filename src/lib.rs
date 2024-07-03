@@ -174,8 +174,6 @@
 //!         - wrapping a `Vec<HashMap<String, MawuValue>>`
 //!         - `as_csv_object` and `to_csv_object` return `Option<Vec<HashMap<String, MawuValue>>>`
 //!         - `is_csv_object` returns `true`
-
-
 //!
 //! #### Example of getting a `MawuValue` if its type is not known or different in the same field
 //! ```rust
@@ -244,6 +242,9 @@
 //! ### Constructing a `MawuValue`
 //! `MawuValue` can be constructed from almost any type using the `MawuValue::from` function.
 //! `MawuValue::new` and `MawuValue::default` will return a `MawuValue::None`.
+//! There also are `MawuValue::new_array` and `MawuValue::new_object` that will return an empty `MawuValue::Array` and `MawuValue::Object`, respectively on the JSON side,
+//! and `MawuValue::new_csv_array` and `MawuValue::new_csv_object` that will return an empty `MawuValue::CsvArray` and `MawuValue::CsvObject`, respectively on the CSV side.
+//! With these functions, as well as `MawuValue::from(Type::default())`, you can create an empty `MawuValue` of, hopefully, any desired type.
 //! For example:
 //! ```rust
 //! use mawu::mawu_value::MawuValue;
@@ -296,7 +297,7 @@
 //! 
 //! #### A comprehensive list of all types a `MawuValue` can be constructed from
 //! TODO
-//! //! ## `MawuError`
+//! ## `MawuError`
 //! TODO
 //!
 //! ## CSV

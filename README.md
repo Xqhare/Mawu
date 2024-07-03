@@ -244,6 +244,9 @@ if mawu_value.is_none() {
 ### Constructing a `MawuValue`
 `MawuValue` can be constructed from almost any type using the `MawuValue::from` function.
 `MawuValue::new` and `MawuValue::default` will return a `MawuValue::None`.
+There also are `MawuValue::new_array` and `MawuValue::new_object` that will return an empty `MawuValue::Array` and `MawuValue::Object`, respectively on the JSON side,
+and `MawuValue::new_csv_array` and `MawuValue::new_csv_object` that will return an empty `MawuValue::CsvArray` and `MawuValue::CsvObject`, respectively on the CSV side.
+With these functions, as well as `MawuValue::from(Type::default())`, you can create an empty `MawuValue` of, hopefully, any desired type.
 For example:
 ```rust
 use mawu::mawu_value::MawuValue;
@@ -255,7 +258,7 @@ let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array().unwrap();
 mawu_value.push(MawuValue::from(4));
 assert_eq!(mawu_value, vec![MawuValue::Int(1), MawuValue::Int(2), MawuValue::Int(3), MawuValue::Int(4)]);
 ```
-One thing to note in the above example is that to mutate the array, you have to use `to_array`. This does create a new copy of the array, so if you plan to store several types inside the same array I recommend this approach:
+One thing to note in the above example is that to mutate the array, you have to use `to_array`. This creates a new copy of the array, so if you plan to store several types inside the same array I recommend this approach:
 ```rust
 use mawu::mawu_value::MawuValue;
 
