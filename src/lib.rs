@@ -60,16 +60,16 @@
 //! cargo update
 //! ```
 //! Mawu is now ready to go!
-//! 
+//!
 //! After opening your IDE of choice, I recommend importing everything in the `mawu` module, at least as you get to know it.
 //! ```rust
 //! use mawu::*;
-//! 
+//!
 //! // most of the time you will ever only need
 //! use mawu::read::json;
 //! // or one of these two
 //! use mawu::read::{csv_headed, csv_headless};
-//! 
+//!
 //! // if you want to work with `MawuValue`'s you will need
 //! use mawu::mawu_value::MawuValue;
 //!
@@ -93,10 +93,10 @@
 //! key4: true
 //! key5: None
 //! ```
-//! 
+//!
 //! In the first printed line in the code example above, is a perfect example of the `MawuValue` enum.
 //! Because Mawu only returns `MawuValue`'s, and you will be interacting with them a lot, I really recommend reading the chapter on `MawuValue`'s.
-//! 
+//!
 //! ## Naming the creation: A Legacy of the Divine
 //! The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
 //! Mawu follows the long tradition of naming things after deities.
@@ -207,11 +207,11 @@
 //!     assert_eq!(value, &-1.0);
 //! } else if mawu_value.is_string() {
 //!     let value: &str = mawu_value.as_str().unwrap();
-//!     let owned_value: String = mawu_value.to_string().unwrap();
+//!     let owned_value: String = mawu_value.to_string();
 //!     let referenced_value: &String = mawu_value.as_string().unwrap();
 //!     // Do something with `value`, `owned_value` or `referenced_value`
-//!  assert_eq!(value, "hello");
-//!  assert_eq!(owned_value, "hello".to_string());
+//!     assert_eq!(value, "hello");
+//!     assert_eq!(owned_value, "hello".to_string());
 //!     assert_eq!(referenced_value, &"hello".to_string());
 //! // These are the JSON exclusive types
 //! } else if mawu_value.is_array() {
@@ -251,8 +251,8 @@
 //!
 //! let mawu_value = MawuValue::from(42);
 //! assert_eq!(mawu_value, MawuValue::Int(42));
-//! 
-//! let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array().unwrap();
+//!
+//! let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array();
 //! mawu_value.push(MawuValue::from(4));
 //! assert_eq!(mawu_value, vec![MawuValue::Int(1), MawuValue::Int(2), MawuValue::Int(3), MawuValue::Int(4)]);
 //! ```
@@ -260,7 +260,7 @@
 //! ```rust
 //! use mawu::mawu_value::MawuValue;
 //!
-//! let mut mawu_value = MawuValue::new_array().to_array().unwrap();
+//! let mut mawu_value = MawuValue::new_array().to_array();
 //! mawu_value.push(MawuValue::from(u8::MAX));
 //! mawu_value.push(MawuValue::from("hello"));
 //! mawu_value.push(MawuValue::from(-3));
@@ -270,7 +270,7 @@
 //! mawu_value.push(MawuValue::from(""));
 //! assert_eq!(mawu_value, vec![MawuValue::Uint(255), MawuValue::String("hello".to_string()), MawuValue::Int(-3), MawuValue::Float(4.2), MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]), MawuValue::Bool(true), MawuValue::None]);
 //! ```
-//! 
+//!
 //! If you are creating an object, please take care that the keys are valid strings (or can be converted to strings, the standards require keys to be strings) and that the values are valid `MawuValue`s or can be converted to `MawuValue`s.
 //! ```rust
 //! use std::collections::HashMap;
@@ -294,7 +294,7 @@
 //! assert_eq!(mawu_value.get("key6").unwrap(), &MawuValue::Bool(true));
 //! assert_eq!(mawu_value.get("key7").unwrap(), &MawuValue::None);
 //! ```
-//! 
+//!
 //! #### A comprehensive list of all types a `MawuValue` can be constructed from
 //! TODO
 //! ## `MawuError`
@@ -522,9 +522,9 @@ pub mod read {
     };
 
     /// Reads a headed CSV file and returns a `MawuValue::CSVObject` or an error if the file could not be read or parsed.
-    /// 
+    ///
     /// Call `as_csv_object` or `to_csv_object` on the result to get the `Vec<HashMap<String, MawuValue>>`
-    /// 
+    ///
     /// # Arguments
     /// * `path` - The path to the CSV file, relative or absolute
     ///
@@ -546,9 +546,9 @@ pub mod read {
     }
 
     /// Reads a headless CSV file and returns a `MawuValue::CSVArray` or an error if the file could not be read or parsed.
-    /// 
+    ///
     /// Call `as_csv_array` or `to_csv_array` on the result to get the `Vec<Vec<MawuValue>>`
-    /// 
+    ///
     /// # Arguments
     /// * `path` - The path to the CSV file, relative or absolute
     ///
@@ -570,10 +570,10 @@ pub mod read {
     }
 
     /// Reads a JSON file and returns a `MawuValue` or an error if the file could not be read or parsed.
-    /// 
+    ///
     /// Call the appropriate `as_` or `to_` methods on the result to get the appropriate type
     /// You can check the type with the `is_` methods
-    /// 
+    ///
     /// # Arguments
     /// * `path` - The path to the JSON file, relative or absolute
     ///

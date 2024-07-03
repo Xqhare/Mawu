@@ -132,15 +132,10 @@ fn json_object_lexer(
             return Ok(MawuValue::from(binding_object));
         }
         let key = json_value_lexer(file_contents)?.to_string();
-        if key.is_none() {
-            return Err(MawuError::JsonError(JsonError::ParseError(
-                JsonParseError::ExpectedKey,
-            )));
-        }
         if file_contents.front() == Some(&":") {
             let _ = file_contents.pop_front();
             let value = json_value_lexer(file_contents)?;
-            binding_object.insert(key.unwrap(), value);
+            binding_object.insert(key, value);
         } else {
             return Err(MawuError::JsonError(JsonError::ParseError(
                 JsonParseError::ExpectedColon,

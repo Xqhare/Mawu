@@ -55,8 +55,7 @@ mod json_tests {
         let m_q2_answer = m_q2.get("answer").unwrap();
         assert_eq!(m_q2_answer.as_uint().unwrap(), &2);
 
-        let very_simple_result =
-            json("data/json/json-test-data/very-simple-json.json").unwrap();
+        let very_simple_result = json("data/json/json-test-data/very-simple-json.json").unwrap();
         let vs_obj = very_simple_result.as_object().unwrap();
         assert_eq!(vs_obj.len(), 3);
         let vs_key1 = vs_obj.get("fruit").unwrap();
@@ -69,8 +68,7 @@ mod json_tests {
 
     #[test]
     fn rfc8259_valid_json() {
-        let rfc8259_array =
-            json("data/json/json-test-data/rfc8259-test-data/array.json").unwrap();
+        let rfc8259_array = json("data/json/json-test-data/rfc8259-test-data/array.json").unwrap();
         let rfc8259_object =
             json("data/json/json-test-data/rfc8259-test-data/object.json").unwrap();
         let rfc8259_string =
@@ -108,20 +106,16 @@ mod json_tests {
     #[test]
     fn json_org_valid_json() {
         let small_weird_json =
-            json("data/json/json-test-data/jsonOrg-json-examples/small-weird-json.json")
-                .unwrap();
+            json("data/json/json-test-data/jsonOrg-json-examples/small-weird-json.json").unwrap();
         let small_simple_json =
-            json("data/json/json-test-data/jsonOrg-json-examples/small-simple-json.json")
-                .unwrap();
+            json("data/json/json-test-data/jsonOrg-json-examples/small-simple-json.json").unwrap();
         let small_complex_json =
-            json("data/json/json-test-data/jsonOrg-json-examples/small-complex-json.json")
-                .unwrap();
+            json("data/json/json-test-data/jsonOrg-json-examples/small-complex-json.json").unwrap();
         let medium_complex_json =
             json("data/json/json-test-data/jsonOrg-json-examples/medium-complex-json.json")
                 .unwrap();
         let large_complex_json =
-            json("data/json/json-test-data/jsonOrg-json-examples/large-complex-json.json")
-                .unwrap();
+            json("data/json/json-test-data/jsonOrg-json-examples/large-complex-json.json").unwrap();
         assert_eq!(small_weird_json.is_object(), true);
         assert_eq!(small_simple_json.is_object(), true);
         assert_eq!(small_complex_json.is_object(), true);
@@ -131,10 +125,9 @@ mod json_tests {
 
     #[test]
     fn microsoft_edge_valid_dummy_json_small() {
-        let micro_64kb = json(
-            "data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/64KB.json",
-        )
-        .unwrap();
+        let micro_64kb =
+            json("data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/64KB.json")
+                .unwrap();
         assert_eq!(micro_64kb.is_array(), true);
         let micro_64kb_mini = json(
             "data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/64KB-min.json",
@@ -179,10 +172,9 @@ mod json_tests {
     #[test]
     #[ignore]
     fn microsoft_edge_valid_dummy_json_large() {
-        let micro_1mb = json(
-            "data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/1MB.json",
-        )
-        .unwrap();
+        let micro_1mb =
+            json("data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/1MB.json")
+                .unwrap();
         assert_eq!(micro_1mb.is_array(), true);
         let micro_1mb_mini = json(
             "data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/1MB-min.json",
@@ -190,10 +182,9 @@ mod json_tests {
         .unwrap();
         assert_eq!(micro_1mb_mini.is_array(), true);
 
-        let micro_5mb = json(
-            "data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/5MB.json",
-        )
-        .unwrap();
+        let micro_5mb =
+            json("data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/5MB.json")
+                .unwrap();
         assert_eq!(micro_5mb.is_array(), true);
         let micro_5mb_mini = json(
             "data/json/json-test-data/microsoftEdge-json-test-data/json-dummy-data/5MB-min.json",
@@ -504,26 +495,23 @@ mod json_tests {
         fn valid_arrays() {
             let arrays_with_spaces = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_arraysWithSpaces.json").unwrap();
             assert_eq!(arrays_with_spaces.is_array(), true);
-            let array_empty = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_empty.json",
-            )
-            .unwrap();
+            let array_empty =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_empty.json")
+                    .unwrap();
             assert_eq!(array_empty.is_array(), true);
             let array_empty_string = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_empty-string.json").unwrap();
             assert_eq!(array_empty_string.is_array(), true);
             let array_ending_with_newline = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_ending_with_newline.json").unwrap();
             assert_eq!(array_ending_with_newline.is_array(), true);
-            let array_false = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_false.json",
-            )
-            .unwrap();
+            let array_false =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_false.json")
+                    .unwrap();
             assert_eq!(array_false.is_array(), true);
             let array_heterogeneous = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_heterogeneous.json").unwrap();
             assert_eq!(array_heterogeneous.is_array(), true);
-            let array_null = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_null.json",
-            )
-            .unwrap();
+            let array_null =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_null.json")
+                    .unwrap();
             assert_eq!(array_null.is_array(), true);
             assert_eq!(array_null.as_array().unwrap()[0].is_none(), true);
             let array_with_1_and_newline = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_array_with_1_and_newline.json").unwrap();
@@ -562,15 +550,13 @@ mod json_tests {
                 json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_number.json")
                     .unwrap();
             assert_eq!(number.as_array().unwrap()[0].is_number(), true);
-            let number_0e1 = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_number_0e1.json",
-            )
-            .unwrap();
+            let number_0e1 =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_number_0e1.json")
+                    .unwrap();
             assert_eq!(number_0e1.as_array().unwrap()[0].is_number(), true);
-            let number_0eplusone = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_number_0e+1.json",
-            )
-            .unwrap();
+            let number_0eplusone =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_number_0e+1.json")
+                    .unwrap();
             assert_eq!(number_0eplusone.as_array().unwrap()[0].is_number(), true);
             let number_after_space = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_number_after_space.json").unwrap();
             assert_eq!(number_after_space.as_array().unwrap()[0].is_number(), true);
@@ -791,10 +777,9 @@ mod json_tests {
             assert!(string_null_escape.as_array().unwrap()[0].is_string());
             let string_one_byte_utf8 = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_one-byte-utf-8.json").unwrap();
             assert!(string_one_byte_utf8.as_array().unwrap()[0].is_string());
-            let string_pi = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_pi.json",
-            )
-            .unwrap();
+            let string_pi =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_pi.json")
+                    .unwrap();
             assert!(string_pi.as_array().unwrap()[0].is_string());
             let string_reservedcharacterinutf_8_uplus1bfff = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_reservedCharacterInUTF-8_U+1BFFF.json").unwrap();
             assert!(string_reservedcharacterinutf_8_uplus1bfff
@@ -873,10 +858,9 @@ mod json_tests {
             assert!(string_unicode_uplusfddo_nonchar.as_array().unwrap()[0].is_string());
             let string_unicode_uplusfffe_nonchar = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_unicode_U+FFFE_nonchar.json").unwrap();
             assert!(string_unicode_uplusfffe_nonchar.as_array().unwrap()[0].is_string());
-            let string_utf8 = json(
-                "data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_utf8.json",
-            )
-            .unwrap();
+            let string_utf8 =
+                json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_utf8.json")
+                    .unwrap();
             assert!(string_utf8.as_array().unwrap()[0].is_string());
             let string_with_del_character = json("data/json/json-test-data/jsonTestSuite-data/test_parsing/y_string_with_del_character.json").unwrap();
             assert!(string_with_del_character.as_array().unwrap()[0].is_string());
