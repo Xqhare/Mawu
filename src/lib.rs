@@ -588,7 +588,7 @@ pub mod read {
     /// Only returns `MawuError`'s
     pub fn json<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         json_lexer::json_lexer(
-            &mut file_handling::read_file(path)?
+            file_handling::read_file(path)?
                 .graphemes(true)
                 .collect::<VecDeque<&str>>(),
         )

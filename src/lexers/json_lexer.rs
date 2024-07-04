@@ -19,9 +19,9 @@ use crate::{
     },
 };
 
-pub fn json_lexer(file_contents: &mut VecDeque<&str>) -> Result<MawuValue, MawuError> {
-    let contents_store: Rc<Mutex<VecDeque<&str>>> = Rc::new(Mutex::new(file_contents.clone()));
+pub fn json_lexer(file_contents: VecDeque<&str>) -> Result<MawuValue, MawuError> {
     if file_contents.len() > 0 {
+        let contents_store: Rc<Mutex<VecDeque<&str>>> = Rc::new(Mutex::new(file_contents));
         let contents = contents_store.try_lock();
         if contents.is_err() {
             return Err(MawuError::InternalError(
@@ -181,7 +181,7 @@ fn json_array_lexer(
 #[test]
 fn object_lexer() {
     let input = json_lexer(
-        &mut read_file("data/json/json-test-data/rfc8259-test-data/object.json")
+        read_file("data/json/json-test-data/rfc8259-test-data/object.json")
             .unwrap()
             .graphemes(true)
             .collect::<VecDeque<&str>>(),
@@ -192,7 +192,7 @@ fn object_lexer() {
 #[test]
 fn array_lexer() {
     let input = json_lexer(
-        &mut read_file("data/json/json-test-data/rfc8259-test-data/array.json")
+        read_file("data/json/json-test-data/rfc8259-test-data/array.json")
             .unwrap()
             .graphemes(true)
             .collect::<VecDeque<&str>>(),
@@ -335,7 +335,7 @@ fn json_string_lexer(
 #[test]
 fn string_lexer() {
     let double_quotes = vec!["\"", "\\", "\"", "\""];
-    let parsed_quotes = json_lexer(&mut double_quotes.clone().into_iter().collect());
+    let parsed_quotes = json_lexer(double_quotes.clone().into_iter().collect());
     assert!(parsed_quotes.is_ok());
     assert!(parsed_quotes.unwrap() == MawuValue::String("\"".to_string()));
 
@@ -343,7 +343,7 @@ fn string_lexer() {
         "\"", "\\", "u", "2", "6", "0", "3", "\\", "u", "0", "0", "2", "6", "\\", "u", "0", "0",
         "E", "A", "\\", "u", "F", "B", "2", "0", "\"",
     ];
-    let parsed_unicode = json_lexer(&mut unicode.into());
+    let parsed_unicode = json_lexer(unicode.into());
     assert!(parsed_unicode.is_ok());
     assert!(
         parsed_unicode.unwrap()
@@ -351,39 +351,39 @@ fn string_lexer() {
     );
 
     let backslash = vec!["\"", "\\", "\\", "\""];
-    let parsed_backslash = json_lexer(&mut backslash.into());
+    let parsed_backslash = json_lexer(backslash.into());
     assert!(parsed_backslash.is_ok());
     assert!(parsed_backslash.unwrap() == MawuValue::String("\\".to_string()));
 
     let slash = vec!["\"", "\\", "/", "\""];
-    let parsed_slash = json_lexer(&mut slash.into());
+    let parsed_slash = json_lexer(slash.into());
     assert!(parsed_slash.is_ok());
     assert!(parsed_slash.unwrap() == MawuValue::String("/".to_string()));
 
     let mut tmp = "\"backspace\"".to_string();
     tmp.insert_str(4, r"\b");
-    let mut backspace = tmp.graphemes(true).collect::<VecDeque<&str>>();
-    let parsed_backspace = json_lexer(&mut backspace);
+    let backspace = tmp.graphemes(true).collect::<VecDeque<&str>>();
+    let parsed_backspace = json_lexer(backspace);
     assert!(parsed_backspace.is_ok());
     assert!(parsed_backspace.unwrap().as_str().unwrap() == "bac\u{0008}kspace");
 
     let formfeed = vec!["\"", "\\", "f", "f", "\""];
-    let parsed_formfeed = json_lexer(&mut formfeed.into());
+    let parsed_formfeed = json_lexer(formfeed.into());
     assert!(parsed_formfeed.is_ok());
     assert!(parsed_formfeed.unwrap() == MawuValue::String("\u{000C}f".to_string()));
 
     let newline = vec!["\"", "\\", "n", "n", "\""];
-    let parsed_newline = json_lexer(&mut newline.into());
+    let parsed_newline = json_lexer(newline.into());
     assert!(parsed_newline.is_ok());
     assert!(parsed_newline.unwrap() == MawuValue::String("\nn".to_string()));
 
     let return_test = vec!["\"", "\\", "r", "r", "\""];
-    let parsed_return = json_lexer(&mut return_test.into());
+    let parsed_return = json_lexer(return_test.into());
     assert!(parsed_return.is_ok());
     assert!(parsed_return.unwrap() == MawuValue::String("\rr".to_string()));
 
     let tab = vec!["\"", "\\", "t", " ", "t", "e", "s", "t", "\""];
-    let parsed_tab = json_lexer(&mut tab.into());
+    let parsed_tab = json_lexer(tab.into());
     assert!(parsed_tab.is_ok());
     assert!(parsed_tab.unwrap() == MawuValue::String("\t test".to_string()));
 }
@@ -431,66 +431,66 @@ fn json_number_lexer(
 // Actual test with 100% coverage (I think)
 #[test]
 fn number_lexer() {
-    let mut small_neg = VecDeque::from(vec!["-", "1", "2", "3"]);
-    let small_neg_res = json_lexer(&mut small_neg).unwrap();
+    let small_neg = VecDeque::from(vec!["-", "1", "2", "3"]);
+    let small_neg_res = json_lexer(small_neg).unwrap();
     assert_eq!(small_neg_res, MawuValue::from("-123"));
-    let mut small_pos = VecDeque::from(vec!["1", "2", "3"]);
-    let small_pos_res = json_lexer(&mut small_pos).unwrap();
+    let small_pos = VecDeque::from(vec!["1", "2", "3"]);
+    let small_pos_res = json_lexer(small_pos).unwrap();
     assert_eq!(small_pos_res, MawuValue::from("123"));
 
-    let mut large_neg = VecDeque::from(vec!["-", "9", "8", "7", "6", "5", "4", "3", "2", "1"]);
-    let large_neg_res = json_lexer(&mut large_neg).unwrap();
+    let large_neg = VecDeque::from(vec!["-", "9", "8", "7", "6", "5", "4", "3", "2", "1"]);
+    let large_neg_res = json_lexer(large_neg).unwrap();
     assert_eq!(large_neg_res, MawuValue::from("-987654321"));
-    let mut large_pos = VecDeque::from(vec!["9", "8", "7", "6", "5", "4", "3", "2", "1"]);
-    let large_pos_res = json_lexer(&mut large_pos).unwrap();
+    let large_pos = VecDeque::from(vec!["9", "8", "7", "6", "5", "4", "3", "2", "1"]);
+    let large_pos_res = json_lexer(large_pos).unwrap();
     assert_eq!(large_pos_res, MawuValue::from("987654321"));
 
-    let mut small_float = VecDeque::from(vec!["1", ".", "2", "3"]);
-    let easy_float_res = json_lexer(&mut small_float).unwrap();
+    let small_float = VecDeque::from(vec!["1", ".", "2", "3"]);
+    let easy_float_res = json_lexer(small_float).unwrap();
     assert_eq!(easy_float_res, MawuValue::from("1.23"));
-    let mut small_neg_float = VecDeque::from(vec!["-", "1", ".", "2", "3"]);
-    let small_neg_float_res = json_lexer(&mut small_neg_float).unwrap();
+    let small_neg_float = VecDeque::from(vec!["-", "1", ".", "2", "3"]);
+    let small_neg_float_res = json_lexer(small_neg_float).unwrap();
     assert_eq!(small_neg_float_res, MawuValue::from("-1.23"));
 
-    let mut large_float = VecDeque::from(vec!["9", ".", "8", "7", "6", "5", "4", "3", "2", "1"]);
-    let large_float_res = json_lexer(&mut large_float).unwrap();
+    let large_float = VecDeque::from(vec!["9", ".", "8", "7", "6", "5", "4", "3", "2", "1"]);
+    let large_float_res = json_lexer(large_float).unwrap();
     assert_eq!(large_float_res, MawuValue::from("9.87654321"));
-    let mut large_neg_float =
+    let large_neg_float =
         VecDeque::from(vec!["-", "9", ".", "8", "7", "6", "5", "4", "3", "2", "1"]);
-    let large_neg_float_res = json_lexer(&mut large_neg_float).unwrap();
+    let large_neg_float_res = json_lexer(large_neg_float).unwrap();
     assert_eq!(large_neg_float_res, MawuValue::from("-9.87654321"));
 
-    let mut small_exp = VecDeque::from(vec!["1", ".", "2", "3", "e", "+", "1", "2"]);
-    let small_exp_res = json_lexer(&mut small_exp).unwrap();
+    let small_exp = VecDeque::from(vec!["1", ".", "2", "3", "e", "+", "1", "2"]);
+    let small_exp_res = json_lexer(small_exp).unwrap();
     assert_eq!(small_exp_res, MawuValue::from("1230000000000.0"));
-    let mut small_neg_exp = VecDeque::from(vec!["-", "1", ".", "2", "3", "e", "+", "1", "2"]);
-    let small_neg_exp_res = json_lexer(&mut small_neg_exp).unwrap();
+    let small_neg_exp = VecDeque::from(vec!["-", "1", ".", "2", "3", "e", "+", "1", "2"]);
+    let small_neg_exp_res = json_lexer(small_neg_exp).unwrap();
     assert_eq!(small_neg_exp_res, MawuValue::from("-1230000000000.0"));
 
-    let mut large_exp = VecDeque::from(vec![
+    let large_exp = VecDeque::from(vec![
         "9", ".", "8", "7", "6", "5", "4", "3", "2", "1", "e", "+", "1", "2",
     ]);
-    let large_exp_res = json_lexer(&mut large_exp).unwrap();
+    let large_exp_res = json_lexer(large_exp).unwrap();
     assert_eq!(large_exp_res, MawuValue::from("9876543210000.0"));
-    let mut large_neg_exp = VecDeque::from(vec![
+    let large_neg_exp = VecDeque::from(vec![
         "-", "9", ".", "8", "7", "6", "5", "4", "3", "2", "1", "e", "+", "1", "2",
     ]);
-    let large_neg_exp_res = json_lexer(&mut large_neg_exp).unwrap();
+    let large_neg_exp_res = json_lexer(large_neg_exp).unwrap();
     assert_eq!(large_neg_exp_res, MawuValue::from("-9876543210000.0"));
 
-    let mut neg_exp = VecDeque::from(vec!["1", ".", "2", "3", "e", "-", "9"]);
-    let neg_exp_res = json_lexer(&mut neg_exp).unwrap();
+    let neg_exp = VecDeque::from(vec!["1", ".", "2", "3", "e", "-", "9"]);
+    let neg_exp_res = json_lexer(neg_exp).unwrap();
     assert_eq!(neg_exp_res, MawuValue::from("0.00000000123"));
-    let mut neg_exp2 = VecDeque::from(vec!["-", "1", ".", "2", "3", "e", "-", "1", "2"]);
-    let neg_exp2_res = json_lexer(&mut neg_exp2).unwrap();
+    let neg_exp2 = VecDeque::from(vec!["-", "1", ".", "2", "3", "e", "-", "1", "2"]);
+    let neg_exp2_res = json_lexer(neg_exp2).unwrap();
     assert_eq!(neg_exp2_res, MawuValue::from("-0.00000000000123"));
 
-    let mut small_exp_float_no_plus_after_e =
+    let small_exp_float_no_plus_after_e =
         VecDeque::from(vec!["1", ".", "2", "3", "e", "1", "2"]);
-    let small_exp_float_res = json_lexer(&mut small_exp_float_no_plus_after_e).unwrap();
+    let small_exp_float_res = json_lexer(small_exp_float_no_plus_after_e).unwrap();
     assert_eq!(small_exp_float_res, MawuValue::from("1230000000000.0"));
-    let mut small_neg_exp_float_no_plus_after_e =
+    let small_neg_exp_float_no_plus_after_e =
         VecDeque::from(vec!["-", "1", ".", "2", "3", "e", "1", "2"]);
-    let small_neg_exp_float_res = json_lexer(&mut small_neg_exp_float_no_plus_after_e).unwrap();
+    let small_neg_exp_float_res = json_lexer(small_neg_exp_float_no_plus_after_e).unwrap();
     assert_eq!(small_neg_exp_float_res, MawuValue::from("-1230000000000.0"));
 }
