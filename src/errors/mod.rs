@@ -4,10 +4,16 @@ pub mod csv_error;
 pub mod json_error;
 
 #[derive(Debug)]
+/// MawuError wraps all errors that can occur in Mawu.
+/// These are mainly `IoError`'s and parsing errors.
 pub enum MawuError {
+    /// A wrapper for `std::io::Error`
     IoError(std::io::Error),
+    /// A wrapper for `csv::Error` containing parsing errors for CSV
     CsvError(csv_error::CsvError),
+    /// A wrapper for `json::Error` containing parsing errors for JSON
     JsonError(json_error::JsonError),
+    /// A wrapper for internal errors. If you ever see this, please file an issue.
     InternalError(MawuInternalError),
 }
 
