@@ -15,6 +15,22 @@ mod json_tests {
     }
 
     #[test]
+    #[ignore]
+    fn my_own_random_data_26mb() {
+        let mawu_result = json("data/json/json-test-data/test_data_160k.json").unwrap();
+        assert_eq!(mawu_result.is_array(), true);
+        assert_eq!(mawu_result.as_array().unwrap().len(), 160000);
+    }
+
+    #[test]
+    #[ignore]
+    fn my_own_random_data_84mb() {
+        let mawu_result = json("data/json/json-test-data/test_data_517k.json").unwrap();
+        assert_eq!(mawu_result.is_array(), true);
+        assert_eq!(mawu_result.as_array().unwrap().len(), 517000);
+    }
+
+    #[test]
     fn simple_valid_json() {
         let simple_result = json("data/json/json-test-data/simple-json.json").unwrap();
         let tmp_simple_bind = simple_result.as_object().unwrap();

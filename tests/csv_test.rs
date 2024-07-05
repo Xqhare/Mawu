@@ -6,6 +6,28 @@ mod csv_tests {
         use pretty_assertions::assert_eq;
 
         #[test]
+        #[ignore]
+        fn my_own_random_large_data_set_84mb_1mil_rows() {
+            let mawu_result = mawu::read::csv_headed(
+                "data/csv/csv-test-data/headed/my-own-random-data/test_data_1mil.csv",
+            );
+            assert!(mawu_result.is_ok());
+            let mawu = mawu_result.unwrap();
+            assert_eq!(mawu.as_csv_object().unwrap().len(), 1_000_000);
+        }
+
+        #[test]
+        #[ignore]
+        fn my_own_random_large_data_set_26mb() {
+            let mawu_result = mawu::read::csv_headed(
+                "data/csv/csv-test-data/headed/my-own-random-data/test_data_310k.csv",
+            );
+            assert!(mawu_result.is_ok());
+            let mawu = mawu_result.unwrap();
+            assert_eq!(mawu.as_csv_object().unwrap().len(), 310_000);
+        }
+
+        #[test]
         fn my_own_random_data_all_types() {
             let mawu_result = mawu::read::csv_headed(
                 "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv",
