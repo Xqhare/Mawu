@@ -24,6 +24,14 @@ mod json_tests {
 
     #[test]
     #[ignore]
+    fn speed_test() {
+        let mawu_result = json("data/json/json-test-data/test_data_517k.json").unwrap();
+        assert_eq!(mawu_result.is_array(), true);
+        assert_eq!(mawu_result.as_array().unwrap().len(), 517000);
+    }
+
+    #[test]
+    #[ignore]
     fn my_own_random_data_84mb() {
         let mawu_result = json("data/json/json-test-data/test_data_517k.json").unwrap();
         assert_eq!(mawu_result.is_array(), true);

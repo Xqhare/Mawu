@@ -2,8 +2,23 @@
 mod csv_tests {
 
     mod headed {
+        use std::{fs::File, io::Read};
+
+        use json::parse;
         use mawu::mawu_value::MawuValue;
         use pretty_assertions::assert_eq;
+
+        #[test]
+        #[ignore]
+        fn speed_external() {
+            let mut inp = File::open("data/json/json-test-data/test_data_517k.json").unwrap();
+            let mut buf: String = Default::default();
+            let _ = inp.read_to_string(&mut buf);
+            let out = parse(&buf);
+            assert!(out.is_ok());
+            assert!(out.as_ref().unwrap().is_array());
+            assert_eq!(out.unwrap().len(), 517000);
+        }
 
         #[test]
         #[ignore]
