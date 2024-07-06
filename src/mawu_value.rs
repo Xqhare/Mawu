@@ -733,6 +733,58 @@ impl MawuValue {
         }
     }
 
+    /// Convenience method to check if the value is negative.
+    ///
+    /// ## Returns
+    /// `Some(true)` if the value is negative, `Some(false)` if the value is positive, and `None` if the value is not a number.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Int(-1);
+    /// assert!(mawu_value.is_negative());
+    /// ```
+    pub fn is_negative(&self) -> Option<bool> {
+        match self {
+            // unsigned cannot be negative
+            MawuValue::Uint(_) => {
+                Some(false)
+            }
+            MawuValue::Int(v) => {
+                if *v < 0 {
+                    Some(true)
+                } else {
+                    Some(false)
+                }
+            },
+            MawuValue::Float(v) => {
+                if *v < 0.0 {
+                    Some(true)                    
+                }   else {
+                    Some(false)                    
+                }   
+            },
+            _ => None,
+        }
+    }
+
+    /// Convenience method to check if the value is positive.
+    ///
+    /// ## Returns
+    /// `Some(true)` if the value is positive, `Some(false)` if the value is negative, and `None` if the value is not a number.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::Int(1);
+    /// assert!(mawu_value.is_positive());
+    /// ```
+    pub fn is_positive(&self) -> Option<bool> {
+       Some(!self.is_negative()?) 
+    }
+
     /// Returns `Some(&Vec<HashMap<String, MawuValue>>)` if the value is an `CSV-Object`, `None` otherwise.
     ///
     /// Consider using `to_csv_object` instead if you prefer to get an owned value

@@ -135,47 +135,93 @@
 //! - Primitive types
 //!     - `MawuValue::None`
 //!         - can only ever be none, is wrapping nothing
-//!         - `as_null` and `to_null` return `None`
-//!         - `is_null` returns `true`
+//!         - `as_none` and `to_null` return `None`
+//!         - `is_none` returns `true`
+//!         - is returned by `MawuValue::default()` and `MawuValue::new()`
+//!         - `is_empty` always returns `true`
+//!         - `len` always returns 0
 //!     - `MawuValue::Bool`
 //!         - wrapping a `bool`
 //!         - `as_bool` and `to_bool` return `Option<bool>`
 //!         - `is_true` and `is_false` return `true` or `false` respectively
+//!         - `is_bool` returns `true`
+//!         - `is_empty` always returns `false`
+//!         - `len` always returns 0
 //!     - `MawuValue::Uint`
 //!         - wrapping a `u64`
-//!         - `as_uint` and `to_uint` return `Option<u64>`
+//!         - `as_uint` and `to_uint` return `Option<u64>
+//!         - `to_usize` returns `Option<usize>`
 //!         - `is_number` and `is_uint` return `true`
+//!         - `is_empty` returns `true` if the unsigned integer is 0
+//!         - `is_negative` always returns `false` and `is_positive` returns `true`
+//!         - `len` always returns 0
 //!     - `MawuValue::Int`
 //!         - wrapping a `i64`
 //!         - `as_int` and `to_int` return `Option<i64>`
+//!         - `to_isize` returns `Option<isize>`
 //!         - `is_number` and `is_int` return `true`
+//!         - `is_empty` returns `true` if the int is 0
+//!         - `is_negative` and `is_positive` return `true` if the int is negative or positive
+//!         - `len` always returns 0
 //!     - `MawuValue::Float`
 //!         - wrapping a `f64`
 //!         - `as_float` and `to_float` return `Option<f64>`
 //!         - `is_number` and `is_float` return `true`
+//!         - `is_empty` returns `true` if the float is 0.0
+//!         - `is_negative` and `is_positive` return `true` if the float is negative or positive
+//!         - `len` always returns 0
 //!     - `MawuValue::String`
 //!         - wrapping a `String`
 //!         - `as_string` and `to_string` return `Option<String>`
 //!         - `as_str` returns `Option<&str>`
 //!         - `is_string` returns `true`
+//!         - `is_empty` returns `true` if the string has a length of 0
+//!         - `len` returns the length of the string
 //! - JSON exclusive types
 //!     - `MawuValue::Array`
 //!         - wrapping a `Vec<MawuValue>`
 //!         - `as_array` and `to_array` return `Option<Vec<MawuValue>>`
 //!         - `is_array` returns `true`
+//!         - can be constructed by using `MawuValue::new_array`
+//!         - `is_empty` returns `true` if the array is empty
+//!         - `clear` removes all elements from the array
+//!         - `iter_array` returns an iterator over the array
+//!         - `array_insert` inserts an element into the array at the given index
+//!         - `array_remove` removes an element from the array at the given index
+//!         - `pop` removes and returns the last element of the array
+//!         - `push` appends an element to the end of the array
+//!         - `contains` returns `true` if the array contains the element
+//!         - `len` returns the number of elements in the array
 //!     - `MawuValue::Object`
 //!         - wrapping a `HashMap<String, MawuValue>`
 //!         - `as_object` and `to_object` return `Option<HashMap<String, MawuValue>>`
 //!         - `is_object` returns `true`
+//!         - can be constructed by using `MawuValue::new_object`
+//!         - `is_empty` returns `true` if the object is empty
+//!         - `clear` removes all elements from the object
+//!         - `iter_object` returns an iterator over the object
+//!         - `get` returns a `Option<MawuValue>` if the object contains the key
+//!         - `object_insert` inserts an element into the object at the given key
+//!         - `object_remove` removes an element from the object at the given key
+//!         - `has_key` returns `true` if the object contains the key
+//!         - `len` returns the number of elements in the object
 //! - CSV exclusive types
 //!     - `MawuValue::CsvArray`
 //!         - wrapping a `Vec<Vec<MawuValue>>`
 //!         - `as_csv_array` and `to_csv_array` return `Option<Vec<Vec<MawuValue>>>`
 //!         - `is_csv_array` returns `true`
+//!         - can be constructed by using `MawuValue::new_csv_array`
+//!         - `is_empty` returns `true` if the array is empty
+//!         - `clear` removes all elements from the array
+//!         - `len` returns the number of elements in the array
 //!     - `MawuValue::CsvObject`
 //!         - wrapping a `Vec<HashMap<String, MawuValue>>`
 //!         - `as_csv_object` and `to_csv_object` return `Option<Vec<HashMap<String, MawuValue>>>`
 //!         - `is_csv_object` returns `true`
+//!         - can be constructed by using `MawuValue::new_csv_object`
+//!         - `is_empty` returns `true` if the object is empty
+//!         - `clear` removes all elements from the object
+//!         - `len` returns the number of elements in the object
 //!
 //! #### Example of getting a `MawuValue` if its type is not known or different in the same field
 //! ```rust
