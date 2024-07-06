@@ -11,6 +11,10 @@ A little technical note: While Mawu uses the same return value types for both CS
 > [!IMPORTANT]
 > This is a hobbyist repo reinventing the wheel and probably not ready for production use.
 
+The performance of Mawu does leave a lot of room for improvement. The JSON parser
+manages about 84mb in 25sec, while the CSV parser manages about 84mb in 26sec. In comparison,
+an actual parser takes about 2sec to open the same file.
+
 ## Features
 - Simple
 - Type aware
@@ -129,8 +133,6 @@ All `to_` functions however return a `Option<MawuValue>`, a freshly cloned copy 
 
 If you are going to clone the data anyway, you can call `to_` directly. Should you call the right `to_` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again. I don't think you should, but you could.
 
-
-
 ### An exhaustive list of all `MawuValue` types and functions
 - Primitive types
     - `MawuValue::None`
@@ -247,6 +249,7 @@ if mawu_value.is_none() {
 There also are `MawuValue::new_array` and `MawuValue::new_object` that will return an empty `MawuValue::Array` and `MawuValue::Object`, respectively on the JSON side,
 and `MawuValue::new_csv_array` and `MawuValue::new_csv_object` that will return an empty `MawuValue::CsvArray` and `MawuValue::CsvObject`, respectively on the CSV side.
 With these functions, as well as `MawuValue::from(Type::default())`, you can create an empty `MawuValue` of, hopefully, any desired type.
+
 For example:
 ```rust
 use mawu::mawu_value::MawuValue;
