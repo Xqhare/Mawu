@@ -7,11 +7,11 @@ pub mod json_error;
 /// MawuError wraps all errors that can occur in Mawu.
 /// These are mainly `IoError`'s and parsing errors.
 pub enum MawuError {
-    /// A wrapper for `std::io::Error`
+    /// A wrapper for `std::io::Error` only used for file handling
     IoError(std::io::Error),
-    /// A wrapper for `csv::Error` containing parsing errors for CSV
+    /// A wrapper for `csv::Error` containing all errors for CSV
     CsvError(csv_error::CsvError),
-    /// A wrapper for `json::Error` containing parsing errors for JSON
+    /// A wrapper for `json::Error` containing all errors for JSON
     JsonError(json_error::JsonError),
     /// A wrapper for internal errors. If you ever see this, please file an issue.
     InternalError(MawuInternalError),
@@ -31,9 +31,13 @@ impl fmt::Display for MawuError {
 }
 
 #[derive(Debug)]
+/// Internal errors, If you ever see this, please file an issue.
 pub enum MawuInternalError {
+    /// Fail-safe if unable to lock the master mutex of the character queue
     UnableToLockMasterMutex,
+    /// Fail-safe if Mawu encountered a String with no chars
     StringWithNoChars(String),
+    /// Fail-save if unable to unescape unicode
     UnableToUnescapeUnicode(String),
 }
 

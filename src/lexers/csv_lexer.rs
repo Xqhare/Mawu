@@ -105,7 +105,9 @@ fn parse_csv_body(
                         let mut entry = t.to_string();
                         while csv_body.front() != Some(&",")
                             && !is_newline(csv_body.front().ok_or_else(|| {
-                                MawuError::CsvError(CsvError::UnrecognizedHeader("".to_string()))
+                                MawuError::CsvError(CsvError::ParseError(CsvParseError::UnrecognizedHeader(
+                                        "".to_string(),
+                                )))
                             })?)
                         {
                             if let Some(g) = csv_body.pop_front() {
@@ -167,9 +169,9 @@ fn make_head(
                             let mut entry = t.to_string();
                             while file_contents.front() != Some(&",")
                                 && !is_newline(file_contents.front().ok_or_else(|| {
-                                    MawuError::CsvError(CsvError::UnrecognizedHeader(
+                                    MawuError::CsvError(CsvError::ParseError(CsvParseError::UnrecognizedHeader(
                                         "".to_string(),
-                                    ))
+                                    )))
                                 })?)
                             {
                                 if let Some(g) = file_contents.pop_front() {
@@ -187,7 +189,7 @@ fn make_head(
                 .iter()
                 .map(|s| format!("{}", s))
                 .collect::<String>();
-            return Err(MawuError::CsvError(CsvError::UnrecognizedHeader(t)));
+            return Err(MawuError::CsvError(CsvError::ParseError(CsvParseError::UnrecognizedHeader(t))));
         };
     }
     Ok((head_out, file_contents))

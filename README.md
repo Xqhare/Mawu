@@ -383,7 +383,55 @@ assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
          - `HashMap<K, V>` where K is a string and V is any type that can be converted to `MawuValue`
 
 ## `MawuError`
-TODO
+`MawuError`'s are the errors that can be returned by `MawuValue`'s methods.
+There are some `std::io::Error`s that are wrapped in `MawuError`s, they are only used for file
+handling. E.g. file not found, file already exists, etc.
+Internal errors, should not be encountered in normal usage, and I kindly ask you to report any
+thrown internal errors.
+
+The largest part is the parsing errors section, split between `JsonError` and `CsvError`. It's
+dealing with, as the name suggests, parsing errors.
+
+The way errors are implemented right now, not a lot of useful data is returned.
+But I have really no better Idea of how to do it, it's my first real error system after all.
+
+For a better understanding of what a `MawuError` is, please refer to the list below.
+
+### A comprehensive list of all `MawuError`s
+- `MawuError`
+    - `IoError`
+        - all possible `std::io::Error`s
+    - `CsvError`
+        - `ParseError(CsvParseError)`
+            - should you encounter this, your special CSV is not compatible with Mawu
+            - `CsvParseError`
+                - `UnescapedDoubleQuote`
+                - `UnterminatedQuote`
+                - `UnescapedCharacter(char)`
+                - `ExtraValue(String)`
+                - `UnrecognizedHeader(String)`
+                - `UnexpectedNewline`
+    - `JsonError`
+        - `ParseError(JsonParseError)`
+            - should you encounter this, I am certain that your file is not valid JSON
+            - `JsonParseError`
+                - `UnescapedDoubleQuote`
+                - `UnterminatedQuote`
+                - `UnescapedCharacter(char)`
+                - `UnexpectedNewline`
+                - `UnexpectedEndOfFile`
+                - `UnexpectedCharacter(String)`
+                - `InvalidStructuralToken(String)`
+                - `InvalidCharacter(String)`
+                - `InvalidEscapeSequence(String)`
+                - `ExpectedColon`
+                - `ExpectedKey`
+                - `ExpectedValue`
+                - `ExpectedEndOfObject`
+    - `InternalError`
+         - `UnableToLockMasterMutex`
+         - `StringWithNoChars(String)`
+         - `UnableToUnescapeUnicode(String)`
 
 ## CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
