@@ -364,7 +364,24 @@ assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
 ```
 
 #### A comprehensive list of all types a `MawuValue` can be constructed from
-TODO
+- primitives
+    - numbers
+         - `u8`, `u16`, `u32`, `u64`, `usize`
+         - `i8`, `i16`, `i32`, `i64`, `isize`
+         - `f32`, `f64`
+    - strings
+         - `&str`, `String`, `&String`
+    - booleans
+         - `true`, `false`
+    - options
+         - `Option<T>` where T can be any type that can be converted to `MawuValue`
+- structures
+    - arrays
+         - `Vec<T>` where T can be any type that can be converted to `MawuValue`
+    - objects
+         - `Vec<(K, V)>` where K is a string and V is any type that can be converted to `MawuValue`
+         - `HashMap<K, V>` where K is a string and V is any type that can be converted to `MawuValue`
+
 ## `MawuError`
 TODO
 
