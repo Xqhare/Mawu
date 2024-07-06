@@ -743,7 +743,7 @@ impl MawuValue {
     /// use mawu::mawu_value::MawuValue;
     ///
     /// let mawu_value = MawuValue::Int(-1);
-    /// assert!(mawu_value.is_negative());
+    /// assert!(mawu_value.is_negative().unwrap());
     /// ```
     pub fn is_negative(&self) -> Option<bool> {
         match self {
@@ -779,7 +779,7 @@ impl MawuValue {
     /// use mawu::mawu_value::MawuValue;
     ///
     /// let mawu_value = MawuValue::Int(1);
-    /// assert!(mawu_value.is_positive());
+    /// assert!(mawu_value.is_positive().unwrap());
     /// ```
     pub fn is_positive(&self) -> Option<bool> {
        Some(!self.is_negative()?) 
