@@ -274,6 +274,23 @@ assert_eq!(mawu_value, vec![MawuValue::Uint(255), MawuValue::String("hello".to_s
 ```
 
 If you are creating an object, please take care that the keys are valid strings (or can be converted to strings, the standards require keys to be strings) and that the values are valid `MawuValue`s or can be converted to `MawuValue`s.
+
+You can pass in a vector of tuples of (key, value) to create an object:
+```rust
+use mawu::mawu_value::MawuValue;
+
+let vec = vec![("key1", u8::MAX), ("key2", "hello"), ("key3", -3), ("key4", 4.2), ("key5", vec![1,2]), ("key6", true), ("key7", "")];
+let object = vec);
+assert_eq!(object.get("key1").unwrap(), &MawuValue::Uint(255));
+assert_eq!(object.get("key2").unwrap(), &MawuValue::String("hello".to_string()));
+assert_eq!(object.get("key3").unwrap(), &MawuValue::Int(-3));
+assert_eq!(object.get("key4").unwrap(), &MawuValue::Float(4.2));
+assert_eq!(object.get("key5").unwrap(), &MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]));
+assert_eq!(object.get("key6").unwrap(), &MawuValue::Bool(true));
+assert_eq!(object.get("key7").unwrap(), &MawuValue::None);
+```
+Or you can pass in a hash-map of (key, value) to create an object:
+
 ```rust
 use std::collections::HashMap;
 use mawu::mawu_value::MawuValue;
