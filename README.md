@@ -296,13 +296,14 @@ use std::collections::HashMap;
 use mawu::mawu_value::MawuValue;
 
 let a_hashmap = HashMap::from([
-    ("key1", MawuValue::from(u8::MAX)),
-    ("key2", MawuValue::from("hello")),
-    ("key3", MawuValue::from(-3)),
-    ("key4", MawuValue::from(4.2)),
-    ("key5", MawuValue::from(vec![1,2])),
-    ("key6", MawuValue::from(true)),
-    ("key7", MawuValue::from(""))
+    ("key1", u8::MAX),
+    ("key2", "hello"),
+    ("key3", -3),
+    ("key4", 4.2),
+    ("key5", vec![1,2]),
+    ("key6", true),
+    ("key7", MawuValue::None),
+    ("key8", ""),
 ]);
 let mawu_value = MawuValue::from(a_hashmap).to_object().unwrap();
 assert_eq!(mawu_value.get("key1").unwrap(), &MawuValue::Uint(255));
@@ -311,7 +312,7 @@ assert_eq!(mawu_value.get("key3").unwrap(), &MawuValue::Int(-3));
 assert_eq!(mawu_value.get("key4").unwrap(), &MawuValue::Float(4.2));
 assert_eq!(mawu_value.get("key5").unwrap(), &MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]));
 assert_eq!(mawu_value.get("key6").unwrap(), &MawuValue::Bool(true));
-assert_eq!(mawu_value.get("key7").unwrap(), &MawuValue::None);
+assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
 ```
 
 #### A comprehensive list of all types a `MawuValue` can be constructed from
