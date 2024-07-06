@@ -117,6 +117,12 @@ where
     }
 }
 
+impl<K, V> From<Vec<(K, V)>> for MawuValue where K: Into<String>, V: Into<MawuValue> {
+    fn from(value: Vec<(K, V)>) -> Self {
+        MawuValue::Object(value.into_iter().map(|(k, v)| (k.into(), v.into())).collect())
+    }
+}
+
 impl<K, V> From<HashMap<K, V>> for MawuValue
 where
     K: Into<String>,
@@ -138,6 +144,12 @@ where
 {
     fn from(value: Vec<T>) -> Self {
         MawuValue::Array(value.into_iter().map(|x| x.into()).collect())
+    }
+}
+
+impl From<&MawuValue> for MawuValue {
+    fn from(value: &MawuValue) -> Self {
+        value.clone()
     }
 }
 
@@ -690,6 +702,37 @@ impl MawuValue {
         }
     }
 
+    /// Convenience method to check if the value is empty.
+    /// For arrays and objects, this will return `true` if the array or object has no elements.
+    /// For Strings, this will return `true` if the string has a length of zero.
+    /// For numbers, this will return `true` if the number is zero.
+    /// For booleans, this will always return `false`, as booleans cannot be empty.
+    /// For `None`, this will always return `true`, as `None` cannot be something.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mawu_value = MawuValue::None;
+    /// assert!(mawu_value.is_empty());
+    /// let any_mawu_value = MawuValue::Int(1);
+    /// assert!(!any_mawu_value.is_empty());
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        match self {
+            MawuValue::CSVObject(v) => v.is_empty(),
+            MawuValue::CSVArray(v) => v.is_empty(),
+            MawuValue::Object(v) => v.is_empty(),
+            MawuValue::Array(v) => v.is_empty(),
+            MawuValue::String(v) => v.is_empty(),
+            MawuValue::Uint(v) => *v == 0,
+            MawuValue::Int(v) => *v == 0,
+            MawuValue::Float(v) => *v == 0.0,
+            MawuValue::Bool(_) => false,
+            MawuValue::None => true,
+        }
+    }
+
     /// Returns `Some(&Vec<HashMap<String, MawuValue>>)` if the value is an `CSV-Object`, `None` otherwise.
     ///
     /// Consider using `to_csv_object` instead if you prefer to get an owned value
@@ -1124,6 +1167,62 @@ impl MawuValue {
         }
     }
 
+    /// Returns a owned copy of the value as an `usize`.
+    /// Also casts any other `MawuValue` containing a number to an `usize`, however only some
+    /// `MawuValue::Int` and `MawuValue::Float` can be represented as an `usize`
+    /// a failure will be returned as `None`.
+    /// Returns `None` if the value is not a number.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let uint = MawuValue::Uint(42);
+    /// let mawu_value = uint.to_usize().unwrap();
+    /// assert_eq!(mawu_value, 42);
+    /// ```
+    pub fn to_usize(&self) -> Option<usize> {
+        let tmp = self.to_uint();
+        if tmp.is_some() {
+            let tmp2 = tmp.unwrap();
+            if tmp2 > usize::MAX as u64 {
+                None
+            } else {
+                Some(tmp2 as usize)
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Returns a owned copy of the value as an `isize`.
+    /// Also casts any other `MawuValue` containing a number to an `isize`, however only some
+    /// `MawuValue::Uint` and `MawuValue::Float` can be represented as an `isize`
+    /// a failure will be returned as `None`.
+    /// Returns `None` if the value is not a number.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let int = MawuValue::Int(-42);
+    /// let mawu_value = int.to_isize().unwrap();
+    /// assert_eq!(mawu_value, -42);
+    /// ```
+    pub fn to_isize(&self) -> Option<isize> {
+        let tmp = self.to_int();
+        if tmp.is_some() {
+            let tmp2 = tmp.unwrap();
+            if tmp2 > isize::MAX as i64 || tmp2 < isize::MIN as i64 {
+                None
+            } else {
+                Some(tmp2 as isize)
+            }
+        } else {
+            None
+        }
+    }
+
     /// Returns a owned copy of the value as an `i64`.
     /// Also casts any other `MawuValue` containing a number to an `i64`, however only some
     /// `MawuValue::Uint` and `MawuValue::Float` can be represented as an `i64`
@@ -1296,6 +1395,295 @@ impl MawuValue {
         match self {
             MawuValue::None => None,
             _ => Some(()),
+        }
+    }
+
+    /// Clears the value
+    /// For arrays and objects, it removes all values, the allocated size is not changed.
+    /// For each other type, it sets the value to `MawuValue::None`.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut int = MawuValue::Int(-42);
+    /// int.clear();
+    /// assert!(int.is_none());
+    /// ```
+    pub fn clear(&mut self) {
+        match self {
+            MawuValue::CSVObject(v) => v.clear(),
+            MawuValue::CSVArray(v) => v.clear(),
+            MawuValue::Array(v) => v.clear(),
+            MawuValue::Object(v) => v.clear(),
+            _ => *self = MawuValue::None,
+        }
+    }
+
+    /// Returns an iterator over the values of an array
+    /// The values are borrowed (`&MawuValue`'s).
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut array = MawuValue::Array(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// let mut iterator = array.iter_array();
+    /// assert_eq!(iterator.next(), Some(&MawuValue::from(1)));
+    /// assert_eq!(iterator.next(), Some(&MawuValue::from(2)));
+    /// assert_eq!(iterator.next(), Some(&MawuValue::from(3)));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    pub fn iter_array(&self) -> impl Iterator<Item = &MawuValue> {
+        self.as_array().unwrap().iter()
+    }
+
+    /// Returns an iterator over the key-value-pairs of an object
+    /// The values are borrowed (`&MawuValue`'s).
+    /// The keys are borrowed (`&String`'s).
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut object = MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key2".to_string(), MawuValue::from(2)), ("key3".to_string(), MawuValue::from(3))]);
+    /// let mut iterator = object.iter_object();
+    /// for (key, value) in iterator {
+    ///     if key == "key1" {
+    ///         assert_eq!(value, &MawuValue::from(1));
+    ///     } else if key == "key2" {
+    ///         assert_eq!(value, &MawuValue::from(2));
+    ///     } else if key == "key3" {
+    ///         assert_eq!(value, &MawuValue::from(3));
+    ///     }
+    /// }
+    /// ```
+    pub fn iter_object(&self) -> impl Iterator<Item = (&String, &MawuValue)> {
+        self.as_object().unwrap().iter()
+    }
+
+
+    /// Works on objects only.
+    /// Returns a reference to the value with the given key.
+    ///
+    /// The key is may be any type that can be converted to a `String`.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut object = MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key2".to_string(), MawuValue::from(2)), ("key3".to_string(), MawuValue::from(3))]);
+    /// assert_eq!(object.get("key1").unwrap(), &MawuValue::from(1));
+    /// assert_eq!(object.get("key2").unwrap(), &MawuValue::from(2));
+    /// assert_eq!(object.get("key3").unwrap(), &MawuValue::from(3));
+    /// assert_eq!(object.get("key4"), None);
+    /// ```
+    ///
+    pub fn get<S>(&self, key: S) -> Option<&MawuValue> where S: Into<String> {
+        match self {
+            MawuValue::Object(v) => v.get(key.into().as_str()),
+            _ => None
+        }
+    }
+
+    /// Works on arrays only.
+    /// Inserts the given value at the given index.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// array.array_insert(0, MawuValue::from(0));
+    /// assert_eq!(array, MawuValue::from(vec![MawuValue::from(0), MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]));
+    /// ```
+    pub fn array_insert(&mut self, index: usize, value: MawuValue) {
+        match self {
+            MawuValue::Array(v) => v.insert(index, value),
+            _ => {}
+        }
+    }
+
+    /// Works on objects only.
+    /// Inserts the given value with the given key.
+    ///
+    /// ## Returns
+    /// Returns `Some(MawuValue)` if the key already existed. The value was replaced and returned.
+    /// Returns `None` if the key did not exist.
+    /// Returns `Some(MawuValue)` if the `MawuValue` was not an `MawuValue::Object`. The `MawuValue` passed into the function was returned.
+    ///
+    /// ## Examples
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut object = MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key2".to_string(), MawuValue::from(2)), ("key3".to_string(), MawuValue::from(3))]);
+    /// object.object_insert("key4", MawuValue::from(10));
+    /// assert_eq!(object.get("key4").unwrap(), &MawuValue::from(10));
+    /// ```
+    pub fn object_insert<S: Into<String>, M: Into<MawuValue>>(&mut self, key: S, value: M) -> Option<MawuValue> {
+        match self {
+            MawuValue::Object(v) => {
+                let tmp = v.insert(key.into(), value.into());
+                if tmp.is_none() {
+                    None
+                } else {
+                    Some(tmp.unwrap())
+                }
+                
+            },
+            _ => Some(value.into()),
+        }
+    }
+
+    /// Works on arrays only.
+    /// Removes the value at the given index and returns it.
+    /// The same restricitions as `Vec::remove` apply, as this is just a convenience function
+    /// calling it.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// assert_eq!(array.array_remove(1), Some(MawuValue::from(2)));
+    /// assert_eq!(array, MawuValue::from(vec![MawuValue::from(1), MawuValue::from(3)]));
+    /// ```
+    pub fn array_remove(&mut self, index: usize) -> Option<MawuValue> {
+        match self {
+            MawuValue::Array(v) => Some(v.remove(index)),
+            _ => None
+        }
+    }
+
+    /// Works on objects only.
+    /// Removes the value with the given key and returns it.
+    /// The same restricitions as `HashMap::remove` apply, as this is just a convenience function
+    /// calling it.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut object = MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key2".to_string(), MawuValue::from(2)), ("key3".to_string(), MawuValue::from(3))]);
+    /// assert_eq!(object.object_remove("key2"), Some(MawuValue::from(2)));
+    /// assert_eq!(object, MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key3".to_string(), MawuValue::from(3))]));
+    /// ```
+    pub fn object_remove<S: Into<String>>(&mut self, key: S) -> Option<MawuValue> {
+        match self {
+            MawuValue::Object(v) => v.remove(key.into().as_str()),
+            _ => None
+        }
+    }
+
+    /// Works on objects only.
+    /// Checks if the object contains the given key
+    ///
+    /// ## Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let object = MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key2".to_string(), MawuValue::from(2)), ("key3".to_string(), MawuValue::from(3))]);
+    /// assert!(object.has_key("key1"));
+    /// assert!(!object.has_key("key4"));
+    /// ```
+    pub fn has_key<S: Into<String>>(&self, key: S) -> bool {
+        match self {
+            MawuValue::Object(v) => v.contains_key(key.into().as_str()),
+            _ => false
+        }
+    }
+
+    /// Works on arrays only.
+    /// Removes and returns the last element of the array
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// assert_eq!(array.pop(), Some(MawuValue::from(3)));
+    /// assert_eq!(array, MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2)]));
+    /// ```
+    pub fn pop(&mut self) -> Option<MawuValue> {
+        match self {
+            MawuValue::Array(v) => v.pop(),
+            _ => None
+        }
+    }
+
+    /// Works on arrays only.
+    /// Appends the given value to the array
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let mut array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// array.push(MawuValue::from(4));
+    /// assert_eq!(array, MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3), MawuValue::from(4)]));
+    /// ```
+    pub fn push<M: Into<MawuValue>>(&mut self, value: M) {
+        match self {
+            MawuValue::Array(v) => v.push(value.into()),
+            _ => {}
+        }
+    }
+
+    /// Works on arrays only.
+    /// Checks if the array contains the given value
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// assert!(array.contains(&MawuValue::from(2)));
+    /// assert!(!array.contains(&MawuValue::from(4)));
+    /// ```
+    pub fn contains<M: Into<MawuValue>>(&self, value: M) -> bool {
+        match self {
+            MawuValue::Array(v) => v.contains(&value.into()),
+            _ => false
+        }
+    }
+
+    /// Returns the length of the value
+    ///
+    /// Returns 0 if the value is `None`, `Bool`, `Uint`, `Int` or `Float`
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// assert_eq!(array.len(), 3);
+    /// let object = MawuValue::from(vec![("key1".to_string(), MawuValue::from(1)), ("key2".to_string(), MawuValue::from(2)), ("key3".to_string(), MawuValue::from(3))]);
+    /// assert_eq!(object.len(), 3);
+    /// let none = MawuValue::None;
+    /// assert_eq!(none.len(), 0);
+    /// let bool = MawuValue::from(true);
+    /// assert_eq!(bool.len(), 0);
+    /// let uint = MawuValue::from(123);
+    /// assert_eq!(uint.len(), 0);
+    /// let string = MawuValue::from("string");
+    /// assert_eq!(string.len(), 6);
+    /// ```
+    pub fn len(&self) -> usize {
+        match self {
+            MawuValue::CSVObject(v) => v.len(),
+            MawuValue::CSVArray(v) => v.len(),
+            MawuValue::Array(v) => v.len(),
+            MawuValue::Object(v) => v.len(),
+            MawuValue::None => 0,
+            MawuValue::Bool(_) => 0,
+            MawuValue::Uint(_) => 0,
+            MawuValue::Int(_) => 0,
+            MawuValue::Float(_) => 0,
+            MawuValue::String(v) => v.len(),
         }
     }
 }
