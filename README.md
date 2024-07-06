@@ -9,11 +9,11 @@ While not a zero dependency library, its only dependency is `unicode-segmentatio
 A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON parser, this results in a bloat of almost 8kb!
 
 > [!IMPORTANT]
-> This is a hobbyist repo reinventing the wheel and probably not ready for production use.
+> This is a hobbyist repo reinventing the wheel and not ready for production use.
 
 The performance of Mawu does leave a lot of room for improvement. The JSON parser
-manages about 84mb in 25sec, while the CSV parser manages about 84mb in 26sec. In comparison,
-an actual parser takes about 2sec to open the same file.
+manages about 84mb in 25 seconds, while the CSV parser manages about 84mb in 26 seconds. In comparison,
+an actual parser takes about 2 seconds to open the same file.
 
 ## Features
 - Simple
@@ -65,7 +65,7 @@ Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers yo
         - [JSON Usage](#json-usage)
 
 ## Using Mawu
-To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions in the documentation below.
+To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions below.
 ```toml
 [dependencies]
 mawu = { git = "https://github.com/Xqhare/mawu" }
@@ -89,8 +89,8 @@ use mawu::read::{csv_headed, csv_headless};
 use mawu::mawu_value::MawuValue;
 ```
 You could then continue with one of the examples in the chapters on CSV and JSON, or just do the good old `println!()` on anything you see!
+Any path to a file in the documentation points to a real file in this repo under the same path
 ```rust
-// any path to a file in the documentation points to a real file in this repo under the same path
 let path_to_file = "data/json/json-test-data/simple-object.json";
 let mawu_value = json(path_to_file).unwrap();
 println!("{}", mawu_value);
@@ -434,9 +434,10 @@ For a better understanding of what a `MawuError` is, please refer to the list be
                 - `ExpectedValue`
                 - `ExpectedEndOfObject`
     - `InternalError`
-         - `UnableToLockMasterMutex`
-         - `StringWithNoChars(String)`
-         - `UnableToUnescapeUnicode(String)`
+        - should you encounter this, I am certain that there is a bug in Mawu, please report it
+        - `UnableToLockMasterMutex`
+        - `StringWithNoChars(String)`
+        - `UnableToUnescapeUnicode(String)`
 
 ## CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.

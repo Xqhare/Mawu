@@ -8,8 +8,7 @@
 //!
 //! A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON parser, this results in a bloat of almost 8kb!
 //!
-//! > [!IMPORTANT]
-//! > This is a hobbyist repo badly reinventing the wheel and not ready for production use.
+//! ***This is a hobbyist repo badly reinventing the wheel and not ready for production use.*** 
 //!
 //! The performance of Mawu does leave a lot of room for improvement. The JSON parser
 //! manages about 84mb in 25sec, while the CSV parser manages about 84mb in 26sec. In comparison,
@@ -63,7 +62,7 @@
 //!         - [JSON Usage](#json-usage)
 //!
 //! ## Using Mawu
-//! To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions in the documentation below.
+//! To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions below.
 //! ```toml
 //! [dependencies]
 //! mawu = { git = "https://github.com/Xqhare/mawu" }
@@ -87,8 +86,8 @@
 //! use mawu::mawu_value::MawuValue;
 //!
 //! // You could then continue with one of the examples in the chapters on CSV and JSON, or just do the good old `println!()` on anything you see!
+//! // Any path to a file in the documentation points to a real file in this repo under the same path
 //!
-//! // any path to a file in the documentation points to a real file in this repo under the same path
 //! let path_to_file = "data/json/json-test-data/simple-object.json";
 //! let mawu_value = json(path_to_file).unwrap();
 //! println!("{}", mawu_value);
@@ -152,7 +151,7 @@
 //!         - `len` always returns 0
 //!     - `MawuValue::Uint`
 //!         - wrapping a `u64`
-//!         - `as_uint` and `to_uint` return `Option<u64>
+//!         - `as_uint` and `to_uint` return `Option<u64>`
 //!         - `to_usize` returns `Option<usize>`
 //!         - `is_number` and `is_uint` return `true`
 //!         - `is_empty` returns `true` if the unsigned integer is 0
@@ -285,7 +284,6 @@
 //! }
 //! ```
 //!
-//! > [!note]
 //! > Chads use `as_{MawuValue}`, just know what kind of data they are getting and know what to do with a reference.
 //! >
 //! > Normie Kernel devs use `to_{MawuValue}`, need to check what kind of data they are getting and have to clone it anyway.
@@ -430,6 +428,7 @@
 //!                 - `ExpectedValue`
 //!                 - `ExpectedEndOfObject`
 //!     - `InternalError`
+//!     - should you encounter this, I am certain that there is a bug in Mawu, please report it
 //!          - `UnableToLockMasterMutex`
 //!          - `StringWithNoChars(String)`
 //!          - `UnableToUnescapeUnicode(String)`
@@ -450,7 +449,6 @@
 //!
 //! Mawu handles CSV files with an empty or filled last row.
 //!
-//! > [!NOTE]
 //! > While the usage of the header is optional, you will need to use either the `read_csv_headless(path)`, or the `read_csv_headed(path)` method.
 //! > [Learn more.](#usage)
 //!
@@ -555,7 +553,6 @@
 //! Some numbers supplied as integers, eg `123456789e29`, can be converted into `f64` numbers should they be too large to be represented as `u64` but a `f64` can still hold them.
 //! As a result of using the rust standard library, precision can be lost.
 //!
-//! > [!IMPORTANT]
 //! > Any overflow will result in a `MawuValue::None`.
 //! > Any underflow will result in a `0`.
 //!
