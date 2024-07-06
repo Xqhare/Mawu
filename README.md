@@ -279,7 +279,7 @@ You can pass in a vector of tuples of (key, value) to create an object:
 ```rust
 use mawu::mawu_value::MawuValue;
 
-let vec = vec![("key1", u8::MAX), ("key2", "hello"), ("key3", -3), ("key4", 4.2), ("key5", vec![1,2]), ("key6", true), ("key7", "")];
+let vec = vec![("key1", MawuValue::from(u8::MAX)), ("key2", MawuValue::from("hello")), ("key3", MawuValue::from(-3)), ("key4", MawuValue::from(4.2)), ("key5", MawuValue::from(vec![1,2])), ("key6", MawuValue::from(true)), ("key7", MawuValue::from(""))];
 let object = vec);
 assert_eq!(object.get("key1").unwrap(), &MawuValue::Uint(255));
 assert_eq!(object.get("key2").unwrap(), &MawuValue::String("hello".to_string()));
@@ -296,14 +296,13 @@ use std::collections::HashMap;
 use mawu::mawu_value::MawuValue;
 
 let a_hashmap = HashMap::from([
-    ("key1", u8::MAX),
-    ("key2", "hello"),
-    ("key3", -3),
-    ("key4", 4.2),
-    ("key5", vec![1,2]),
-    ("key6", true),
-    ("key7", MawuValue::None),
-    ("key8", ""),
+    ("key1", MawuValue::from(u8::MAX)),
+    ("key2", MawuValue::from("hello")),
+    ("key3", MawuValue::from(-3)),
+    ("key4", MawuValue::from(4.2)),
+    ("key5", MawuValue::from(vec![1,2])),
+    ("key6", MawuValue::from(true)),
+    ("key7", MawuValue::from(""))
 ]);
 let mawu_value = MawuValue::from(a_hashmap).to_object().unwrap();
 assert_eq!(mawu_value.get("key1").unwrap(), &MawuValue::Uint(255));
