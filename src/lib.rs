@@ -321,7 +321,7 @@
 //! ```
 //!
 //! If you are creating an object, please take care that the keys are valid strings (or can be converted to strings, the standards require keys to be strings) and that the values are valid `MawuValue`s or can be converted to `MawuValue`s.
-//! 
+//!
 //! You can pass in a vector of tuples of (key, value) to create an object:
 //! ```rust
 //! use mawu::mawu_value::MawuValue;

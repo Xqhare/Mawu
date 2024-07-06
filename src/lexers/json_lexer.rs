@@ -485,8 +485,7 @@ fn number_lexer() {
     let neg_exp2_res = json_lexer(neg_exp2).unwrap();
     assert_eq!(neg_exp2_res, MawuValue::from("-0.00000000000123"));
 
-    let small_exp_float_no_plus_after_e =
-        VecDeque::from(vec!["1", ".", "2", "3", "e", "1", "2"]);
+    let small_exp_float_no_plus_after_e = VecDeque::from(vec!["1", ".", "2", "3", "e", "1", "2"]);
     let small_exp_float_res = json_lexer(small_exp_float_no_plus_after_e).unwrap();
     assert_eq!(small_exp_float_res, MawuValue::from("1230000000000.0"));
     let small_neg_exp_float_no_plus_after_e =

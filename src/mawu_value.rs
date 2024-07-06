@@ -117,9 +117,18 @@ where
     }
 }
 
-impl<K, V> From<Vec<(K, V)>> for MawuValue where K: Into<String>, V: Into<MawuValue> {
+impl<K, V> From<Vec<(K, V)>> for MawuValue
+where
+    K: Into<String>,
+    V: Into<MawuValue>,
+{
     fn from(value: Vec<(K, V)>) -> Self {
-        MawuValue::Object(value.into_iter().map(|(k, v)| (k.into(), v.into())).collect())
+        MawuValue::Object(
+            value
+                .into_iter()
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
+        )
     }
 }
 
@@ -420,7 +429,10 @@ fn new_array_object() {
 
 #[test]
 fn from_hashmap() {
-    let mawu_value = MawuValue::Object(HashMap::from([("key".to_string(), MawuValue::from(u8::MAX))]));
+    let mawu_value = MawuValue::Object(HashMap::from([(
+        "key".to_string(),
+        MawuValue::from(u8::MAX),
+    )]));
     println!("{:?}", mawu_value);
     assert!(mawu_value.is_object());
 }
@@ -429,9 +441,7 @@ fn from_hashmap() {
 fn creating_csv_object() {
     use std::collections::HashMap;
 
-    let a_hashmap = HashMap::from([
-        ("key1".to_string(), MawuValue::from(u8::MAX)),
-    ]);
+    let a_hashmap = HashMap::from([("key1".to_string(), MawuValue::from(u8::MAX))]);
     let mawu_value = MawuValue::CSVObject(vec![a_hashmap]);
     println!("{:?}", mawu_value);
     assert!(mawu_value.is_csv_object());
@@ -445,7 +455,6 @@ fn creating_csv_array() {
 }
 
 impl MawuValue {
-    
     /// Check if the value is an `CSV-Object`
     ///
     /// ## Returns
@@ -748,23 +757,21 @@ impl MawuValue {
     pub fn is_negative(&self) -> Option<bool> {
         match self {
             // unsigned cannot be negative
-            MawuValue::Uint(_) => {
-                Some(false)
-            }
+            MawuValue::Uint(_) => Some(false),
             MawuValue::Int(v) => {
                 if *v < 0 {
                     Some(true)
                 } else {
                     Some(false)
                 }
-            },
+            }
             MawuValue::Float(v) => {
                 if *v < 0.0 {
-                    Some(true)                    
-                }   else {
-                    Some(false)                    
-                }   
-            },
+                    Some(true)
+                } else {
+                    Some(false)
+                }
+            }
             _ => None,
         }
     }
@@ -782,7 +789,7 @@ impl MawuValue {
     /// assert!(mawu_value.is_positive().unwrap());
     /// ```
     pub fn is_positive(&self) -> Option<bool> {
-       Some(!self.is_negative()?) 
+        Some(!self.is_negative()?)
     }
 
     /// Returns `Some(&Vec<HashMap<String, MawuValue>>)` if the value is an `CSV-Object`, `None` otherwise.
@@ -793,7 +800,7 @@ impl MawuValue {
     /// ```rust
     /// use std::collections::HashMap;
     /// use mawu::mawu_value::MawuValue;
-    /// 
+    ///
     /// let csv_object = MawuValue::CSVObject(vec![HashMap::from([("a".to_string(), MawuValue::Int(-1))])]);
     /// let mawu_value = csv_object.as_csv_object().unwrap();
     /// assert_eq!(mawu_value[0].get("a").unwrap(), &MawuValue::Int(-1));
@@ -804,8 +811,6 @@ impl MawuValue {
             _ => None,
         }
     }
-
-    
 
     /// Returns `Some(&Vec<Vec<MawuValue>>)` if the value is an `CSV-Array`, `None` otherwise.
     ///
@@ -1123,34 +1128,34 @@ impl MawuValue {
         match self {
             MawuValue::String(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::Int(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::Uint(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::Float(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::Bool(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::CSVObject(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::CSVArray(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::Object(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::Array(_) => {
                 format!("{}", self)
-            },
+            }
             MawuValue::None => {
                 format!("")
-            },
+            }
         }
     }
 
@@ -1175,7 +1180,7 @@ impl MawuValue {
     /// let int = MawuValue::Int(42);
     /// let mawu_value = int.to_uint();
     /// assert_eq!(mawu_value.unwrap(), 42);
-    /// 
+    ///
     /// let float = MawuValue::Float(42.0);
     /// let mawu_value = float.to_uint();
     /// assert_eq!(mawu_value.unwrap(), 42);
@@ -1296,7 +1301,7 @@ impl MawuValue {
     /// let uint = MawuValue::Uint(42);
     /// let mawu_value = uint.to_int();
     /// assert_eq!(mawu_value.unwrap(), 42);
-    /// 
+    ///
     /// let float = MawuValue::Float(42.0);
     /// let mawu_value = float.to_int();
     /// assert_eq!(mawu_value.unwrap(), 42);
@@ -1348,7 +1353,7 @@ impl MawuValue {
     /// let int = MawuValue::Int(-42);
     /// let mawu_value = int.to_float();
     /// assert_eq!(mawu_value.unwrap(), -42.0);
-    /// 
+    ///
     /// let uint = MawuValue::Uint(42);
     /// let mawu_value = uint.to_float();
     /// assert_eq!(mawu_value.unwrap(), 42.0);
@@ -1515,7 +1520,6 @@ impl MawuValue {
         self.as_object().unwrap().iter()
     }
 
-
     /// Works on objects only.
     /// Returns a reference to the value with the given key.
     ///
@@ -1533,10 +1537,13 @@ impl MawuValue {
     /// assert_eq!(object.get("key4"), None);
     /// ```
     ///
-    pub fn get<S>(&self, key: S) -> Option<&MawuValue> where S: Into<String> {
+    pub fn get<S>(&self, key: S) -> Option<&MawuValue>
+    where
+        S: Into<String>,
+    {
         match self {
             MawuValue::Object(v) => v.get(key.into().as_str()),
-            _ => None
+            _ => None,
         }
     }
 
@@ -1575,7 +1582,11 @@ impl MawuValue {
     /// object.object_insert("key4", MawuValue::from(10));
     /// assert_eq!(object.get("key4").unwrap(), &MawuValue::from(10));
     /// ```
-    pub fn object_insert<S: Into<String>, M: Into<MawuValue>>(&mut self, key: S, value: M) -> Option<MawuValue> {
+    pub fn object_insert<S: Into<String>, M: Into<MawuValue>>(
+        &mut self,
+        key: S,
+        value: M,
+    ) -> Option<MawuValue> {
         match self {
             MawuValue::Object(v) => {
                 let tmp = v.insert(key.into(), value.into());
@@ -1584,8 +1595,7 @@ impl MawuValue {
                 } else {
                     Some(tmp.unwrap())
                 }
-                
-            },
+            }
             _ => Some(value.into()),
         }
     }
@@ -1606,7 +1616,7 @@ impl MawuValue {
     pub fn array_remove(&mut self, index: usize) -> Option<MawuValue> {
         match self {
             MawuValue::Array(v) => Some(v.remove(index)),
-            _ => None
+            _ => None,
         }
     }
 
@@ -1627,7 +1637,7 @@ impl MawuValue {
     pub fn object_remove<S: Into<String>>(&mut self, key: S) -> Option<MawuValue> {
         match self {
             MawuValue::Object(v) => v.remove(key.into().as_str()),
-            _ => None
+            _ => None,
         }
     }
 
@@ -1646,7 +1656,7 @@ impl MawuValue {
     pub fn has_key<S: Into<String>>(&self, key: S) -> bool {
         match self {
             MawuValue::Object(v) => v.contains_key(key.into().as_str()),
-            _ => false
+            _ => false,
         }
     }
 
@@ -1664,7 +1674,7 @@ impl MawuValue {
     pub fn pop(&mut self) -> Option<MawuValue> {
         match self {
             MawuValue::Array(v) => v.pop(),
-            _ => None
+            _ => None,
         }
     }
 
@@ -1700,7 +1710,7 @@ impl MawuValue {
     pub fn contains<M: Into<MawuValue>>(&self, value: M) -> bool {
         match self {
             MawuValue::Array(v) => v.contains(&value.into()),
-            _ => false
+            _ => false,
         }
     }
 
