@@ -25,19 +25,30 @@ an actual parser takes about 2sec to open the same file.
 - Fully documented
     - Handling of edge cases is explained in the documentation
 - Tries to stay as close to the rfc4180, rfc8259 and ECMA-404 standard as possible for maximum interoperability
+- Minimal dependencies
 - Actually written by a human
+- Speed optimised for better developer experience - just get another coffee!
 
-## Overview
+## Naming the creation: A Legacy of the Divine
+The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
+Mawu follows the long tradition of naming things after deities.
+
+Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
+
+## Contents
 - [Mawu](#mawu)
     - [Features](#features)
-    - [Overview](#overview)
-    - [Using Mawu](#using-mawu)
     - [Naming the Creation: A Legacy of the Divine](#naming-the-creation-a-legacy-of-the-divine)
+    - [Contents](#contents)
+    - [Using Mawu](#using-mawu)
     - [`MawuValue`](#mawuvalue)
         - [Convenience functions](#convenience-functions)
         - [An exhaustive list of all `MawuValue` types and functions](#an-exhaustive-list-of-all-mawuvalue-types-and-functions)
         - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
+        - [Constructing a `MawuValue`](#constructing-a-mawuvalue)
+            - [A comprehensive list of all types a `MawuValue` can be constructed from](#a-comprehensive-list-of-all-types-a-mawuvalue-can-be-constructed-from)
     - [`MawuError`](#mawuerror)
+        - [A comprehensive list of all `MawuError`s](#a-comprehensive-list-of-all-mawuerrors)
     - [CSV](#csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
@@ -100,12 +111,6 @@ key5: None
 
 In the first printed line in the code example above, is a perfect example of the `MawuValue` enum.
 Because Mawu only returns `MawuValue`'s, and you will be interacting with them a lot, I really recommend reading the chapter on `MawuValue`'s.
-
-## Naming the creation: A Legacy of the Divine
-The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
-Mawu follows the long tradition of naming things after deities.
-
-Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
 
 ## `MawuValue`
 Mawu uses the `MawuValue` enum to represent the different types of values that can be found in JSON and CSV files.
