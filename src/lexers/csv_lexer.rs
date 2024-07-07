@@ -6,7 +6,7 @@ use crate::{
         MawuError,
     },
     mawu_value::MawuValue,
-    utils::is_newline,
+    utils::{is_newline, is_whitespace},
 };
 
 pub fn headed(file_contents: VecDeque<&str>) -> Result<MawuValue, MawuError> {
@@ -69,7 +69,7 @@ fn parse_csv_body(
                 out.push(row_data.iter().map(|s| MawuValue::from(s)).collect());
                 // assignment is only overwritten before being read if the very first character IS a newline and thus, probably, maybe, fine.
                 row_data = Default::default();
-            } else if h == "," {
+            }  else if h == "," {
                 if is_next_newline && head_length > row_data.len() {
                     // push as many nulls as needed to fill in the missing data
                     for _ in 0..(head_length - row_data.len()) {
@@ -94,6 +94,8 @@ fn parse_csv_body(
                     }
                 }
                 row_data.push(value);
+            } else if h == " " || h == "\t" {
+                let _ = h;
             } else {
                 let mut value: String = h.to_string();
                 while csv_body.front() != Some(&",")
@@ -106,7 +108,7 @@ fn parse_csv_body(
                         while csv_body.front() != Some(&",")
                             && !is_newline(csv_body.front().ok_or_else(|| {
                                 MawuError::CsvError(CsvError::ParseError(
-                                    CsvParseError::UnrecognizedHeader("".to_string()),
+                                    CsvParseError::UnexpectedNewline
                                 ))
                             })?)
                         {
@@ -114,6 +116,7 @@ fn parse_csv_body(
                                 entry.push_str(g);
                             }
                         }
+                        entry = entry.trim_end().to_string();
                         value.push_str(&entry);
                     }
                 }
@@ -135,6 +138,12 @@ fn make_head(
                 head_done = true;
             } else if content == "," {
                 // do literally nothing
+                let _ = content;
+                continue;
+            } else if content == " " || content == "\t" {
+                // do literally nothing
+                let _ = content;
+                continue;
             } else {
                 if content == "\"" {
                     let mut value: String = Default::default();
@@ -178,6 +187,7 @@ fn make_head(
                                     entry.push_str(g);
                                 }
                             }
+                            let entry = entry.trim_end().to_string();
                             value.push_str(&entry);
                         }
                     }
