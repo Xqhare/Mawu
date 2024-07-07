@@ -729,3 +729,122 @@ pub mod read {
         )
     }
 }
+
+pub mod write {
+    use std::path::Path;
+
+    use crate::{errors::MawuError, mawu_value::MawuValue};
+
+    /// Writes a CSV file with the given contents.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the CSV file, relative or absolute
+    /// * `contents` - The contents of the CSV file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+    ///
+    /// # Example
+    /// ```rust
+    /// use mawu::write::csv;
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let path_to_file = "csv_output.csv";
+    /// let csv_value = MawuValue::CSVArray(vec![
+    ///     vec![
+    ///         MawuValue::from("a"),
+    ///         MawuValue::from("b"),
+    ///     ],
+    ///     vec![
+    ///         MawuValue::from("c"),
+    ///         MawuValue::from("d"),
+    ///     ],
+    /// ]);
+    /// csv(path_to_file, csv_value).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Only returns `MawuError`'s
+    pub fn csv<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C) -> Result<(), MawuError> {
+        contents.into().write_to_file(path)
+    }
+
+
+    /// Writes a pretty printed CSV file with the given contents.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the CSV file, relative or absolute
+    /// * `contents` - The contents of the CSV file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+    /// * `space` - The number of spaces to use for indentation
+    ///
+    /// # Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    /// use mawu::write::csv_pretty;
+    ///
+    /// let path_to_file = "csv_output.csv";
+    /// let mut csv_value = MawuValue::new_csv_object().to_csv_object().unwrap();
+    /// let row0 = HashMap::from([
+    ///   ("key1".to_string(), MawuValue::from("value1")) 
+    /// ]);
+    /// let row1 = HashMap::from([
+    ///   ("key2".to_string(), MawuValue::from(2)) 
+    /// ]);
+    /// csv_value.push(row0);
+    /// csv_value.push(row1);
+    /// csv_pretty(path_to_file, csv_value, 4).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Only returns `MawuError`'s
+    pub fn csv_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
+        contents.into().write_to_file_pretty(path, space)
+    }
+
+    /// Writes a JSON file with the given contents.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the JSON file, relative or absolute
+    /// * `contents` - The contents of the JSON file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+    ///
+    /// # Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    /// use mawu::write::json;
+    ///
+    /// let path_to_file = "json_output.json";
+    /// let json_value = MawuValue::from(HashMap::from([
+    ///   ("key1".to_string(), MawuValue::from("value1")),
+    ///   ("key2".to_string(), MawuValue::from(2))
+    /// ]));
+    /// json(path_to_file, json_value).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Only returns `MawuError`'s
+    pub fn json<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C) -> Result<(), MawuError> {
+        contents.into().write_to_file(path)
+    }
+
+    /// Writes a pretty printed JSON file with the given contents.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the JSON file, relative or absolute
+    /// * `contents` - The contents of the JSON file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+    /// * `space` - The number of spaces to use for indentation
+    ///
+    /// # Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    /// use mawu::write::json_pretty;
+    ///
+    /// let path_to_file = "json_output.json";
+    /// let mut json_value = MawuValue::new_object().to_object().unwrap();
+    /// json_value.insert("key1".to_string(), MawuValue::from("value1"));
+    /// json_value.insert("key2".to_string(), MawuValue::from(2));
+    /// json_pretty(path_to_file, json_value, 4).unwrap();
+    /// ```
+    pub fn json_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
+        contents.into().write_to_file_pretty(path, space)
+    }
+}

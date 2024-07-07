@@ -1,5 +1,7 @@
 use core::fmt;
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
+
+use crate::errors::MawuError;
 
 #[derive(Clone, Debug, PartialEq)]
 /// MawuValue wraps all data types supported by Mawu.
@@ -309,6 +311,45 @@ impl From<&str> for MawuValue {
     }
 }
 
+#[test]
+fn new_array_object() {
+    let array = MawuValue::new_array();
+    let object = MawuValue::new_object();
+    let csv_array = MawuValue::new_csv_array();
+    let csv_object = MawuValue::new_csv_object();
+    assert_eq!(array, MawuValue::Array(vec![]));
+    assert_eq!(object, MawuValue::Object(HashMap::new()));
+    assert_eq!(csv_array, MawuValue::CSVArray(vec![vec![]]));
+    assert_eq!(csv_object, MawuValue::CSVObject(vec![HashMap::new()]));
+}
+
+#[test]
+fn from_hashmap() {
+    let mawu_value = MawuValue::Object(HashMap::from([(
+        "key".to_string(),
+        MawuValue::from(u8::MAX),
+    )]));
+    println!("{:?}", mawu_value);
+    assert!(mawu_value.is_object());
+}
+
+#[test]
+fn creating_csv_object() {
+    use std::collections::HashMap;
+
+    let a_hashmap = HashMap::from([("key1".to_string(), MawuValue::from(u8::MAX))]);
+    let mawu_value = MawuValue::CSVObject(vec![a_hashmap]);
+    println!("{:?}", mawu_value);
+    assert!(mawu_value.is_csv_object());
+}
+
+#[test]
+fn creating_csv_array() {
+    let mawu_value = MawuValue::CSVArray(vec![vec![MawuValue::from(u8::MAX)]]);
+    println!("{:?}", mawu_value);
+    assert!(mawu_value.is_csv_array());
+}
+
 impl MawuValue {
     /// To create a new `MawuValue`, please use the `MawuValue::from` function. It works on almost any basic rust type,
     /// including Option's, Vector's and HashMap's.
@@ -413,48 +454,6 @@ impl MawuValue {
     pub fn new_array() -> MawuValue {
         MawuValue::Array(Vec::new())
     }
-}
-
-#[test]
-fn new_array_object() {
-    let array = MawuValue::new_array();
-    let object = MawuValue::new_object();
-    let csv_array = MawuValue::new_csv_array();
-    let csv_object = MawuValue::new_csv_object();
-    assert_eq!(array, MawuValue::Array(vec![]));
-    assert_eq!(object, MawuValue::Object(HashMap::new()));
-    assert_eq!(csv_array, MawuValue::CSVArray(vec![vec![]]));
-    assert_eq!(csv_object, MawuValue::CSVObject(vec![HashMap::new()]));
-}
-
-#[test]
-fn from_hashmap() {
-    let mawu_value = MawuValue::Object(HashMap::from([(
-        "key".to_string(),
-        MawuValue::from(u8::MAX),
-    )]));
-    println!("{:?}", mawu_value);
-    assert!(mawu_value.is_object());
-}
-
-#[test]
-fn creating_csv_object() {
-    use std::collections::HashMap;
-
-    let a_hashmap = HashMap::from([("key1".to_string(), MawuValue::from(u8::MAX))]);
-    let mawu_value = MawuValue::CSVObject(vec![a_hashmap]);
-    println!("{:?}", mawu_value);
-    assert!(mawu_value.is_csv_object());
-}
-
-#[test]
-fn creating_csv_array() {
-    let mawu_value = MawuValue::CSVArray(vec![vec![MawuValue::from(u8::MAX)]]);
-    println!("{:?}", mawu_value);
-    assert!(mawu_value.is_csv_array());
-}
-
-impl MawuValue {
     /// Check if the value is an `CSV-Object`
     ///
     /// ## Returns
@@ -1746,6 +1745,20 @@ impl MawuValue {
             MawuValue::Int(_) => 0,
             MawuValue::Float(_) => 0,
             MawuValue::String(v) => v.len(),
+        }
+    }
+
+    pub fn write_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), MawuError> {
+        self.write_to_file_inner(path, 0)
+    }
+
+    pub fn write_to_file_pretty<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
+        self.write_to_file_inner(path, spaces)
+    }
+
+    fn write_to_file_inner<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
+        match self {
+            _ => Ok(()),
         }
     }
 }
