@@ -85,9 +85,10 @@
 //! // if you want to work with `MawuValue`'s you will need
 //! use mawu::mawu_value::MawuValue;
 //!
-//! // You could then continue with one of the examples in the chapters on CSV and JSON, or just do the good old `println!()` on anything you see!
-//! // Any path to a file in the documentation points to a real file in this repo under the same path
+//! // You could then continue with one of the examples in the chapters on CSV and JSON,
+//! // or just do the good old `println!()` on anything you see!
 //!
+//! // Any path to a file in the documentation points to a real file in this repo under the same path
 //! let path_to_file = "data/json/json-test-data/simple-object.json";
 //! let mawu_value = json(path_to_file).unwrap();
 //! println!("{}", mawu_value);
@@ -302,6 +303,7 @@
 //! let mawu_value = MawuValue::from(42);
 //! assert_eq!(mawu_value, MawuValue::Int(42));
 //!
+//! // For vectors you can just pass them into `MawuValue::from`
 //! let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array();
 //! mawu_value.push(MawuValue::from(4));
 //! assert_eq!(mawu_value, vec![MawuValue::Int(1), MawuValue::Int(2), MawuValue::Int(3), MawuValue::Int(4)]);
@@ -427,6 +429,7 @@
 //!                 - `ExpectedKey`
 //!                 - `ExpectedValue`
 //!                 - `ExpectedEndOfObject`
+//!                 - `InvalidNumber(String)`
 //!     - `InternalError`
 //!     - should you encounter this, I am certain that there is a bug in Mawu, please report it
 //!          - `UnableToLockMasterMutex`
@@ -450,7 +453,7 @@
 //! Mawu handles CSV files with an empty or filled last row.
 //!
 //! > While the usage of the header is optional, you will need to use either the `read_csv_headless(path)`, or the `read_csv_headed(path)` method.
-//! > [Learn more.](#usage)
+//! > [Learn more.](#csv-usage)
 //!
 //! ### Handling missing or not provided values
 //! The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are many different ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
@@ -542,7 +545,7 @@
 //! Ordering of arrays is kept the same as in the JSON file.
 //!
 //! #### Numbers
-//! `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will be returned as `MawuValue::None`.
+//! `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will error.
 //!
 //! The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 //! Should Mawu encounter a number not representable in 64 bits, it will return an error.

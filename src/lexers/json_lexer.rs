@@ -52,6 +52,16 @@ fn json_value_lexer(
         } else if this_char == "[" {
             // array
             return json_array_lexer(file_contents);
+        } else if this_char == "N" && file_contents.front() == Some(&"a") && file_contents.get(1) == Some(&"N") || this_char == "n" && file_contents.front() == Some(&"a") && file_contents.get(1) == Some(&"n") {
+            // NaN
+            return Err(MawuError::JsonError(JsonError::ParseError(
+                JsonParseError::InvalidNumber("NaN".to_string()),
+            )));
+        } else if this_char == "I" && file_contents.front() == Some(&"n") && file_contents.get(1) == Some(&"f") || this_char == "i" && file_contents.front() == Some(&"n") && file_contents.get(1) == Some(&"f") {
+            // Infinity
+            return Err(MawuError::JsonError(JsonError::ParseError(
+                JsonParseError::InvalidNumber("Infinity".to_string()),
+            )));
         } else if this_char == "t"
             && file_contents.front() == Some(&"r")
             && file_contents.get(1) == Some(&"u")

@@ -45,6 +45,8 @@ pub enum JsonParseError {
     ExpectedValue,
     /// Expected end of object, got something else
     ExpectedEndOfObject,
+    /// Encountered `NaN` or `Infinity`
+    InvalidNumber(String),
 }
 
 impl fmt::Display for JsonParseError {
@@ -67,6 +69,7 @@ impl fmt::Display for JsonParseError {
             JsonParseError::ExpectedValue => write!(f, "Expected value"),
             JsonParseError::UnexpectedCharacter(ref s) => write!(f, "Unexpected character: {}", s),
             JsonParseError::ExpectedEndOfObject => write!(f, "Expected end of object"),
+            JsonParseError::InvalidNumber(ref s) => write!(f, "Invalid number: {}", s),
         }
     }
 }

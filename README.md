@@ -308,6 +308,7 @@ use mawu::mawu_value::MawuValue;
 let mawu_value = MawuValue::from(42);
 assert_eq!(mawu_value, MawuValue::Int(42));
 
+// For vectors you can just pass them into `MawuValue::from`
 let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array().unwrap();
 mawu_value.push(MawuValue::from(4));
 assert_eq!(mawu_value, vec![MawuValue::Int(1), MawuValue::Int(2), MawuValue::Int(3), MawuValue::Int(4)]);
@@ -334,7 +335,7 @@ You can pass in a vector of tuples of (key, value) to create an object:
 use mawu::mawu_value::MawuValue;
 
 let vec = vec![("key1", MawuValue::from(u8::MAX)), ("key2", MawuValue::from("hello")), ("key3", MawuValue::from(-3)), ("key4", MawuValue::from(4.2)), ("key5", MawuValue::from(vec![1,2])), ("key6", MawuValue::from(true)), ("key7", MawuValue::from(""))];
-let object = vec);
+let object = MawuValue::from(vec);
 assert_eq!(object.get("key1").unwrap(), &MawuValue::Uint(255));
 assert_eq!(object.get("key2").unwrap(), &MawuValue::String("hello".to_string()));
 assert_eq!(object.get("key3").unwrap(), &MawuValue::Int(-3));
@@ -433,6 +434,7 @@ For a better understanding of what a `MawuError` is, please refer to the list be
                 - `ExpectedKey`
                 - `ExpectedValue`
                 - `ExpectedEndOfObject`
+                - `InvalidNumber(String)`
     - `InternalError`
         - should you encounter this, I am certain that there is a bug in Mawu, please report it
         - `UnableToLockMasterMutex`
@@ -549,7 +551,7 @@ Because of the same behavior of `HashMap`, Mawu will return JSON objects not in 
 Ordering of arrays is kept the same as in the JSON file.
 
 #### Numbers
-`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will be returned as `MawuValue::None`.
+`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will error.
 
 The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 Should Mawu encounter a number not representable in 64 bits, it will return an error.
