@@ -4,6 +4,16 @@ use crate::errors::{MawuError, MawuInternalError};
 
 pub mod file_handling;
 
+/// Takes in a `usize` and returns a `String` that is `n` spaces long filled with whitespace
+pub fn make_whitespace(n: u8) -> String {
+    let mut s: String = Default::default();
+    // upcasting is ok
+    while s.len() < n as usize {
+        s = " ".to_string() + &s;
+    }
+    s
+}
+
 /// Takes in a `&str` and checks if it is a newline character
 /// (any of `\n`, `\r\n`, `\r`)
 ///
