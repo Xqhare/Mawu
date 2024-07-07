@@ -5,6 +5,7 @@ use std::fmt;
 pub enum CsvError {
     /// A wrapper for all parsing errors
     ParseError(CsvParseError),
+    WriteError(CsvWriteError),
 }
 
 pub type Result<T> = std::result::Result<T, CsvError>;
@@ -13,6 +14,22 @@ impl fmt::Display for CsvError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             CsvError::ParseError(ref e) => e.fmt(f),
+            CsvError::WriteError(ref e) => e.fmt(f),
+        }
+    }
+}
+
+#[derive(Debug)]
+/// CsvWriteError wraps all writing errors
+pub enum CsvWriteError {
+    /// Supplied value is not a CSV value
+    NotCSV,
+}
+
+impl fmt::Display for CsvWriteError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            CsvWriteError::NotCSV => write!(f, "Supplied value is not a CSV value"),
         }
     }
 }
