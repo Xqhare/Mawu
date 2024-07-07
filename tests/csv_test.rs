@@ -52,7 +52,7 @@ mod csv_tests {
             assert_eq!(mawu.as_csv_object().unwrap().len(), 50);
             assert_eq!(mawu.as_csv_object().unwrap()[0].len(), 3);
             for value in mawu.as_csv_object().unwrap() {
-                //println!("{:?}", x);
+                //println!("{:?}", value);
                 assert_eq!(value.len(), 3);
                 let id = value.get("Id").unwrap().as_uint().unwrap();
                 let types = value.get("Type").unwrap();
