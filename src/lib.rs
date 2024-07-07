@@ -498,7 +498,7 @@
 //! use std::collections::HashMap;
 //! use mawu::read::{csv_headed, csv_headless};
 //!
-//! let path_to_file = "data/json/json-test-data/simple-json.json";
+//! let path_to_file = "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv";
 //! // for a csv file with header
 //! let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap().to_csv_object().unwrap();
 //!
@@ -639,10 +639,14 @@
 //!     println!("{}", value);
 //! }
 //! ```
+
+use mawu_value::MawuValue;
+use write::csv_pretty;
 pub mod errors;
 mod lexers;
 pub mod mawu_value;
 mod utils;
+mod serializers;
 
 pub mod read {
     use core::str;
@@ -740,6 +744,8 @@ pub mod write {
     /// # Arguments
     /// * `path` - The path to the CSV file, relative or absolute
     /// * `contents` - The contents of the CSV file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+    ///     - please note that CSV does not support all types, only `MawuValue::Array` as an input
+    ///     type
     ///
     /// # Example
     /// ```rust
@@ -772,6 +778,7 @@ pub mod write {
     /// # Arguments
     /// * `path` - The path to the CSV file, relative or absolute
     /// * `contents` - The contents of the CSV file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+    ///     - please note that CSV does not support all types, only `MawuValue::Array` as an input
     /// * `space` - The number of spaces to use for indentation
     ///
     /// # Example
@@ -780,7 +787,7 @@ pub mod write {
     /// use mawu::mawu_value::MawuValue;
     /// use mawu::write::csv_pretty;
     ///
-    /// let path_to_file = "csv_output.csv";
+    /// let path_to_file = "csv_output_pretty.csv";
     /// let mut csv_value = MawuValue::new_csv_object().to_csv_object().unwrap();
     /// let row0 = HashMap::from([
     ///   ("key1".to_string(), MawuValue::from("value1")) 
@@ -838,7 +845,7 @@ pub mod write {
     /// use mawu::mawu_value::MawuValue;
     /// use mawu::write::json_pretty;
     ///
-    /// let path_to_file = "json_output.json";
+    /// let path_to_file = "json_output_pretty.json";
     /// let mut json_value = MawuValue::new_object().to_object().unwrap();
     /// json_value.insert("key1".to_string(), MawuValue::from("value1"));
     /// json_value.insert("key2".to_string(), MawuValue::from(2));
@@ -847,4 +854,28 @@ pub mod write {
     pub fn json_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
         contents.into().write_to_file_pretty(path, space)
     }
+}
+
+#[test]
+fn write_csv_headed() {
+    use std::collections::HashMap;
+    
+    let path_to_file = "csv_output_pretty2.csv";
+
+    let row0 = HashMap::from([
+      ("key1".to_string(), MawuValue::from("value1")),
+      ("key2".to_string(), MawuValue::from(2))  
+    ]);
+    let row1 = HashMap::from([
+      ("key1".to_string(), MawuValue::from("value2")),
+      ("key2".to_string(), MawuValue::from(3))  
+    ]);
+    let row2 = HashMap::from([
+      ("key1".to_string(), MawuValue::from("value3")),
+      ("key2".to_string(), MawuValue::from(4))
+    ]);
+    
+    let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+
+    csv_pretty(path_to_file, csv_value, 4).unwrap();
 }

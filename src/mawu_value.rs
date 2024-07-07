@@ -1,7 +1,7 @@
 use core::fmt;
 use std::{collections::HashMap, path::Path};
 
-use crate::errors::MawuError;
+use crate::{errors::{csv_error::{CsvError, CsvWriteError}, MawuError}, serializers::csv_serializer, utils::file_handling::write_file};
 
 #[derive(Clone, Debug, PartialEq)]
 /// MawuValue wraps all data types supported by Mawu.
@@ -1560,6 +1560,7 @@ impl MawuValue {
     pub fn array_insert(&mut self, index: usize, value: MawuValue) {
         match self {
             MawuValue::Array(v) => v.insert(index, value),
+            MawuValue::CSVArray(v) => v[index].push(value),
             _ => {}
         }
     }
@@ -1758,7 +1759,9 @@ impl MawuValue {
 
     fn write_to_file_inner<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
         match self {
-            _ => Ok(()),
+            MawuValue::CSVObject(v) => write_file(path, csv_serializer::serialize_csv_headed(MawuValue::CSVObject(v.clone()), spaces)),
+            MawuValue::CSVArray(v) => write_file(path, csv_serializer::serialize_csv_unheaded(MawuValue::CSVArray(v.clone()), spaces)),
+            _ => Err(MawuError::CsvError(CsvError::WriteError(CsvWriteError::NotCSV))),
         }
     }
 }

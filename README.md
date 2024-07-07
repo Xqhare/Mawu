@@ -504,7 +504,7 @@ use mawu::mawu_value::MawuValue;
 use std::collections::HashMap;
 use mawu::read::{csv_headed, csv_headless};
 
-let path_to_file = "data/json/json-test-data/simple-json.json";
+let path_to_file = "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv";
 // for a csv file with header
 let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap().to_csv_object().unwrap();
 
