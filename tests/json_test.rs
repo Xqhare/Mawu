@@ -3,6 +3,14 @@ mod json_tests {
     use mawu::read::json;
     use pretty_assertions::assert_eq;
 
+    #[test]
+    fn nan_infinity_has_to_fail() {
+        let nan = json("data/json/json-test-data/n_nan.json");
+        assert!(nan.is_err());
+        let infinity = json("data/json/json-test-data/n_inf.json");
+        assert!(infinity.is_err());
+    }
+
     // This is implicitly testing a lot of stuff!
     // But mainly testing the optimisations of the JSON parser
     #[test]

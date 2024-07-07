@@ -545,7 +545,8 @@
 //! Ordering of arrays is kept the same as in the JSON file.
 //!
 //! #### Numbers
-//! `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will error.
+//! `Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will error. Should you pass in a string into `MawuValue::from` like "1.0e500000" instead of a float with Infinity (or NaN), you will be returned a `MawuValue::None`.
+//! If you want or need to use `NaN` or `Infinity` in your code, you can always just cast them to strings.
 //!
 //! The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
 //! Should Mawu encounter a number not representable in 64 bits, it will return an error.
