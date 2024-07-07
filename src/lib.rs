@@ -562,7 +562,7 @@
 //!
 //! #### Strings
 //! Mawu accepts only UTF-8 encoded files.
-//! Escaped UTF-16 surrogate pairs are permitted by the standards and are parsed correctly.
+//! Escaped UTF-16 surrogate pairs as permitted by the standards are parsed correctly.
 //!
 //! #### Structure
 //! Mawu accepts any amount of nested structures.
