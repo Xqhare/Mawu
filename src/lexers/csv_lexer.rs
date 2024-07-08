@@ -50,6 +50,11 @@ fn parse_csv_body(
     let mut row_data: Vec<String> = Default::default();
     while csv_body.front().is_some() {
         if let Some(h) = csv_body.pop_front() {
+            if h == "\n" && csv_body.is_empty() {
+                out.push(row_data.iter().map(|s| MawuValue::from(s)).collect());
+                row_data = Default::default();
+                break;
+            }
             let is_next_newline: bool = {
                 if let Some(k) = csv_body.front() {
                     if is_newline(k) {
@@ -99,18 +104,12 @@ fn parse_csv_body(
             } else {
                 let mut value: String = h.to_string();
                 while csv_body.front() != Some(&",")
-                    && !is_newline(csv_body.front().ok_or_else(|| {
-                        MawuError::CsvError(CsvError::ParseError(CsvParseError::UnexpectedNewline))
-                    })?)
+                    && !is_newline(csv_body.front().unwrap_or(&"\n"))
                 {
                     if let Some(t) = csv_body.pop_front() {
                         let mut entry = t.to_string();
                         while csv_body.front() != Some(&",")
-                            && !is_newline(csv_body.front().ok_or_else(|| {
-                                MawuError::CsvError(CsvError::ParseError(
-                                    CsvParseError::UnexpectedNewline
-                                ))
-                            })?)
+                            && !is_newline(csv_body.front().unwrap_or(&"\n"))
                         {
                             if let Some(g) = csv_body.pop_front() {
                                 entry.push_str(g);
@@ -123,6 +122,9 @@ fn parse_csv_body(
                 row_data.push(value);
             }
         }
+    }
+    if !row_data.is_empty() {
+        out.push(row_data.iter().map(|s| MawuValue::from(s)).collect());
     }
     Ok(out)
 }
