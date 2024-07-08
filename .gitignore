@@ -22,5 +22,4 @@ Cargo.lock
 *.vim
 rfc*.*
 test.json
-*output*.csv
-*output*.json
+*output*.*
