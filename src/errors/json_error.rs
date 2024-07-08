@@ -5,6 +5,7 @@ use std::fmt;
 pub enum JsonError {
     /// A wrapper for all JSON parsing errors
     ParseError(JsonParseError),
+    WriteError(JsonWriteError),
 }
 
 pub type Result<T> = std::result::Result<T, JsonError>;
@@ -13,6 +14,22 @@ impl fmt::Display for JsonError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             JsonError::ParseError(ref e) => e.fmt(f),
+            JsonError::WriteError(ref e) => e.fmt(f),
+        }
+    }
+}
+
+#[derive(Debug)]
+/// CsvWriteError wraps all writing errors
+pub enum JsonWriteError {
+    /// Supplied value is not a CSV value
+    NotJSON,
+}
+
+impl fmt::Display for JsonWriteError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            JsonWriteError::NotJSON => write!(f, "Supplied value is not a JSON value"),
         }
     }
 }
