@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::{mawu_value::MawuValue, utils::make_whitespace};
 
 fn serialize_csv_value<T: Into<MawuValue>>(value: T, spaces: u8) -> String {
@@ -51,11 +53,26 @@ pub fn serialize_csv_headed(value: MawuValue, spaces: u8) -> String {
         body.push(row);
     }
     head = head.trim_end_matches(',').to_string();
+    head = head.trim_start().to_string();
     let mut out = format!("{}\n", head);
     out.push_str(body.join("\n").as_str());
     out
 }
 
 pub fn serialize_csv_unheaded<T: Into<MawuValue>>(value: T, spaces: u8) -> String {
-    todo!()
+    // Input == Vec<Vec<MawuValue>>
+    // First vec holds rows, second vec holds data in each row
+    // output == String, with each row on a new line, values separated by commas
+    let mut out = format!("{}", make_whitespace(spaces));
+    for v in value.into().to_csv_array().unwrap() {
+        let mut row = String::new();
+        for i in v {
+            row.push_str(&serialize_csv_value(i, spaces));
+            row.push(',');
+        }
+        row = row.trim_end_matches(',').to_string();
+        out.push_str(&row);
+        out.push('\n');
+    }
+    out
 }
