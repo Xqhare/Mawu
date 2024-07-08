@@ -1,7 +1,7 @@
 use core::fmt;
 use std::{collections::HashMap, path::Path};
 
-use crate::{errors::{csv_error::{CsvError, CsvWriteError}, MawuError}, serializers::csv_serializer, utils::file_handling::write_file};
+use crate::{errors::{csv_error::{CsvError, CsvWriteError}, json_error::{JsonError, JsonWriteError}, MawuError}, serializers::csv_serializer, utils::file_handling::write_file};
 
 #[derive(Clone, Debug, PartialEq)]
 /// MawuValue wraps all data types supported by Mawu.
@@ -1750,19 +1750,37 @@ impl MawuValue {
     }
 
     pub fn write_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), MawuError> {
-        self.write_to_file_inner(path, 0)
+        match self {
+            MawuValue::CSVObject(_) => self.write_to_file_csv(path, 0),
+            MawuValue::CSVArray(_) => self.write_to_file_csv(path, 0),
+            _ => self.write_to_file_json(path, 0),
+        }
+        
     }
 
     pub fn write_to_file_pretty<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
-        self.write_to_file_inner(path, spaces)
+        match self {
+            MawuValue::CSVObject(_) => self.write_to_file_csv(path, spaces),
+            MawuValue::CSVArray(_) => self.write_to_file_csv(path, spaces),
+            _ => self.write_to_file_json(path, spaces),
+        }
     }
 
-    fn write_to_file_inner<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
+    fn write_to_file_csv<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
         match self {
             MawuValue::CSVObject(v) => write_file(path, csv_serializer::serialize_csv_headed(MawuValue::CSVObject(v.clone()), spaces)),
             MawuValue::CSVArray(v) => write_file(path, csv_serializer::serialize_csv_unheaded(MawuValue::CSVArray(v.clone()), spaces)),
             _ => Err(MawuError::CsvError(CsvError::WriteError(CsvWriteError::NotCSV))),
         }
+    }
+
+    fn write_to_file_json<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
+        todo!();
+        /* match self {
+            MawuValue::CSVObject(v) => Err(MawuError::JsonError(JsonError::WriteError(JsonWriteError::NotJSON))),
+            MawuValue::CSVArray(v) => Err(MawuError::JsonError(JsonError::WriteError(JsonWriteError::NotJSON))),
+            _ => write_file(path, json_serializer::serialize_json(self, spaces)),
+        } */
     }
 }
 
