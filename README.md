@@ -369,6 +369,54 @@ assert_eq!(mawu_value.get("key6").unwrap(), &MawuValue::Bool(true));
 assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
 ```
 
+#### Creating a `MawuValue` for CSV data
+Writing CSV data presents its own challenges, thanks to the differing implementations in use.
+Because of this, the `MawuValue` for CSV data is a bit different than the other types and needs to be constructed with a bit more help.
+```rust
+use mawu::mawu_value::MawuValue;
+use mawu::write::csv_pretty;
+
+let path_to_file = "csv_output_pretty.csv";
+let csv_value = MawuValue::CSVArray(vec![
+    // each row is a vector of `MawuValue`s, with each element in the vector being a column
+    vec![
+        MawuValue::from("a"),
+        MawuValue::from(1),
+    ],
+    vec![
+        MawuValue::from(-1),
+        MawuValue::from(true),
+    ],
+]);
+csv_pretty(path_to_file, csv_value, 4).unwrap();
+```
+
+To create a headed CSV file, you will need a `Vec<HashMap<String, MawuValue>>` as the value.
+```rust
+use std::collections::HashMap;
+use mawu::mawu_value::MawuValue;
+use mawu::write::csv_pretty;
+
+let path_to_file = "csv_output_pretty2.csv";
+
+let row0 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value1")),
+  ("key2".to_string(), MawuValue::from(2))  
+]);
+let row1 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value2")),
+  ("key2".to_string(), MawuValue::from(3))  
+]);
+let row2 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value3")),
+  ("key2".to_string(), MawuValue::from(4))
+]);
+
+let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+
+csv_pretty(path_to_file, csv_value, 4).unwrap();
+```
+
 #### A comprehensive list of all types a `MawuValue` can be constructed from
 - primitives
     - numbers

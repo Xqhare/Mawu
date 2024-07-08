@@ -344,7 +344,7 @@
 //! ```rust
 //! use std::collections::HashMap;
 //! use mawu::mawu_value::MawuValue;
-//!
+//! 
 //! let a_hashmap = HashMap::from([
 //!     ("key1", MawuValue::from(u8::MAX)),
 //!     ("key2", MawuValue::from("hello")),
@@ -361,9 +361,57 @@
 //! assert_eq!(mawu_value.get("key4").unwrap(), &MawuValue::Float(4.2));
 //! assert_eq!(mawu_value.get("key5").unwrap(), &MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]));
 //! assert_eq!(mawu_value.get("key6").unwrap(), &MawuValue::Bool(true));
-//! assert_eq!(mawu_value.get("key7").unwrap(), &MawuValue::None);
+//! assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
 //! ```
-//!
+//! 
+//! #### Creating a `MawuValue` for CSV data
+//! Writing CSV data presents its own challenges, thanks to the differing implementations in use.
+//! Because of this, the `MawuValue` for CSV data is a bit different than the other types and needs to be constructed with a bit more help.
+//! ```rust
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write::csv_pretty;
+//! 
+//! let path_to_file = "csv_output_pretty.csv";
+//! let csv_value = MawuValue::CSVArray(vec![
+//!     // each row is a vector of `MawuValue`s, with each element in the vector being a column
+//!     vec![
+//!         MawuValue::from("a"),
+//!         MawuValue::from(1),
+//!     ],
+//!     vec![
+//!         MawuValue::from(-1),
+//!         MawuValue::from(true),
+//!     ],
+//! ]);
+//! csv_pretty(path_to_file, csv_value, 4).unwrap();
+//! ```
+//! 
+//! To create a headed CSV file, you will need a `Vec<HashMap<String, MawuValue>>` as the value.
+//! ```rust
+//! use std::collections::HashMap;
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write::csv_pretty;
+//! 
+//! let path_to_file = "csv_output_pretty2.csv";
+//! 
+//! let row0 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value1")),
+//!   ("key2".to_string(), MawuValue::from(2))  
+//! ]);
+//! let row1 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value2")),
+//!   ("key2".to_string(), MawuValue::from(3))  
+//! ]);
+//! let row2 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value3")),
+//!   ("key2".to_string(), MawuValue::from(4))
+//! ]);
+//! 
+//! let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+//! 
+//! csv_pretty(path_to_file, csv_value, 4).unwrap();
+//! ```
+//! 
 //! #### A comprehensive list of all types a `MawuValue` can be constructed from
 //! - primitives
 //!     - numbers
@@ -640,14 +688,14 @@
 //! }
 //! ```
 
-use mawu_value::MawuValue;
-use write::csv_pretty;
+
 pub mod errors;
 mod lexers;
 pub mod mawu_value;
 mod utils;
 mod serializers;
 
+/// Reads CSV and JSON files into `MawuValue`
 pub mod read {
     use core::str;
     use std::{collections::VecDeque, path::Path};
@@ -734,12 +782,14 @@ pub mod read {
     }
 }
 
+/// Writes CSV and JSON files from `MawuValue`
 pub mod write {
     use std::path::Path;
 
     use crate::{errors::MawuError, mawu_value::MawuValue};
 
     /// Writes a CSV file with the given contents.
+    /// I recommend constructing a `MawuValue` using the methods shown in the example
     ///
     /// # Arguments
     /// * `path` - The path to the CSV file, relative or absolute
@@ -756,13 +806,37 @@ pub mod write {
     /// let csv_value = MawuValue::CSVArray(vec![
     ///     vec![
     ///         MawuValue::from("a"),
-    ///         MawuValue::from("b"),
+    ///         MawuValue::from(1),
     ///     ],
     ///     vec![
-    ///         MawuValue::from("c"),
-    ///         MawuValue::from("d"),
+    ///         MawuValue::from(-1),
+    ///         MawuValue::from(true),
     ///     ],
     /// ]);
+    /// csv(path_to_file, csv_value).unwrap();
+    /// ```
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    /// use mawu::write::csv;
+    /// 
+    /// let path_to_file = "csv_output_2.csv";
+    ///
+    /// let row0 = HashMap::from([
+    ///   ("key1".to_string(), MawuValue::from("value1")),
+    ///   ("key2".to_string(), MawuValue::from(2))  
+    /// ]);
+    /// let row1 = HashMap::from([
+    ///   ("key1".to_string(), MawuValue::from("value2")),
+    ///   ("key2".to_string(), MawuValue::from(3))  
+    /// ]);
+    /// let row2 = HashMap::from([
+    ///   ("key1".to_string(), MawuValue::from("value3")),
+    ///   ("key2".to_string(), MawuValue::from(4))
+    /// ]);
+    /// 
+    /// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+    ///
     /// csv(path_to_file, csv_value).unwrap();
     /// ```
     ///
@@ -772,8 +846,8 @@ pub mod write {
         contents.into().write_to_file(path)
     }
 
-
     /// Writes a pretty printed CSV file with the given contents.
+    /// I recommend constructing a `MawuValue` using the methods shown in the example
     ///
     /// # Arguments
     /// * `path` - The path to the CSV file, relative or absolute
@@ -783,20 +857,44 @@ pub mod write {
     ///
     /// # Example
     /// ```rust
-    /// use std::collections::HashMap;
     /// use mawu::mawu_value::MawuValue;
     /// use mawu::write::csv_pretty;
     ///
     /// let path_to_file = "csv_output_pretty.csv";
-    /// let mut csv_value = MawuValue::new_csv_object().to_csv_object().unwrap();
+    /// let csv_value = MawuValue::CSVArray(vec![
+    ///     vec![
+    ///         MawuValue::from("a"),
+    ///         MawuValue::from(1),
+    ///     ],
+    ///     vec![
+    ///         MawuValue::from(-1),
+    ///         MawuValue::from(true),
+    ///     ],
+    /// ]);
+    /// csv_pretty(path_to_file, csv_value, 4).unwrap();
+    /// ```
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use mawu::mawu_value::MawuValue;
+    /// use mawu::write::csv_pretty;
+    /// 
+    /// let path_to_file = "csv_output_pretty2.csv";
+    ///
     /// let row0 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value1")) 
+    ///   ("key1".to_string(), MawuValue::from("value1")),
+    ///   ("key2".to_string(), MawuValue::from(2))  
     /// ]);
     /// let row1 = HashMap::from([
-    ///   ("key2".to_string(), MawuValue::from(2)) 
+    ///   ("key1".to_string(), MawuValue::from("value2")),
+    ///   ("key2".to_string(), MawuValue::from(3))  
     /// ]);
-    /// csv_value.push(row0);
-    /// csv_value.push(row1);
+    /// let row2 = HashMap::from([
+    ///   ("key1".to_string(), MawuValue::from("value3")),
+    ///   ("key2".to_string(), MawuValue::from(4))
+    /// ]);
+    /// 
+    /// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+    ///
     /// csv_pretty(path_to_file, csv_value, 4).unwrap();
     /// ```
     ///
@@ -857,25 +955,61 @@ pub mod write {
 }
 
 #[test]
-fn write_csv_headed() {
+fn write_csv() {
+    use pretty_assertions::assert_eq;
     use std::collections::HashMap;
+
+    use crate::mawu_value::MawuValue;
+    use crate::write::{csv, csv_pretty};
     
+    // test headed
     let path_to_file = "csv_output_pretty2.csv";
 
     let row0 = HashMap::from([
       ("key1".to_string(), MawuValue::from("value1")),
-      ("key2".to_string(), MawuValue::from(2))  
+      ("key2".to_string(), MawuValue::from(u8::from(2)))  
     ]);
     let row1 = HashMap::from([
       ("key1".to_string(), MawuValue::from("value2")),
-      ("key2".to_string(), MawuValue::from(3))  
+      ("key2".to_string(), MawuValue::from(u8::from(3)))  
     ]);
     let row2 = HashMap::from([
       ("key1".to_string(), MawuValue::from("value3")),
-      ("key2".to_string(), MawuValue::from(4))
+      ("key2".to_string(), MawuValue::from(u8::from(4)))
     ]);
     
     let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
 
-    csv_pretty(path_to_file, csv_value, 4).unwrap();
+    csv_pretty(path_to_file, csv_value.clone(), 4).unwrap();
+    // lets parse the output and make sure it is correct
+    let pretty_output = read::csv_headed(path_to_file);
+    assert!(pretty_output.is_ok());
+    let pretty_output_bind = pretty_output.unwrap();
+    assert_eq!(pretty_output_bind.as_csv_object().unwrap()[0].get("key1").unwrap(), &MawuValue::from("value1"));
+    assert_eq!(pretty_output_bind.as_csv_object().unwrap()[0].get("key2").unwrap(), &MawuValue::from(u8::from(2)));
+    assert_eq!(pretty_output_bind.as_csv_object().unwrap()[1].get("key1").unwrap(), &MawuValue::from("value2"));
+    assert_eq!(pretty_output_bind.as_csv_object().unwrap()[1].get("key2").unwrap(), &MawuValue::from(u8::from(3)));
+    assert_eq!(pretty_output_bind.as_csv_object().unwrap()[2].get("key1").unwrap(), &MawuValue::from("value3"));
+    assert_eq!(pretty_output_bind.as_csv_object().unwrap()[2].get("key2").unwrap(), &MawuValue::from(u8::from(4)));
+    // test headless
+    let filepath = "csv_output2.csv";
+    let csv_value_headless = MawuValue::CSVArray(vec![
+        vec![
+            MawuValue::from("a"),
+            MawuValue::from(u8::from(1)),
+        ],
+        vec![
+            MawuValue::from(-1),
+            MawuValue::from(true),
+        ],
+    ]);
+    csv(filepath, csv_value_headless.clone()).unwrap();
+    // again parse output
+    let output = read::csv_headless(filepath);
+    assert!(output.is_ok());
+    let output_bind = output.unwrap();
+    assert_eq!(output_bind.as_csv_array().unwrap()[0][0], MawuValue::from("a"));
+    assert_eq!(output_bind.as_csv_array().unwrap()[0][1], MawuValue::from(u8::from(1)));
+    assert_eq!(output_bind.as_csv_array().unwrap()[1][0], MawuValue::from(-1));
+    assert_eq!(output_bind.as_csv_array().unwrap()[1][1], MawuValue::from(true));
 }
