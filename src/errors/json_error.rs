@@ -22,14 +22,17 @@ impl fmt::Display for JsonError {
 #[derive(Debug)]
 /// CsvWriteError wraps all writing errors
 pub enum JsonWriteError {
-    /// Supplied value is not a CSV value
+    /// Supplied value is not a JSON value
     NotJSON,
+    /// Supplied value is not a JSON value
+    NotJSONType(String),
 }
 
 impl fmt::Display for JsonWriteError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             JsonWriteError::NotJSON => write!(f, "Supplied value is not a JSON value"),
+            JsonWriteError::NotJSONType(ref s) => write!(f, "Not JSON type: {}", s),
         }
     }
 }
