@@ -43,6 +43,19 @@ mod csv_tests {
         }
 
         #[test]
+        fn write_and_read_data() {
+            let mawu_result = mawu::read::csv_headed(
+                "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv",
+            ).unwrap();
+            assert!(mawu_result.is_csv_object());
+            let write_succ = mawu::write::csv("test_file_delete_me.csv", mawu_result.clone());
+            let write_read = mawu::read::csv_headed("test_file_delete_me.csv");
+            assert!(write_succ.is_ok());
+            assert!(write_read.is_ok());
+            assert_eq!(write_read.unwrap(), mawu_result);
+        }
+
+        #[test]
         fn my_own_random_data_all_types() {
             let mawu_result = mawu::read::csv_headed(
                 "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv",
