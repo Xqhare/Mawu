@@ -347,6 +347,7 @@ fn string_lexer() {
     let double_quotes = vec!["\"", "\\", "\"", "\""];
     let parsed_quotes = json_lexer(double_quotes.clone().into_iter().collect());
     assert!(parsed_quotes.is_ok());
+    //println!("{:?}", parsed_quotes);
     assert!(parsed_quotes.unwrap() == MawuValue::String("\"".to_string()));
 
     let unicode = vec![

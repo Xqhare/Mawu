@@ -6,7 +6,7 @@ use crate::{
         MawuError,
     },
     mawu_value::MawuValue,
-    utils::{is_newline, is_whitespace},
+    utils::is_newline,
 };
 
 pub fn headed(file_contents: VecDeque<&str>) -> Result<MawuValue, MawuError> {
