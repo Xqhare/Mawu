@@ -24,12 +24,14 @@ impl fmt::Display for CsvError {
 pub enum CsvWriteError {
     /// Supplied value is not a CSV value
     NotCSV,
+    UnallowedType(String),
 }
 
 impl fmt::Display for CsvWriteError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             CsvWriteError::NotCSV => write!(f, "Supplied value is not a CSV value"),
+            CsvWriteError::UnallowedType(ref s) => write!(f, "Unallowed type: {}", s),
         }
     }
 }
