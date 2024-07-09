@@ -5,10 +5,10 @@ use crate::errors::{MawuError, MawuInternalError};
 pub mod file_handling;
 
 /// Takes in a `usize` and returns a `String` that is `n` spaces long filled with whitespace
-pub fn make_whitespace(n: u8) -> String {
+pub fn make_whitespace<N: Into<usize> + Copy>(n: N) -> String {
     let mut s: String = Default::default();
     // upcasting is ok
-    while s.len() < n as usize {
+    while s.len() < n.into() {
         s = " ".to_string() + &s;
     }
     s
