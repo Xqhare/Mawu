@@ -1,7 +1,7 @@
 use core::fmt;
 use std::{collections::HashMap, path::Path};
 
-use crate::{errors::{csv_error::{CsvError, CsvWriteError}, json_error::{JsonError, JsonWriteError}, MawuError}, serializers::csv_serializer, utils::file_handling::write_file};
+use crate::{errors::MawuError, serializers::{csv_serializer, json_serializer}, utils::file_handling::write_file};
 
 #[derive(Clone, Debug, PartialEq)]
 /// MawuValue wraps all data types supported by Mawu.
@@ -329,7 +329,7 @@ fn from_hashmap() {
         "key".to_string(),
         MawuValue::from(u8::MAX),
     )]));
-    println!("{:?}", mawu_value);
+    // println!("{:?}", mawu_value);
     assert!(mawu_value.is_object());
 }
 
@@ -339,14 +339,14 @@ fn creating_csv_object() {
 
     let a_hashmap = HashMap::from([("key1".to_string(), MawuValue::from(u8::MAX))]);
     let mawu_value = MawuValue::CSVObject(vec![a_hashmap]);
-    println!("{:?}", mawu_value);
+    //println!("{:?}", mawu_value);
     assert!(mawu_value.is_csv_object());
 }
 
 #[test]
 fn creating_csv_array() {
     let mawu_value = MawuValue::CSVArray(vec![vec![MawuValue::from(u8::MAX)]]);
-    println!("{:?}", mawu_value);
+    //println!("{:?}", mawu_value);
     assert!(mawu_value.is_csv_array());
 }
 
@@ -1620,6 +1620,32 @@ impl MawuValue {
         }
     }
 
+    /// Works on arrays only.
+    /// Returns a reference to the value at the given index.
+    /// The same restricitions as `Vec::get` apply, as this is just a convenience function
+    /// calling it.
+    ///
+    /// ## Example
+    /// ```rust
+    /// use mawu::mawu_value::MawuValue;
+    ///
+    /// let array = MawuValue::from(vec![MawuValue::from(1), MawuValue::from(2), MawuValue::from(3)]);
+    /// assert_eq!(array.array_peek(1).unwrap(), &MawuValue::from(2));
+    /// assert_eq!(array.array_peek(3), None);
+    /// ```
+    pub fn array_peek(&self, index: usize) -> Option<&MawuValue> {
+        match self {
+            MawuValue::Array(v) => {
+                if index < v.len() {
+                    v.get(index)
+                } else {
+                    None
+                }
+            },
+            _ => None,
+        }
+    }
+
     /// Works on objects only.
     /// Removes the value with the given key and returns it.
     /// The same restricitions as `HashMap::remove` apply, as this is just a convenience function
@@ -1749,38 +1775,20 @@ impl MawuValue {
         }
     }
 
+    /// Internal helper function
+    /// Writes the value to a file with 0 spaces at the given path
     pub fn write_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), MawuError> {
-        match self {
-            MawuValue::CSVObject(_) => self.write_to_file_csv(path, 0),
-            MawuValue::CSVArray(_) => self.write_to_file_csv(path, 0),
-            _ => self.write_to_file_json(path, 0),
-        }
-        
+        self.write_to_file_pretty(path, 0)
     }
 
+    /// Internal helper function
+    /// Writes the value to a file with the given number of spaces
     pub fn write_to_file_pretty<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
         match self {
-            MawuValue::CSVObject(_) => self.write_to_file_csv(path, spaces),
-            MawuValue::CSVArray(_) => self.write_to_file_csv(path, spaces),
-            _ => self.write_to_file_json(path, spaces),
+            MawuValue::CSVObject(v) => write_file(path, csv_serializer::serialize_csv_headed(MawuValue::CSVObject(v.clone()), spaces)?),
+            MawuValue::CSVArray(v) => write_file(path, csv_serializer::serialize_csv_unheaded(MawuValue::CSVArray(v.clone()), spaces)?),
+            _ => write_file(path, json_serializer::serialize_json(self.clone(), spaces, 0)?),
         }
-    }
-
-    fn write_to_file_csv<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
-        match self {
-            MawuValue::CSVObject(v) => write_file(path, csv_serializer::serialize_csv_headed(MawuValue::CSVObject(v.clone()), spaces)),
-            MawuValue::CSVArray(v) => write_file(path, csv_serializer::serialize_csv_unheaded(MawuValue::CSVArray(v.clone()), spaces)),
-            _ => Err(MawuError::CsvError(CsvError::WriteError(CsvWriteError::NotCSV))),
-        }
-    }
-
-    fn write_to_file_json<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
-        todo!();
-        /* match self {
-            MawuValue::CSVObject(v) => Err(MawuError::JsonError(JsonError::WriteError(JsonWriteError::NotJSON))),
-            MawuValue::CSVArray(v) => Err(MawuError::JsonError(JsonError::WriteError(JsonWriteError::NotJSON))),
-            _ => write_file(path, json_serializer::serialize_json(self, spaces)),
-        } */
     }
 }
 
