@@ -357,7 +357,8 @@ let a_hashmap = HashMap::from([
     ("key4", MawuValue::from(4.2)),
     ("key5", MawuValue::from(vec![1,2])),
     ("key6", MawuValue::from(true)),
-    ("key7", MawuValue::from(""))
+    ("key7", MawuValue::from("")),
+    ("key8", MawuValue::None),
 ]);
 let mawu_value = MawuValue::from(a_hashmap).to_object().unwrap();
 assert_eq!(mawu_value.get("key1").unwrap(), &MawuValue::Uint(255));
