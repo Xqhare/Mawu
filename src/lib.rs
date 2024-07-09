@@ -352,7 +352,8 @@
 //!     ("key4", MawuValue::from(4.2)),
 //!     ("key5", MawuValue::from(vec![1,2])),
 //!     ("key6", MawuValue::from(true)),
-//!     ("key7", MawuValue::from(""))
+//!     ("key7", MawuValue::from("")),
+//!     ("key8", MawuValue::None),
 //! ]);
 //! let mawu_value = MawuValue::from(a_hashmap).to_object().unwrap();
 //! assert_eq!(mawu_value.get("key1").unwrap(), &MawuValue::Uint(255));
@@ -917,10 +918,15 @@ pub mod write {
     /// use mawu::write::json;
     ///
     /// let path_to_file = "json_output.json";
-    /// let json_value = MawuValue::from(HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value1")),
-    ///   ("key2".to_string(), MawuValue::from(2))
-    /// ]));
+    /// let data = vec![
+    ///     MawuValue::from("a"),
+    ///     MawuValue::from(1),
+    ///     vec![
+    ///         MawuValue::from(-1),
+    ///         MawuValue::from(true),
+    ///     ].into(),
+    /// ];
+    /// let json_value = MawuValue::from(data);
     /// json(path_to_file, json_value).unwrap();
     /// ```
     ///
@@ -939,7 +945,6 @@ pub mod write {
     ///
     /// # Example
     /// ```rust
-    /// use std::collections::HashMap;
     /// use mawu::mawu_value::MawuValue;
     /// use mawu::write::json_pretty;
     ///
@@ -952,6 +957,85 @@ pub mod write {
     pub fn json_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
         contents.into().write_to_file_pretty(path, space)
     }
+}
+
+#[test]
+//#[ignore]
+// THIS REQUIRES THE JSON DOC TESTS (RUN LAST)! Only run after testing normally at least once!
+fn write_json_doc_files() {
+    let path_to_file1 = "json_output_pretty.json";
+    let path_to_file2 = "json_output.json";
+    let json_value1 = json(path_to_file1).unwrap();
+    let json_value2 = json(path_to_file2).unwrap();
+
+    assert!(json_value1.is_object());
+    assert_eq!(json_value1.get("key1").unwrap().as_str().unwrap(), "value1");
+    assert_eq!(json_value1.get("key2").unwrap().as_uint().unwrap(), &2);
+
+    assert!(json_value2.is_array());
+    assert_eq!(json_value2.len(), 3);
+    assert_eq!(json_value2.array_peek(0).unwrap().as_str().unwrap(), "a");
+    assert_eq!(json_value2.array_peek(1).unwrap().as_uint().unwrap(), &1);
+    assert!(json_value2.array_peek(2).unwrap().is_array());
+    assert_eq!(json_value2.array_peek(2).unwrap().len(), 2);
+    assert_eq!(json_value2.array_peek(2).unwrap().array_peek(0).unwrap().as_int().unwrap(), &-1);
+    assert_eq!(json_value2.array_peek(2).unwrap().array_peek(1).unwrap().as_bool().unwrap(), &true);
+}
+
+#[test]
+fn write_json() {
+    use pretty_assertions::assert_eq;
+    use std::collections::HashMap;
+    use crate::mawu_value::MawuValue;
+    use crate::write::{json, json_pretty};
+
+    let path_to_file = "json_output_pretty2.json";
+    let mut json_value = MawuValue::new_object().to_object().unwrap();
+    json_value.insert("key1".to_string(), MawuValue::from("value1"));
+    json_value.insert("key2".to_string(), MawuValue::from(u8::from(2)));
+    json(path_to_file, json_value).unwrap();
+    // parse output
+    let pretty_output = read::json(path_to_file).unwrap();
+    assert!(pretty_output.is_object());
+    assert_eq!(pretty_output.get("key1").unwrap().as_str().unwrap(), "value1");
+    assert_eq!(pretty_output.get("key2").unwrap().as_uint().unwrap(), &2);
+
+    let filepath = "json_output2.json";
+    let json_value = MawuValue::from(vec![
+        MawuValue::from("hello"),
+        MawuValue::from("world"),
+        MawuValue::from(42),
+        MawuValue::from(3.14),
+        MawuValue::from(HashMap::from([
+            ("key1".to_string(), MawuValue::from("value1")),
+            ("key2".to_string(), MawuValue::from(u8::from(2))),
+        ])),
+        MawuValue::from(vec![
+            MawuValue::from("hello"),
+            MawuValue::from("world"),
+            MawuValue::from(42),
+            MawuValue::from(3.14),
+            MawuValue::from(HashMap::from([
+                ("key1".to_string(), MawuValue::from("value1")),
+                ("key2".to_string(), MawuValue::from(u8::from(2))),
+            ])),
+        ]),
+    ]);
+    json_pretty(filepath, json_value, 4).unwrap();
+    // again parse output
+    let large_output: MawuValue = read::json(filepath).unwrap();
+
+    assert_eq!(large_output.is_array(), true);
+    assert_eq!(large_output.len(), 6);
+    assert_eq!(large_output.as_array().unwrap().len(), 6);
+
+    assert_eq!(large_output.as_array().unwrap()[0].as_str().unwrap(), "hello");
+    assert_eq!(large_output.as_array().unwrap()[1].as_str().unwrap(), "world");
+    assert_eq!(large_output.as_array().unwrap()[2].as_uint().unwrap(), &42);
+    assert_eq!(large_output.as_array().unwrap()[3].as_float().unwrap(), &3.14);
+
+    assert!(large_output.as_array().unwrap()[4].is_object());
+    assert_eq!(large_output.as_array().unwrap()[5].len(), 5);
 }
 
 #[test]
