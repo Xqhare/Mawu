@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod json_tests {
-    use mawu::read::json;
+    use mawu::{mawu_value::MawuValue, read::json};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -9,6 +9,56 @@ mod json_tests {
         assert!(nan.is_err());
         let infinity = json("data/json/json-test-data/n_inf.json");
         assert!(infinity.is_err());
+    }
+
+    #[test]
+    fn write_weird_shit() {
+        let weird = MawuValue::from(vec![
+            MawuValue::from("\""),
+            MawuValue::from("\\"),
+            MawuValue::from("/"),
+            // I would include these if I knew how to escape them so that the equality test would pass
+            //MawuValue::from(r"\b"),
+            //MawuValue::from(r"\f"),
+            //MawuValue::from(r"\n"),
+            //MawuValue::from(r"\r"),
+            //MawuValue::from(r"\t"),
+            MawuValue::from("\u{0061}"),
+            MawuValue::from("\u{30af}"),
+            MawuValue::from("\u{30EA}"),
+            MawuValue::from("\u{30b9}"),
+            MawuValue::from("\u{A66D}"),
+            MawuValue::from("\u{002c}"),
+            MawuValue::from("\u{0123}"),
+            //MawuValue::from("\u{0821}"),
+            MawuValue::from("\u{0123}"),
+            MawuValue::from("new\u{000A}line"),
+        ]);
+        let write_succ = mawu::write::json("test_file_delete_me_weird_unicode.json", weird.clone());
+        assert!(write_succ.is_ok());
+        let read_succ = mawu::read::json("test_file_delete_me_weird_unicode.json");
+        assert!(read_succ.is_ok());
+        for (a_weird, b_read) in weird.as_array().unwrap().iter().zip(read_succ.as_ref().unwrap().as_array().unwrap()) {
+            assert_eq!(a_weird, b_read);
+        }
+        assert_eq!(read_succ.unwrap(), weird);
+        let weird2 = MawuValue::from(vec![
+            MawuValue::from(r"\b"),
+            MawuValue::from(r"\f"),
+            MawuValue::from(r"\n"),
+            MawuValue::from(r"\r"),
+            MawuValue::from(r"\t"),
+        ]);
+        let write_succ2 = mawu::write::json("test_file_delete_me_weird_unicode2.json", weird2.clone());
+        assert!(write_succ2.is_ok());
+        let read_succ2 = mawu::read::json("test_file_delete_me_weird_unicode2.json");
+        assert!(read_succ2.is_ok());
+        //println!("{:?}", read_succ2);
+        //println!("{:?}", weird2);
+
+        // clenup time!
+        std::fs::remove_file("test_file_delete_me_weird_unicode.json").unwrap();
+        std::fs::remove_file("test_file_delete_me_weird_unicode2.json").unwrap();
     }
 
     // This is implicitly testing a lot of stuff!
