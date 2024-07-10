@@ -1,5 +1,5 @@
 //! # Mawu
-//! A simple JSON and CSV parsing rust library.
+//! A simple JSON and CSV parsing and writing rust library.
 //!
 //! Mawu supports 64bit systems only.
 //!
@@ -44,21 +44,25 @@
 //!        - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
 //!        - [Constructing a `MawuValue`](#constructing-a-mawuvalue)
 //!            - [A comprehensive list of all types a `MawuValue` can be constructed from](#a-comprehensive-list-of-all-types-a-mawuvalue-can-be-constructed-from)
-//!    - [`MawuError`](#mawuerror)
+//!     - [`MawuError`](#mawuerror)
 //!        - [A comprehensive list of all `MawuError`s](#a-comprehensive-list-of-all-mawuerrors)
-//!     - [CSV](#csv)
+//!     - [Reading CSV](#reading-csv)
 //!         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
 //!             - [With header](#with-header)
 //!             - [Without header](#without-header)
 //!         - [CSV Return value](#csv-return-value)
 //!         - [CSV Usage](#csv-usage)
-//!     - [JSON](#json)
+//!     - [Reading JSON](#reading-json)
 //!         - [Edge cases](#edge-cases)
 //!             - [Objects](#objects)
 //!             - [Arrays](#arrays)
 //!             - [Numbers](#numbers)
 //!             - [Strings](#strings)
 //!             - [Structure](#structure)
+//!         - [JSON Usage](#json-usage)
+//!     - [Writing CSV](#writing-csv)
+//!         - [CSV Usage](#csv-usage)
+//!     - [Writing JSON](#writing-json)
 //!         - [JSON Usage](#json-usage)
 //!
 //! ## Using Mawu
@@ -364,6 +368,8 @@
 //! assert_eq!(mawu_value.get("key6").unwrap(), &MawuValue::Bool(true));
 //! assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
 //! ```
+//!
+//! There are more examples in the function docs.
 //! 
 //! #### Creating a `MawuValue` for CSV data
 //! Writing CSV data presents its own challenges, thanks to the differing implementations in use.
@@ -485,7 +491,7 @@
 //!          - `StringWithNoChars(String)`
 //!          - `UnableToUnescapeUnicode(String)`
 //!
-//! ## CSV
+//! ## Reading CSV
 //! This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
 //!
 //! Please note that CSV, while a standard exists, is seldom implemented as such in practice, and almost every implementation of CSV is not conforming to the rfc4180 standard in some way and thus more or less compatible with each other.
@@ -569,7 +575,7 @@
 //! }
 //! ```
 //!
-//! ## JSON
+//! ## Reading JSON
 //! This library supports JSON files that conform to the rfc8259 and the ECMA-404 standard.
 //! JSON is one of the most used and common file formats used for data interchange. Defined in 2001 by Douglas Crockford, JSON has gone through several editions and has been used in production for over 20 years.
 //! Because of the several editions and conciseness of JSON grammar, many aspects are left undefined and the various implementations are not consistent in the way they parse JSON.
@@ -965,8 +971,8 @@ pub mod write {
 fn write_json_doc_files() {
     let path_to_file1 = "json_output_pretty.json";
     let path_to_file2 = "json_output.json";
-    let json_value1 = json(path_to_file1).unwrap();
-    let json_value2 = json(path_to_file2).unwrap();
+    let json_value1 = read::json(path_to_file1).unwrap();
+    let json_value2 = read::json(path_to_file2).unwrap();
 
     assert!(json_value1.is_object());
     assert_eq!(json_value1.get("key1").unwrap().as_str().unwrap(), "value1");
