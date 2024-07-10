@@ -48,6 +48,7 @@ fn parse_csv_body(
 ) -> Result<Vec<Vec<MawuValue>>, MawuError> {
     let mut out: Vec<Vec<MawuValue>> = Default::default();
     let mut row_data: Vec<String> = Default::default();
+    let mut last_char = None;
     while csv_body.front().is_some() {
         if let Some(h) = csv_body.pop_front() {
             if h == "\n" && csv_body.is_empty() {
@@ -68,6 +69,15 @@ fn parse_csv_body(
                 }
             };
             if is_newline(h) {
+                if last_char.is_none() && head_length > row_data.len() || last_char.unwrap() == "," && head_length > row_data.len() {
+                    for _ in 0..(head_length - row_data.len()) {
+                        row_data.push(String::from(""));
+                    }
+                } else if head_length > row_data.len() {
+                    for _ in 0..(head_length - row_data.len()) {
+                        row_data.push(String::from(""));
+                    }
+                }
                 if is_next_newline {
                     let _ = csv_body.pop_front();
                 }
@@ -80,6 +90,8 @@ fn parse_csv_body(
                     for _ in 0..(head_length - row_data.len()) {
                         row_data.push(String::from(""));
                     }
+                } else if last_char.is_none() || last_char.unwrap() == "," {
+                    row_data.push(String::from(""));
                 }
             } else if h == "\"" {
                 let mut value: String = Default::default();
@@ -121,6 +133,7 @@ fn parse_csv_body(
                 }
                 row_data.push(value);
             }
+            last_char = Some(h)
         }
     }
     if !row_data.is_empty() {
