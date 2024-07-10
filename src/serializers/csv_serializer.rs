@@ -1,12 +1,26 @@
 use crate::{errors::{csv_error::{CsvError, CsvWriteError}, MawuError}, mawu_value::MawuValue, utils::make_whitespace};
 
+fn serialize_csv_string(value: String, spaces: u8) -> Result<String, MawuError> {
+            let mut out = format!("{}\"", make_whitespace(spaces));
+            let tmp = value.replace("\"", "\"\"");
+            out.push_str(&tmp);
+            out.push('"');
+            Ok(out)
+}
+
 fn serialize_csv_value<T: Into<MawuValue>>(value: T, spaces: u8) -> Result<String, MawuError> {
     let value = value.into();
     match value {
-        MawuValue::String(s) => Ok(format!("{}\"{}\"", make_whitespace(spaces), s)),
+        MawuValue::String(s) => serialize_csv_string(s, spaces),
         MawuValue::Uint(u) => Ok(format!("{}{}", make_whitespace(spaces), u)),
         MawuValue::Int(i) => Ok(format!("{}{}", make_whitespace(spaces), i)),
-        MawuValue::Float(f) => Ok(format!("{}{}", make_whitespace(spaces), f)),
+        MawuValue::Float(f) => {
+            if f.fract() == 0.0 {
+                Ok(format!("{}{}.0", make_whitespace(spaces), f.to_string()))
+            } else {
+               Ok(format!("{}{}", make_whitespace(spaces), f)) 
+            }
+        }, 
         MawuValue::Bool(b) => Ok(format!("{}{}", make_whitespace(spaces), b)),
         MawuValue::Array(a) => {
             let mut out = format!("{}[", make_whitespace(spaces));

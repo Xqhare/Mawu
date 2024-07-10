@@ -84,7 +84,13 @@ pub fn serialize_json(value: MawuValue, spaces: u8, depth: u16) -> Result<String
             out.push_str(format!("{}", i).as_str());
         },
         MawuValue::Float(f) => {
-            out.push_str(format!("{}", f).as_str());
+            // I don't know if this is correct, never worked or heard of fract() until googling
+            // right now
+            if f.fract() == 0.0 || f.fract() == -0.0 {
+                out.push_str(&format!("{}{}.0", make_whitespace(spaces), f));
+            } else {
+               out.push_str(&format!("{}{}", make_whitespace(spaces), f));
+            }
         },
         MawuValue::String(s) => {
             out.push_str(format!("\"{}\"", s).as_str());
