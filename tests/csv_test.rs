@@ -52,7 +52,167 @@ mod csv_tests {
             let write_read = mawu::read::csv_headed("test_file_delete_me.csv");
             assert!(write_succ.is_ok());
             assert!(write_read.is_ok());
-            assert_eq!(write_read.unwrap(), mawu_result);
+            // actual equality check
+            for row in mawu_result.as_csv_object().unwrap() {
+                assert_eq!(row.len(), 3);
+                let id = row.get("Id").unwrap().as_uint().unwrap();
+                let types = row.get("Type").unwrap();
+                let content = row.get("Content").unwrap();
+                // test for all possible `MawuValue`s for CSV's up to id 50
+                if *id == 1 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(0));
+                } else if *id == 2 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(100));
+                } else if *id == 3 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(1000));
+                } else if *id == 4 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(8114191311414));
+                } else if *id == 5 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(69));
+                } else if *id == 6 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(420));
+                } else if *id == 7 {
+                    assert_eq!(types, &MawuValue::String("uint".to_string()));
+                    assert_eq!(content, &MawuValue::Uint(185911));
+                } else if *id == 8 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-1));
+                } else if *id == 9 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-188));
+                } else if *id == 10 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-42));
+                } else if *id == 11 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-185911));
+                } else if *id == 12 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-8114191311414));
+                } else if *id == 13 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-1000));
+                } else if *id == 14 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-10000));
+                } else if *id == 15 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-69));
+                } else if *id == 16 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-420));
+                } else if *id == 17 {
+                    assert_eq!(types, &MawuValue::String("sint".to_string()));
+                    assert_eq!(content, &MawuValue::Int(-1337));
+                } else if *id == 18 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(0.0));
+                } else if *id == 19 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(8114191311414.185911));
+                } else if *id == 20 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(-185911.8114191311414));
+                } else if *id == 21 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(18.8));
+                } else if *id == 22 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(-18.8));
+                } else if *id == 23 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(185911.8114191311414));
+                } else if *id == 24 {
+                    assert_eq!(types, &MawuValue::String("float".to_string()));
+                    assert_eq!(content, &MawuValue::Float(-8114191311414.185911));
+                } else if *id == 25 {
+                    assert_eq!(types, &MawuValue::String("bool".to_string()));
+                    assert_eq!(content, &MawuValue::Bool(true));
+                } else if *id == 26 {
+                    assert_eq!(types, &MawuValue::String("bool".to_string()));
+                    assert_eq!(content, &MawuValue::Bool(false));
+                } else if *id == 27 {
+                    assert_eq!(types, &MawuValue::String("none".to_string()));
+                    assert_eq!(content, &MawuValue::None);
+                } else if *id == 28 {
+                    assert_eq!(types, &MawuValue::None);
+                    assert_eq!(content, &MawuValue::None);
+                } else if *id == 29 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("let's support all special characters I can find on my keyboard üöä +*~ #' -_ .: ,; µ@€ <|> ^′!\"§$%&/{([])}=ß\\?`´ /*-+,".to_string()));
+                } else if *id == 30 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Some String".to_string()));
+                } else if *id == 31 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("a string, with a comma".to_string()));
+                } else if *id == 32 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("lorem ipsum".to_string()));
+                } else if *id == 33 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("test string".to_string()));
+                } else if *id == 34 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("hitchhikers guide to the galaxy".to_string()));
+                } else if *id == 35 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("lord of the rings".to_string()));
+                } else if *id == 36 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("discworld".to_string()));
+                } else if *id == 37 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("das geheimniss von askir".to_string()));
+                } else if *id == 38 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Götterkrieg".to_string()));
+                } else if *id == 39 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("the wanderer".to_string()));
+                } else if *id == 40 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("hurt".to_string()));
+                } else if *id == 41 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("rasputin".to_string()));
+                } else if *id == 42 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("YMCA".to_string()));
+                } else if *id == 43 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Ding-dong the witch is dead".to_string()));
+                } else if *id == 44 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("It's time to take a shit\n on the Company's Dime".to_string()));
+                } else if *id == 45 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("You're An Ace, Kid".to_string()));
+                } else if *id == 46 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Schälläfäscht 3000".to_string()));
+                } else if *id == 47 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Wild Wild West".to_string()));
+                } else if *id == 48 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Chaos Theory".to_string()));
+                } else if *id == 49 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("CPR".to_string()));
+                } else if *id == 50 {
+                    assert_eq!(types, &MawuValue::String("string".to_string()));
+                    assert_eq!(content, &MawuValue::String("Los Disturbados - \"Stuparena\"".to_string()));
+                }
+            }
+
+            std::fs::remove_file("test_file_delete_me.csv").unwrap();
         }
 
         #[test]
@@ -450,6 +610,232 @@ mod csv_tests {
     mod headless {
         use mawu::mawu_value::MawuValue;
         use pretty_assertions::assert_eq;
+
+        #[test]
+        fn read_and_write_data() {
+            let mawu_result = mawu::read::csv_headless(
+                "data/csv/csv-test-data/headless/my-own-random-data/all-types.csv",
+            );
+            assert_eq!(mawu_result.is_ok(), true);
+            let mawu = mawu_result.unwrap();
+            assert_eq!(mawu.as_csv_array().unwrap().len(), 50);
+            let write_succ = mawu::write::csv("test_file_delete_me2.csv", mawu.clone());
+            assert!(write_succ.is_ok());
+            let read_write = mawu::read::csv_headless("test_file_delete_me2.csv");
+            assert!(read_write.is_ok());
+            assert_eq!(read_write.as_ref().unwrap(), &mawu);
+            // lets check the 50 rows
+            let mut id = 1;
+            for row in read_write.unwrap().as_csv_array().unwrap() {
+                assert_eq!(row.len(), 3);
+                if id == 1 {
+                    assert_eq!(row[0], MawuValue::Uint(1));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(0));
+                } else if id == 2 {
+                    assert_eq!(row[0], MawuValue::Uint(2));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(100));
+                } else if id == 3 {
+                    assert_eq!(row[0], MawuValue::Uint(3));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(1000));
+                } else if id == 4 {
+                    assert_eq!(row[0], MawuValue::Uint(4));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(8114191311414));
+                } else if id == 5 {
+                    assert_eq!(row[0], MawuValue::Uint(5));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(69));
+                } else if id == 6 {
+                    assert_eq!(row[0], MawuValue::Uint(6));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(420));
+                } else if id == 7 {
+                    assert_eq!(row[0], MawuValue::Uint(7));
+                    assert_eq!(row[1], MawuValue::String("uint".to_string()));
+                    assert_eq!(row[2], MawuValue::Uint(185911));
+                } else if id == 8 {
+                    assert_eq!(row[0], MawuValue::Uint(8));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-1));
+                } else if id == 9 {
+                    assert_eq!(row[0], MawuValue::Uint(9));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-188));
+                } else if id == 10 {
+                    assert_eq!(row[0], MawuValue::Uint(10));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-42));
+                } else if id == 11 {
+                    assert_eq!(row[0], MawuValue::Uint(11));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-185911));
+                } else if id == 12 {
+                    assert_eq!(row[0], MawuValue::Uint(12));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-8114191311414));
+                } else if id == 13 {
+                    assert_eq!(row[0], MawuValue::Uint(13));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-1000));
+                } else if id == 14 {
+                    assert_eq!(row[0], MawuValue::Uint(14));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-10000));
+                } else if id == 15 {
+                    assert_eq!(row[0], MawuValue::Uint(15));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-69));
+                } else if id == 16 {
+                    assert_eq!(row[0], MawuValue::Uint(16));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-420));
+                } else if id == 17 {
+                    assert_eq!(row[0], MawuValue::Uint(17));
+                    assert_eq!(row[1], MawuValue::String("sint".to_string()));
+                    assert_eq!(row[2], MawuValue::Int(-1337));
+                } else if id == 18 {
+                    assert_eq!(row[0], MawuValue::Uint(18));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(0.0));
+                } else if id == 19 {
+                    assert_eq!(row[0], MawuValue::Uint(19));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(8114191311414.186));
+                } else if id == 20 {
+                    assert_eq!(row[0], MawuValue::Uint(20));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(-185911.8114191311414));
+                } else if id == 21 {
+                    assert_eq!(row[0], MawuValue::Uint(21));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(18.8));
+                } else if id == 22 {
+                    assert_eq!(row[0], MawuValue::Uint(22));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(-18.8));
+                } else if id == 23 {
+                    assert_eq!(row[0], MawuValue::Uint(23));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(185911.8114191311414));
+                } else if id == 24 {
+                    assert_eq!(row[0], MawuValue::Uint(24));
+                    assert_eq!(row[1], MawuValue::String("float".to_string()));
+                    assert_eq!(row[2], MawuValue::Float(-8114191311414.186));
+                } else if id == 25 {
+                    assert_eq!(row[0], MawuValue::Uint(25));
+                    assert_eq!(row[1], MawuValue::String("bool".to_string()));
+                    assert_eq!(row[2], MawuValue::Bool(true));
+                } else if id == 26 {
+                    assert_eq!(row[0], MawuValue::Uint(26));
+                    assert_eq!(row[1], MawuValue::String("bool".to_string()));
+                    assert_eq!(row[2], MawuValue::Bool(false));
+                } else if id == 27 {
+                    assert_eq!(row[0], MawuValue::Uint(27));
+                    assert_eq!(row[1], MawuValue::String("none".to_string()));
+                    assert_eq!(row[2], MawuValue::None);
+                } else if id == 28 {
+                    assert_eq!(row[0], MawuValue::Uint(28));
+                    assert_eq!(row[1], MawuValue::None);
+                    assert_eq!(row[2], MawuValue::None);
+                } else if id == 29 {
+                    assert_eq!(row[0], MawuValue::Uint(29));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("let's support all special characters I can find on my keyboard üöä +*~ #' -_ .: ,; µ@€ <|> ^′!\"§$%&/{([])}=ß\\?`´ /*-+,".to_string()));
+                } else if id == 30 {
+                    assert_eq!(row[0], MawuValue::Uint(30));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Some String".to_string()));
+                } else if id == 31 {
+                    assert_eq!(row[0], MawuValue::Uint(31));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("a string, with a comma".to_string()));
+                } else if id == 32 {
+                    assert_eq!(row[0], MawuValue::Uint(32));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("lorem ipsum".to_string()));
+                } else if id == 33 {
+                    assert_eq!(row[0], MawuValue::Uint(33));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("test string".to_string()));
+                } else if id == 34 {
+                    assert_eq!(row[0], MawuValue::Uint(34));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("hitchhikers guide to the galaxy".to_string()));
+                } else if id == 35 {
+                    assert_eq!(row[0], MawuValue::Uint(35));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("lord of the rings".to_string()));
+                } else if id == 36 {
+                    assert_eq!(row[0], MawuValue::Uint(36));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("discworld".to_string()));
+                } else if id == 37 {
+                    assert_eq!(row[0], MawuValue::Uint(37));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("das geheimniss von askir".to_string()));
+                } else if id == 38 {
+                    assert_eq!(row[0], MawuValue::Uint(38));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Götterkrieg".to_string()));
+                } else if id == 39 {
+                    assert_eq!(row[0], MawuValue::Uint(39));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("the wanderer".to_string()));
+                } else if id == 40 {
+                    assert_eq!(row[0], MawuValue::Uint(40));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("hurt".to_string()));
+                } else if id == 41 {
+                    assert_eq!(row[0], MawuValue::Uint(41));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("rasputin".to_string()));
+                } else if id == 42 {
+                    assert_eq!(row[0], MawuValue::Uint(42));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("YMCA".to_string()));
+                } else if id == 43 {
+                    assert_eq!(row[0], MawuValue::Uint(43));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Ding-dong the witch is dead".to_string()));
+                } else if id == 44 {
+                    assert_eq!(row[0], MawuValue::Uint(44));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("It's time to take a shit\n on the Company's Dime".to_string()));
+                } else if id == 45 {
+                    assert_eq!(row[0], MawuValue::Uint(45));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("You're An Ace, Kid".to_string()));
+                } else if id == 46 {
+                    assert_eq!(row[0], MawuValue::Uint(46));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Schälläfäscht 3000".to_string()));
+                } else if id == 47 {
+                    assert_eq!(row[0], MawuValue::Uint(47));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Wild Wild West".to_string()));
+                } else if id == 48 {
+                    assert_eq!(row[0], MawuValue::Uint(48));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Chaos Theory".to_string()));
+                } else if id == 49 {
+                    assert_eq!(row[0], MawuValue::Uint(49));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("CPR".to_string()));
+                } else if id == 50 {
+                    assert_eq!(row[0], MawuValue::Uint(50));
+                    assert_eq!(row[1], MawuValue::String("string".to_string()));
+                    assert_eq!(row[2], MawuValue::String("Los Disturbados - \"Stuparena\"".to_string()));
+                } else {
+                    assert!(false);
+                }
+
+                id += 1;
+            }
+            std::fs::remove_file("test_file_delete_me2.csv").unwrap();
+        }
 
         #[test]
         fn my_own_random_data_all_types() {
