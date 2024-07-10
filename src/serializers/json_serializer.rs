@@ -93,7 +93,7 @@ pub fn serialize_json(value: MawuValue, spaces: u8, depth: u16) -> Result<String
             }
         },
         MawuValue::String(s) => {
-            out.push_str(format!("\"{}\"", s).as_str());
+            out.push_str(serialize_string_to_json(&s).as_str());
         },
         MawuValue::CSVObject(_) => {
             Err(MawuError::JsonError(JsonError::WriteError(JsonWriteError::NotJSONType("CSVObject".to_string()))))?
@@ -106,4 +106,30 @@ pub fn serialize_json(value: MawuValue, spaces: u8, depth: u16) -> Result<String
         out = out.trim_start().to_string();
     }
     Ok(out)
+}
+
+fn serialize_string_to_json(value: &str) -> String {
+    let mut tmp_bind: String = Default::default();
+    for (index, c) in value.chars().enumerate() {
+        if c == '"' {
+            tmp_bind.push_str("\\\"");
+        } else if c == '\\' {
+            tmp_bind.push_str("\\");
+            if index + 1 == value.len() {
+                tmp_bind.push_str("\\");
+            }
+        } else if c == '/' {
+            tmp_bind.push('\\');
+            tmp_bind.push('/');
+        } else if c == '\n' {
+            tmp_bind.push_str("\\n");
+        } else if c == '\r' {
+            tmp_bind.push_str("\\r");
+        } else if c == '\t' {
+            tmp_bind.push_str("\\t");
+        } else {
+            tmp_bind.push(c);
+        }
+    }
+    format!("\"{}\"", tmp_bind)
 }
