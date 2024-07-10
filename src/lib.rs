@@ -821,6 +821,9 @@ pub mod write {
     ///     ],
     /// ]);
     /// csv(path_to_file, csv_value).unwrap();
+    ///
+    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+    /// std::fs::remove_file(path_to_file).unwrap();
     /// ```
     /// ```rust
     /// use std::collections::HashMap;
@@ -845,6 +848,9 @@ pub mod write {
     /// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
     ///
     /// csv(path_to_file, csv_value).unwrap();
+    ///
+    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+    /// std::fs::remove_file(path_to_file).unwrap();
     /// ```
     ///
     /// # Errors
@@ -879,6 +885,9 @@ pub mod write {
     ///     ],
     /// ]);
     /// csv_pretty(path_to_file, csv_value, 4).unwrap();
+    ///
+    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+    /// std::fs::remove_file(path_to_file).unwrap();
     /// ```
     /// ```rust
     /// use std::collections::HashMap;
@@ -903,6 +912,9 @@ pub mod write {
     /// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
     ///
     /// csv_pretty(path_to_file, csv_value, 4).unwrap();
+    ///
+    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+    /// std::fs::remove_file(path_to_file).unwrap();
     /// ```
     ///
     /// # Errors
@@ -934,6 +946,9 @@ pub mod write {
     /// ];
     /// let json_value = MawuValue::from(data);
     /// json(path_to_file, json_value).unwrap();
+    ///
+    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+    /// std::fs::remove_file(path_to_file).unwrap();
     /// ```
     ///
     /// # Errors
@@ -959,6 +974,9 @@ pub mod write {
     /// json_value.insert("key1".to_string(), MawuValue::from("value1"));
     /// json_value.insert("key2".to_string(), MawuValue::from(2));
     /// json_pretty(path_to_file, json_value, 4).unwrap();
+    ///
+    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+    /// std::fs::remove_file(path_to_file).unwrap();
     /// ```
     pub fn json_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
         contents.into().write_to_file_pretty(path, space)
@@ -966,11 +984,29 @@ pub mod write {
 }
 
 #[test]
-//#[ignore]
-// THIS REQUIRES THE JSON DOC TESTS (RUN LAST)! Only run after testing normally at least once!
 fn write_json_doc_files() {
     let path_to_file1 = "json_output_pretty.json";
     let path_to_file2 = "json_output.json";
+    if std::fs::File::open(path_to_file1).is_err() {
+        let path_to_file = "json_output_pretty.json";
+        let mut json_value = mawu_value::MawuValue::new_object().to_object().unwrap();
+        json_value.insert("key1".to_string(), mawu_value::MawuValue::from("value1"));
+        json_value.insert("key2".to_string(), mawu_value::MawuValue::from(2));
+        write::json_pretty(path_to_file, json_value, 4).expect("Failed to write JSON file");
+    }
+    if std::fs::File::open(path_to_file2).is_err() {
+        let path_to_file = "json_output.json";
+        let data = vec![
+            mawu_value::MawuValue::from("a"),
+            mawu_value::MawuValue::from(1),
+            vec![
+                mawu_value::MawuValue::from(-1),
+                mawu_value::MawuValue::from(true),
+            ].into(),
+        ];
+        let json_value = mawu_value::MawuValue::from(data);
+        write::json(path_to_file, json_value).expect("Failed to write JSON file");
+    }
     let json_value1 = read::json(path_to_file1).unwrap();
     let json_value2 = read::json(path_to_file2).unwrap();
 
@@ -986,6 +1022,10 @@ fn write_json_doc_files() {
     assert_eq!(json_value2.array_peek(2).unwrap().len(), 2);
     assert_eq!(json_value2.array_peek(2).unwrap().array_peek(0).unwrap().as_int().unwrap(), &-1);
     assert_eq!(json_value2.array_peek(2).unwrap().array_peek(1).unwrap().as_bool().unwrap(), &true);
+
+    // remove the test files
+    std::fs::remove_file(path_to_file1).unwrap();
+    std::fs::remove_file(path_to_file2).unwrap();
 }
 
 #[test]
@@ -1042,6 +1082,10 @@ fn write_json() {
 
     assert!(large_output.as_array().unwrap()[4].is_object());
     assert_eq!(large_output.as_array().unwrap()[5].len(), 5);
+
+    // remove the test files
+    std::fs::remove_file(path_to_file).unwrap();
+    std::fs::remove_file(filepath).unwrap();
 }
 
 #[test]
@@ -1102,4 +1146,8 @@ fn write_csv() {
     assert_eq!(output_bind.as_csv_array().unwrap()[0][1], MawuValue::from(u8::from(1)));
     assert_eq!(output_bind.as_csv_array().unwrap()[1][0], MawuValue::from(-1));
     assert_eq!(output_bind.as_csv_array().unwrap()[1][1], MawuValue::from(true));
+
+    // Cleaning up the filesystem
+    std::fs::remove_file(path_to_file).unwrap();
+    std::fs::remove_file(filepath).unwrap();
 }
