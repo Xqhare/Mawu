@@ -15,12 +15,12 @@ pub fn make_whitespace<N: Into<usize> + Copy>(n: N) -> String {
 }
 
 /// Takes in a `&str` and checks if it is a newline character
-/// (any of `\n`, `\r\n`, `\r`)
+/// (either `\n` or `\r`)
 ///
 /// ## Returns
 /// `true` if the string is a newline, `false` otherwise
-pub fn is_newline(s: &str) -> bool {
-    s == "\n" || s == "\r\n" || s == "\r"
+pub fn is_newline(s: &char) -> bool {
+    s == &'\n' || s == &'\r'
 }
 
 /// Takes in two `&str` and unescapes unicode characters
@@ -103,38 +103,31 @@ fn my_unescape_unicode_handler(s: String) -> Result<String, MawuError> {
 ///
 /// ## Errors
 /// `MawuError::InternalError` if the string has no characters
-pub fn is_digit(c: &str) -> Result<bool, MawuError> {
-    let charr = c.chars().next();
-    if charr.is_some() {
-        // This if loop has proven to be faster than the char method `is_digit` by a very slight
-        // margin. But it is faster! (Using `match` is slower than both `if` and `char` methods)
-        if charr.unwrap() >= '0' && charr.unwrap() <= '9' {
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+pub fn is_digit(c: &char) -> Result<bool, MawuError> {
+    // This if loop has proven to be faster than the char method `is_digit` by a very slight
+    // margin. But it is faster! (Using `match` is slower than both `if` and `char` methods)
+    if c >= &'0' && c <= &'9' {
+        Ok(true)
     } else {
-        Err(MawuError::InternalError(
-            MawuInternalError::StringWithNoChars(c.to_string()),
-        ))
+        Ok(false)
     }
+    }
+
+pub fn is_end_of_primitive_value(c: char) -> bool {
+    c == ',' || c == ':' || c == '}' || c == ']'
 }
 
-pub fn is_end_of_primitive_value(c: &str) -> bool {
-    c == "," || c == ":" || c == "}" || c == "]"
-}
-
-pub fn is_whitespace(c: &str) -> bool {
-    is_newline(c) || c == " " || c == "\t"
+pub fn is_whitespace(c: &char) -> bool {
+    is_newline(c) || c == &' ' || c == &'\t'
 }
 
 /// Returns true if the given character is a json string terminator (':','}',']')
 /// Do not forget to check for end of file!
 /// Uses `\n` as end of file making it compatible with modern windows, linux and some OSX versions.
-pub fn is_json_string_terminator_token(c: Option<&&str>) -> bool {
+pub fn is_json_string_terminator_token(c: Option<&char>) -> bool {
     if c.is_none() {
         return false;
     }
     let c = c.unwrap();
-    *c == ":" || *c == "," || *c == "}" || *c == "]"
+    *c == ':' || *c == ',' || *c == '}' || *c == ']'
 }

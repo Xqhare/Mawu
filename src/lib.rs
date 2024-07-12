@@ -704,9 +704,7 @@ mod serializers;
 
 /// Reads CSV and JSON files into `MawuValue`
 pub mod read {
-    use core::str;
     use std::{collections::VecDeque, path::Path};
-    use unicode_segmentation::UnicodeSegmentation;
 
     use crate::{
         errors::MawuError,
@@ -734,8 +732,8 @@ pub mod read {
     pub fn csv_headed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headed(
             file_handling::read_file(path)?
-                .graphemes(true)
-                .collect::<VecDeque<&str>>(),
+                .chars()
+                .collect::<VecDeque<char>>(),
         )
     }
 
@@ -758,8 +756,8 @@ pub mod read {
     pub fn csv_headless<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headless(
             file_handling::read_file(path)?
-                .graphemes(true)
-                .collect::<VecDeque<&str>>(),
+                .chars()
+                .collect::<VecDeque<char>>(),        
         )
     }
 
@@ -783,8 +781,8 @@ pub mod read {
     pub fn json<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         json_lexer::json_lexer(
             file_handling::read_file(path)?
-                .graphemes(true)
-                .collect::<VecDeque<&str>>(),
+                .chars()
+                .collect::<VecDeque<char>>(),
         )
     }
 }
