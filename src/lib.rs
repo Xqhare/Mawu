@@ -4,7 +4,7 @@
 //! Mawu supports 64bit systems only.
 //!
 //! Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard.
-//! While not a zero dependency library, its only dependency is `unicode-segmentation`.
+//! Mawu is a zero dependency library.
 //!
 //! A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON parser, this results in a bloat of almost 8kb!
 //!
