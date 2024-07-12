@@ -278,6 +278,7 @@ mod csv_tests {
             );
             assert_eq!(mawu_result.is_ok(), true);
             let mawu = mawu_result.unwrap();
+            //println!("{:?}", mawu.as_csv_object().unwrap());
             assert_eq!(mawu.as_csv_object().unwrap().len(), 100);
             assert_eq!(mawu.as_csv_object().unwrap()[0].len(), 12);
 
