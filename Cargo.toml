@@ -1,12 +1,9 @@
 [package]
 name = "mawu"
 authors = ["Xqhare"]
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
 
 [dev-dependencies]
 json = "0.12.4"
 pretty_assertions = "1.4.0"
-
-[dependencies]
-unicode-segmentation = "1.11.0"
