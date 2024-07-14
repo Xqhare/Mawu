@@ -1,7 +1,5 @@
 use core::fmt;
-use std::{collections::HashMap, path::Path};
-
-use crate::{errors::MawuError, serializers::{csv_serializer, json_serializer}, utils::file_handling::write_file};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
 /// MawuValue wraps all data types supported by Mawu.
@@ -1477,6 +1475,7 @@ impl MawuValue {
     }
 
     /// Returns an iterator over the values of an array
+    /// Only works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray` 
     /// The values are borrowed (`&MawuValue`'s).
     ///
     /// ## Examples
@@ -1495,6 +1494,7 @@ impl MawuValue {
     }
 
     /// Returns an iterator over the key-value-pairs of an object
+    /// Only works on json objects `MawuValue::Object`, and not on `MawuValue::CSVObject`
     /// The values are borrowed (`&MawuValue`'s).
     /// The keys are borrowed (`&String`'s).
     ///
@@ -1519,7 +1519,7 @@ impl MawuValue {
         self.as_object().unwrap().iter()
     }
 
-    /// Works on objects only.
+    /// Works on json objects `MawuValue::Object`, and not on `MawuValue::CSVObject`
     /// Returns a reference to the value with the given key.
     ///
     /// The key is may be any type that can be converted to a `String`.
@@ -1546,7 +1546,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on arrays only.
+    /// Works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray`
     /// Inserts the given value at the given index.
     ///
     /// ## Examples
@@ -1565,7 +1565,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on objects only.
+    /// Works on json objects `MawuValue::Object`, and not on `MawuValue::CSVObject`
     /// Inserts the given value with the given key.
     ///
     /// ## Returns
@@ -1600,7 +1600,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on arrays only.
+    /// Works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray`
     /// Removes the value at the given index and returns it.
     /// The same restricitions as `Vec::remove` apply, as this is just a convenience function
     /// calling it.
@@ -1620,7 +1620,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on arrays only.
+    /// Works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray`
     /// Returns a reference to the value at the given index.
     /// The same restricitions as `Vec::get` apply, as this is just a convenience function
     /// calling it.
@@ -1646,7 +1646,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on objects only.
+    /// Works on json objects `MawuValue::Object`, and not on `MawuValue::CSVObject`
     /// Removes the value with the given key and returns it.
     /// The same restricitions as `HashMap::remove` apply, as this is just a convenience function
     /// calling it.
@@ -1667,7 +1667,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on objects only.
+    /// Works on json objects `MawuValue::Object`, and not on `MawuValue::CSVObject`
     /// Checks if the object contains the given key
     ///
     /// ## Example
@@ -1686,7 +1686,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on arrays only.
+    /// Works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray`
     /// Removes and returns the last element of the array
     ///
     /// ## Example
@@ -1704,7 +1704,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on arrays only.
+    /// Works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray`
     /// Appends the given value to the array
     ///
     /// ## Example
@@ -1722,7 +1722,7 @@ impl MawuValue {
         }
     }
 
-    /// Works on arrays only.
+    /// Works on json arrays `MawuValue::Array`, and not on `MawuValue::CSVArray`
     /// Checks if the array contains the given value
     ///
     /// ## Example
@@ -1775,21 +1775,6 @@ impl MawuValue {
         }
     }
 
-    /// Internal helper function
-    /// Writes the value to a file with 0 spaces at the given path
-    pub fn write_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), MawuError> {
-        self.write_to_file_pretty(path, 0)
-    }
-
-    /// Internal helper function
-    /// Writes the value to a file with the given number of spaces
-    pub fn write_to_file_pretty<P: AsRef<Path>>(&self, path: P, spaces: u8) -> Result<(), MawuError> {
-        match self {
-            MawuValue::CSVObject(v) => write_file(path, csv_serializer::serialize_csv_headed(MawuValue::CSVObject(v.clone()), spaces)?),
-            MawuValue::CSVArray(v) => write_file(path, csv_serializer::serialize_csv_unheaded(MawuValue::CSVArray(v.clone()), spaces)?),
-            _ => write_file(path, json_serializer::serialize_json(self.clone(), spaces, 0)?),
-        }
-    }
 }
 
 // While not 100% test coverage, it's a decent sanity check
