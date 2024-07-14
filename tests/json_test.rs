@@ -34,7 +34,7 @@ mod json_tests {
             MawuValue::from("\u{0123}"),
             MawuValue::from("new\u{000A}line"),
         ]);
-        let write_succ = mawu::write::json("test_file_delete_me_weird_unicode.json", weird.clone());
+        let write_succ = mawu::write("test_file_delete_me_weird_unicode.json", weird.clone());
         assert!(write_succ.is_ok());
         let read_succ = mawu::read::json("test_file_delete_me_weird_unicode.json");
         assert!(read_succ.is_ok());
@@ -49,7 +49,7 @@ mod json_tests {
             MawuValue::from(r"\r"),
             MawuValue::from(r"\t"),
         ]);
-        let write_succ2 = mawu::write::json("test_file_delete_me_weird_unicode2.json", weird2.clone());
+        let write_succ2 = mawu::write("test_file_delete_me_weird_unicode2.json", weird2.clone());
         assert!(write_succ2.is_ok());
         let read_succ2 = mawu::read::json("test_file_delete_me_weird_unicode2.json");
         assert!(read_succ2.is_ok());

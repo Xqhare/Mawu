@@ -48,7 +48,7 @@ mod csv_tests {
                 "data/csv/csv-test-data/headed/my-own-random-data/all-types.csv",
             ).unwrap();
             assert!(mawu_result.is_csv_object());
-            let write_succ = mawu::write::csv("test_file_delete_me.csv", mawu_result.clone());
+            let write_succ = mawu::write("test_file_delete_me.csv", mawu_result.clone());
             let write_read = mawu::read::csv_headed("test_file_delete_me.csv");
             assert!(write_succ.is_ok());
             assert!(write_read.is_ok());
@@ -620,7 +620,7 @@ mod csv_tests {
             assert_eq!(mawu_result.is_ok(), true);
             let mawu = mawu_result.unwrap();
             assert_eq!(mawu.as_csv_array().unwrap().len(), 50);
-            let write_succ = mawu::write::csv("test_file_delete_me2.csv", mawu.clone());
+            let write_succ = mawu::write("test_file_delete_me2.csv", mawu.clone());
             assert!(write_succ.is_ok());
             let read_write = mawu::read::csv_headless("test_file_delete_me2.csv");
             assert!(read_write.is_ok());
