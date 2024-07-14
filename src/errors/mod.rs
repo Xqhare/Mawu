@@ -39,6 +39,8 @@ pub enum MawuInternalError {
     StringWithNoChars(String),
     /// Fail-save if unable to unescape unicode
     UnableToUnescapeUnicode(String),
+    /// Fail-safe if Mawu encountered a String with no chars
+    NotUTF8(String),
 }
 
 impl fmt::Display for MawuInternalError {
@@ -48,7 +50,8 @@ impl fmt::Display for MawuInternalError {
             MawuInternalError::StringWithNoChars(ref s) => write!(f, "String with no chars: {}", s),
             MawuInternalError::UnableToUnescapeUnicode(ref s) => {
                 write!(f, "Unable to unescape unicode: {}", s)
-            }
+            },
+            MawuInternalError::NotUTF8(ref s) => write!(f, "Not UTF8: {}", s),
         }
     }
 }
