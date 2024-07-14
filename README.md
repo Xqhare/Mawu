@@ -1,37 +1,34 @@
 # Mawu
-A simple JSON and CSV parsing rust library.
+A JSON and CSV serialization and deserialization library written in rust.
 
-Mawu supports 64bit systems only.
+Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a JSON and CSV serialization and deserialization library implementing the rfc4180, rfc8259 and the ECMA-404 standard.
 
-Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard. 
-While not a zero dependency library, its only dependency is `unicode-segmentation`.
+Mawu is a zero dependency library and supports 64bit systems only.
 
-A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON parser, this results in a bloat of almost 8kb!
+A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON functionality, this results in a bloat of almost 13kb!
 
-> [!IMPORTANT]
-> This is a hobbyist repo reinventing the wheel and not ready for production use.
+> [!warning]
+> This is a hobbyist repo badly reinventing the wheel and not ready for production use. 
 
-The performance of Mawu does leave a lot of room for improvement. The JSON parser
-manages about 84mb in 25 seconds, while the CSV parser manages about 84mb in 26 seconds. In comparison,
-an actual parser takes about 2 seconds to open the same file.
+The performance of Mawu does leave room for improvement.
+Talking about the parsing alone, the JSON parser manages about 84mb in 10 to 11 seconds, while the CSV parser manages about 84mb in 14 to 15 seconds. In comparison,
+an actual parser takes about 2sec to open the same file.
 
 ## Features
 - Simple
 - Type aware
 - Supports both CSV and JSON
-    - CSV
-        - With or without header
+- Reading and writing
+- Write pretty with custom spacing
+- Supports CSV files with or without header
 - Supports missing or not provided values
 - Fully documented
-    - Handling of edge cases is explained in the documentation
+- Handling of edge cases is explained in the documentation
 - Tries to stay as close to the rfc4180, rfc8259 and ECMA-404 standard as possible for maximum interoperability
-- Minimal dependencies
 - Actually written by a human
-- Speed optimised for better developer experience - just get another coffee!
 
 ## Naming the creation: A Legacy of the Divine
-The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
-Mawu follows the long tradition of naming things after deities.
+The name "Mawu" isn't chosen by chance, it honors the long tradition of naming things after deities, by naming it after the powerful West African goddess associated with the moon, the sun, and creation itself.
 
 Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
 
@@ -42,20 +39,20 @@ Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers yo
     - [Contents](#contents)
     - [Using Mawu](#using-mawu)
     - [`MawuValue`](#mawuvalue)
-        - [Convenience functions](#convenience-functions)
-        - [An exhaustive list of all `MawuValue` types and functions](#an-exhaustive-list-of-all-mawuvalue-types-and-functions)
-        - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
-        - [Constructing a `MawuValue`](#constructing-a-mawuvalue)
-            - [A comprehensive list of all types a `MawuValue` can be constructed from](#a-comprehensive-list-of-all-types-a-mawuvalue-can-be-constructed-from)
+       - [Convenience functions](#convenience-functions)
+       - [An exhaustive list of all `MawuValue` types and functions](#an-exhaustive-list-of-all-mawuvalue-types-and-functions)
+       - [Example of getting a `MawuValue` if its type is not known or different in the same field](#example-of-getting-a-mawuvalue-if-its-type-is-not-known-or-different-in-the-same-field)
+       - [Constructing a `MawuValue`](#constructing-a-mawuvalue)
+           - [A comprehensive list of all types a `MawuValue` can be constructed from](#a-comprehensive-list-of-all-types-a-mawuvalue-can-be-constructed-from)
     - [`MawuError`](#mawuerror)
-        - [A comprehensive list of all `MawuError`s](#a-comprehensive-list-of-all-mawuerrors)
-    - [CSV](#csv)
+       - [A comprehensive list of all `MawuError`s](#a-comprehensive-list-of-all-mawuerrors)
+    - [Reading CSV](#reading-csv)
         - [Handling missing or not provided values](#handling-missing-or-not-provided-values)
             - [With header](#with-header)
             - [Without header](#without-header)
         - [CSV Return value](#csv-return-value)
         - [CSV Usage](#csv-usage)
-    - [JSON](#json)
+    - [Reading JSON](#reading-json)
         - [Edge cases](#edge-cases)
             - [Objects](#objects)
             - [Arrays](#arrays)
@@ -63,14 +60,19 @@ Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers yo
             - [Strings](#strings)
             - [Structure](#structure)
         - [JSON Usage](#json-usage)
+    - [Writing](#writing)
+        - [Writing data to disk](#writing-data-to-disk)
+            - [Writing examples](#writing-examples)
+        - [Writing pretty data to disk](#writing-pretty-data-to-disk)
+            - [Writing pretty examples](#writing-pretty-examples)
 
 ## Using Mawu
-To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions below.
+Start by adding this repository to your `Cargo.toml`.
 ```toml
 [dependencies]
 mawu = { git = "https://github.com/Xqhare/mawu" }
 ```
-Then simply run a quick:
+Then run a shell command: 
 ```shell
 cargo update
 ```
@@ -87,16 +89,35 @@ use mawu::read::{csv_headed, csv_headless};
 
 // if you want to work with `MawuValue`'s you will need
 use mawu::mawu_value::MawuValue;
-```
-You could then continue with one of the examples in the chapters on CSV and JSON, or just do the good old `println!()` on anything you see!
-Any path to a file in the documentation points to a real file in this repo under the same path
-```rust
+
+// You could then continue with one of the examples in the chapters on CSV and JSON,
+// or just do the good old `println!()` on anything you see!
+
+// Any path to a file in the documentation points to a real file in this repo under the same path
 let path_to_file = "data/json/json-test-data/simple-object.json";
 let mawu_value = json(path_to_file).unwrap();
 println!("{}", mawu_value);
 for (key, value) in mawu_value.as_object().unwrap() {
     println!("{}: {}", key, value);
 }
+
+// to save to a file there are only these two functions
+use mawu::{write, write_pretty};
+
+// you need a MawuValue and a path to a file
+let path_to_file = "example-file.json";
+let mawu_value = MawuValue::from(vec![1, 2, 3]);
+// now the writing can begin!
+let write_result = write(path_to_file, mawu_value.clone());
+assert!(write_result.is_ok());
+// if you want to write pretty data, use write_pretty - It takes one additional argument to specify the number of spaces to indent
+let write_pretty_result = write_pretty(path_to_file, mawu_value, 4);
+assert!(write_pretty_result.is_ok());
+assert_eq!(std::path::Path::new(path_to_file).exists(), true);
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+// this step is of course not required in the real world
+std::fs::remove_file(path_to_file).unwrap();
 ```
 This would print out the following (the order of the key-value-pairs may differ):
 ```shell
@@ -115,13 +136,13 @@ Because Mawu only returns `MawuValue`'s, and you will be interacting with them a
 ## `MawuValue`
 Mawu uses the `MawuValue` enum to represent the different types of values that can be found in JSON and CSV files.
 
-Both the CSV parser and the JSON parser use a different subset of this enum to represent the different types of values.
+Both the CSV and the JSON modules use a different subset of this enum to represent the different types of values.
 The difference is slight however, as only the `array` and `object` are different at all, and are represented as `MawuValue::CsvArray` and `MawuValue::CsvObject` for the CSV parser, and `Mawu::Array` and `Mawu::Object` for the JSON parser.
 The `CsvArray` and `CsvObject` types are only ever used by the CSV parser as return values. `CsvArray` is used to return a headless CSV file, and `CsvObject` is used to return a headed CSV file.
+Because CSV files do not implement arrays or objects in the same way as JSON files, the `CsvArray` and `CsvObject` types are never used in the JSON module and they will never contain a value of type `MawuValue::Array` or `MawuValue::Object`.
 
-Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type, e.g. `u64` or `f64`.
-
-`MawuValue` implements the `std::fmt::Display` trait, which allows you to print the value by using `{}`.
+Mawu supports only 64-bit systems, and all numbers parsed by Mawu are stored in a `_64` type, e.g. `u64`, `f64` or `i64`.
+This also means that Mawu does not support `u128` or `i128`.
 
 ### Convenience Functions
 Mawu provides convenience functions for all types in the form of `is_{MawuValue}`, `as_{MawuValue}` and `to_{MawuValue}` functions.
@@ -129,7 +150,7 @@ Mawu provides convenience functions for all types in the form of `is_{MawuValue}
 Calling `is_` will return `true` if the value is the type requested, and `false` otherwise. This can be useful if you have different data-types in the same array.
 `is_true`, `is_false`, `is_number` and `is_null` are convenience functions to check if the value is a boolean and `true`, if the value is a boolean and `false`, if the value is a number (either a float, integer or signed integer) or if the value is `None`, respectively and can be used in logic without any further processing or allocating needed.
 
-When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested. 
+When you call any `as_` or `to_` function on a `MawuValue` you are returned a `Option()` wrapping the desired value, or `None` if the value is not the type requested.
 Calling `as_null` or `to_null` will return `None` instead when the value is none, and `Some()` wrapping nothing otherwise.
 
 All `as_` functions return a `Option<&MawuValue>`, a pointer to the underlying data. These functions are stricter than `to_`, and will only return a value if it was parsed as such.
@@ -138,13 +159,20 @@ All `to_` functions however return a `Option<MawuValue>`, a freshly cloned copy 
 
 If you are going to clone the data anyway, you can call `to_` directly. Should you call the right `to_` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again. I don't think you should, but you could.
 
+There are some miscellaneous functions that are not `as_` or `to_`. Some, like `len` and
+`is_empty`, work on most or all types, and some, like `clear`, `iter_array`, `iter_object` work only on `Array` and `Object` types.
+
+The `new_` functions are not in a place where I would call them actually useful. Instead, please construct a `MawuValue` using the `MawuValue::from()` function.
+
+For a better overview, take a look at the table below.
+
 ### An exhaustive list of all `MawuValue` types and functions
 - Primitive types
     - `MawuValue::None`
         - can only ever be none, is wrapping nothing
-        - is returned by `MawuValue::default()` and `MawuValue::new()`
         - `as_none` and `to_null` return `None`
         - `is_none` returns `true`
+        - is returned by `MawuValue::default()` and `MawuValue::new()`
         - `is_empty` always returns `true`
         - `len` always returns 0
     - `MawuValue::Bool`
@@ -156,7 +184,7 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
         - `len` always returns 0
     - `MawuValue::Uint`
         - wrapping a `u64`
-        - `as_uint` and `to_uint` return `Option<u64>
+        - `as_uint` and `to_uint` return `Option<u64>`
         - `to_usize` returns `Option<usize>`
         - `is_number` and `is_uint` return `true`
         - `is_empty` returns `true` if the unsigned integer is 0
@@ -187,9 +215,9 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
 - JSON exclusive types
     - `MawuValue::Array`
         - wrapping a `Vec<MawuValue>`
-        - can be constructed by using `MawuValue::new_array`
         - `as_array` and `to_array` return `Option<Vec<MawuValue>>`
         - `is_array` returns `true`
+        - can be constructed by using `MawuValue::new_array`
         - `is_empty` returns `true` if the array is empty
         - `clear` removes all elements from the array
         - `iter_array` returns an iterator over the array
@@ -199,11 +227,19 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
         - `push` appends an element to the end of the array
         - `contains` returns `true` if the array contains the element
         - `len` returns the number of elements in the array
+        - `clear` removes all elements from the array
+        - `iter_array` returns an iterator over the array
+        - `array_insert` inserts an element into the array at the given index
+        - `array_remove` removes an element from the array at the given index
+        - `array_peek` returns a reference to the element from the array at the given index
+        - `pop` removes and returns the last element of the array
+        - `push` appends an element to the end of the array
+        - `contains` returns `true` if the array contains the element
     - `MawuValue::Object`
         - wrapping a `HashMap<String, MawuValue>`
-        - can be constructed by using `MawuValue::new_object`
         - `as_object` and `to_object` return `Option<HashMap<String, MawuValue>>`
         - `is_object` returns `true`
+        - can be constructed by using `MawuValue::new_object`
         - `is_empty` returns `true` if the object is empty
         - `clear` removes all elements from the object
         - `iter_object` returns an iterator over the object
@@ -212,25 +248,34 @@ If you are going to clone the data anyway, you can call `to_` directly. Should y
         - `object_remove` removes an element from the object at the given key
         - `has_key` returns `true` if the object contains the key
         - `len` returns the number of elements in the object
+        - `clear` removes all elements from the object
+        - `iter_object` returns an iterator over the object
+        - `get` returns a `Option<MawuValue>` if the object contains the key
+        - `object_insert` inserts an element into the object at the given key
+        - `object_remove` removes an element from the object at the given key
+        - `has_key` returns `true` if the object contains the key
 - CSV exclusive types
     - `MawuValue::CsvArray`
         - wrapping a `Vec<Vec<MawuValue>>`
-        - can be constructed by using `MawuValue::new_csv_array`
         - `as_csv_array` and `to_csv_array` return `Option<Vec<Vec<MawuValue>>>`
         - `is_csv_array` returns `true`
+        - can be constructed by using `MawuValue::new_csv_array`
         - `is_empty` returns `true` if the array is empty
         - `clear` removes all elements from the array
         - `len` returns the number of elements in the array
+        - `clear` removes all elements from the array
     - `MawuValue::CsvObject`
         - wrapping a `Vec<HashMap<String, MawuValue>>`
-        - can be constructed by using `MawuValue::new_csv_object`
         - `as_csv_object` and `to_csv_object` return `Option<Vec<HashMap<String, MawuValue>>>`
         - `is_csv_object` returns `true`
+        - can be constructed by using `MawuValue::new_csv_object`
         - `is_empty` returns `true` if the object is empty
         - `clear` removes all elements from the object
         - `len` returns the number of elements in the object
+        - `clear` removes all elements from the object
 
 #### Example of getting a `MawuValue` if its type is not known or different in the same field
+This example shows the usage of `is_`, `as_` and `to_` functions.
 ```rust
 use mawu::mawu_value::MawuValue;
 use mawu::read::json;
@@ -242,50 +287,70 @@ let path_to_file = "data/json/json-test-data/simple-json.json";
 let mawu_value = json(path_to_file).unwrap();
 if mawu_value.is_none() {
     let value: Option<()> = mawu_value.as_none();
-    // Do something with `value`
+    let owned_value: Option<()> = mawu_value.to_none();
+// Do something with `value`
     assert_eq!(value, None);
+    assert_eq!(owned_value, None);
 } else if mawu_value.is_bool() {
     let value: &bool = mawu_value.as_bool().unwrap();
+    let owned_value: bool = mawu_value.to_bool().unwrap();
     // Do something with `value`
     assert_eq!(value, &true);
+    assert_eq!(owned_value, true);
 } else if mawu_value.is_uint() {
     let value: &u64 = mawu_value.as_uint().unwrap();
-    // Do something with `value`
+    let owned_value: u64 = mawu_value.to_uint().unwrap();
+ // Do something with `value`
     assert_eq!(value, &1);
+    assert_eq!(owned_value, 1);
 } else if mawu_value.is_int() {
     let value: &i64 = mawu_value.as_int().unwrap();
+    let owned_value: i64 = mawu_value.to_int().unwrap();
     // Do something with `value`
     assert_eq!(value, &-1);
+    assert_eq!(owned_value, -1);
 } else if mawu_value.is_float() {
     let value: &f64 = mawu_value.as_float().unwrap();
-    // Do something with `value`
+    let owned_value: f64 = mawu_value.to_float().unwrap();
+ // Do something with `value`
     assert_eq!(value, &-1.0);
+    assert_eq!(owned_value, -1.0);
 } else if mawu_value.is_string() {
     let value: &str = mawu_value.as_str().unwrap();
-    let owned_value: String = mawu_value.to_string().unwrap();
+    // to_string cannot fail, as any value can be converted to a string
+    let owned_value: String = mawu_value.to_string();
     let referenced_value: &String = mawu_value.as_string().unwrap();
     // Do something with `value`, `owned_value` or `referenced_value`
     assert_eq!(value, "hello");
     assert_eq!(owned_value, "hello".to_string());
     assert_eq!(referenced_value, &"hello".to_string());
-    // These are the JSON exclusive types
+// These are the JSON exclusive types
 } else if mawu_value.is_array() {
     let array: &Vec<MawuValue> = mawu_value.as_array().unwrap();
+    // to_array cannot fail, as any value can be converted to an array (put simply, used as the first element of a vector)
+    let owned_array: Vec<MawuValue> = mawu_value.to_array();
     // Do something with `array`
     assert_eq!(array.len(), 1);
+    assert_eq!(owned_array.len(), 1);
 } else if mawu_value.is_object() {
     let object: &HashMap<String, MawuValue> = mawu_value.as_object().unwrap();
+    let owned_object: HashMap<String, MawuValue> = mawu_value.to_object().unwrap();
     // Do something with `object`
     assert_eq!(object.len(), 1);
-    // These are the CSV exclusive return types
+    assert_eq!(owned_object.len(), 1);
+// These are the CSV exclusive return types
 } else if mawu_value.is_csv_array() {
     let csv_array: &Vec<Vec<MawuValue>> = mawu_value.as_csv_array().unwrap();
+    let owned_csv_array: Vec<Vec<MawuValue>> = mawu_value.to_csv_array().unwrap();
     // Do something with `csv_array`
     assert_eq!(csv_array.len(), 1);
+    assert_eq!(owned_csv_array.len(), 1);
 } else if mawu_value.is_csv_object() {
     let csv_object: &Vec<HashMap<String, MawuValue>> = mawu_value.as_csv_object().unwrap();
+    let owned_csv_object: Vec<HashMap<String, MawuValue>> = mawu_value.to_csv_object().unwrap();
     // Do something with `csv_object`
     assert_eq!(csv_object.len(), 1);
+    assert_eq!(owned_csv_object.len(), 1);
 }
 ```
 
@@ -301,6 +366,11 @@ There also are `MawuValue::new_array` and `MawuValue::new_object` that will retu
 and `MawuValue::new_csv_array` and `MawuValue::new_csv_object` that will return an empty `MawuValue::CsvArray` and `MawuValue::CsvObject`, respectively on the CSV side.
 With these functions, as well as `MawuValue::from(Type::default())`, you can create an empty `MawuValue` of, hopefully, any desired type.
 
+> [!tip]
+> I really recommend using the `MawuValue::from` function. It's simple and shockingly nice to
+> work with. Please note the CSV section below, as CSV is a very different beast and has to be
+> handled more explicitly.
+
 For example:
 ```rust
 use mawu::mawu_value::MawuValue;
@@ -309,15 +379,15 @@ let mawu_value = MawuValue::from(42);
 assert_eq!(mawu_value, MawuValue::Int(42));
 
 // For vectors you can just pass them into `MawuValue::from`
-let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array().unwrap();
+let mut mawu_value = MawuValue::from(vec![1, 2, 3]).to_array();
 mawu_value.push(MawuValue::from(4));
 assert_eq!(mawu_value, vec![MawuValue::Int(1), MawuValue::Int(2), MawuValue::Int(3), MawuValue::Int(4)]);
 ```
-One thing to note in the above example is that to mutate the array, you have to use `to_array`. This creates a new copy of the array, so if you plan to store several types inside the same array I recommend this approach:
+One thing to note in the above example is that to mutate the array, you have to use `to_array`. This does create a new copy of the array, so if you plan to store several types inside the same array there is this approach:
 ```rust
 use mawu::mawu_value::MawuValue;
 
-let mut mawu_value = MawuValue::new_array().to_array().unwrap();
+let mut mawu_value = MawuValue::new_array().to_array();
 mawu_value.push(MawuValue::from(u8::MAX));
 mawu_value.push(MawuValue::from("hello"));
 mawu_value.push(MawuValue::from(-3));
@@ -326,6 +396,16 @@ mawu_value.push(MawuValue::from(vec![1, 2]));
 mawu_value.push(MawuValue::from(true));
 mawu_value.push(MawuValue::from(""));
 assert_eq!(mawu_value, vec![MawuValue::Uint(255), MawuValue::String("hello".to_string()), MawuValue::Int(-3), MawuValue::Float(4.2), MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]), MawuValue::Bool(true), MawuValue::None]);
+```
+However, I would recommend doing this:
+```rust
+use mawu::mawu_value::MawuValue;
+
+let data0 = 1;
+let data_vec = vec![1, 2];
+let data_string = "hello";
+let mawu_value = MawuValue::from(vec![MawuValue::from(data0), MawuValue::from(data_vec), MawuValue::from(data_string)]);
+assert_eq!(mawu_value, MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]), MawuValue::String("hello".to_string())]));
 ```
 
 If you are creating an object, please take care that the keys are valid strings (or can be converted to strings, the standards require keys to be strings) and that the values are valid `MawuValue`s or can be converted to `MawuValue`s.
@@ -343,9 +423,22 @@ assert_eq!(object.get("key4").unwrap(), &MawuValue::Float(4.2));
 assert_eq!(object.get("key5").unwrap(), &MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]));
 assert_eq!(object.get("key6").unwrap(), &MawuValue::Bool(true));
 assert_eq!(object.get("key7").unwrap(), &MawuValue::None);
-```
-Or you can pass in a hash-map of (key, value) to create an object:
 
+let another_vec = vec![("key1", 1), ("key2", 2), ("key3", 3), ("key4", 4), ("key5", 5), ("key6", 6), ("key7", 7), ("key8", 8), ("key9", 9), ("key10", 10)];
+let another_object = MawuValue::from(another_vec);
+assert_eq!(another_object.get("key1").unwrap(), &MawuValue::Int(1));
+assert_eq!(another_object.get("key2").unwrap(), &MawuValue::Int(2));
+assert_eq!(another_object.get("key3").unwrap(), &MawuValue::Int(3));
+assert_eq!(another_object.get("key4").unwrap(), &MawuValue::Int(4));
+assert_eq!(another_object.get("key5").unwrap(), &MawuValue::Int(5));
+assert_eq!(another_object.get("key6").unwrap(), &MawuValue::Int(6));
+assert_eq!(another_object.get("key7").unwrap(), &MawuValue::Int(7));
+assert_eq!(another_object.get("key8").unwrap(), &MawuValue::Int(8));
+assert_eq!(another_object.get("key9").unwrap(), &MawuValue::Int(9));
+assert_eq!(another_object.get("key10").unwrap(), &MawuValue::Int(10));
+```
+
+Or you can pass in a hashmap of (key, value) to create an object:
 ```rust
 use std::collections::HashMap;
 use mawu::mawu_value::MawuValue;
@@ -368,14 +461,40 @@ assert_eq!(mawu_value.get("key4").unwrap(), &MawuValue::Float(4.2));
 assert_eq!(mawu_value.get("key5").unwrap(), &MawuValue::Array(vec![MawuValue::Int(1), MawuValue::Int(2)]));
 assert_eq!(mawu_value.get("key6").unwrap(), &MawuValue::Bool(true));
 assert_eq!(mawu_value.get("key7").unwrap(), mawu_value.get("key8").unwrap());
+
+let another_hashmap = HashMap::from([
+    ("key1", 1),
+    ("key2", 2),
+    ("key3", 3),
+    ("key4", 4),
+    ("key5", 5),
+    ("key6", 6),
+    ("key7", 7),
+    ("key8", 8),
+    ("key9", 9),
+    ("key10", 10),
+]);
+let another_mawu_value = MawuValue::from(another_hashmap).to_object().unwrap();
+assert_eq!(another_mawu_value.get("key1").unwrap(), &MawuValue::Int(1));
+assert_eq!(another_mawu_value.get("key2").unwrap(), &MawuValue::Int(2));
+assert_eq!(another_mawu_value.get("key3").unwrap(), &MawuValue::Int(3));
+assert_eq!(another_mawu_value.get("key4").unwrap(), &MawuValue::Int(4));
+assert_eq!(another_mawu_value.get("key5").unwrap(), &MawuValue::Int(5));
+assert_eq!(another_mawu_value.get("key6").unwrap(), &MawuValue::Int(6));
+assert_eq!(another_mawu_value.get("key7").unwrap(), &MawuValue::Int(7));
+assert_eq!(another_mawu_value.get("key8").unwrap(), &MawuValue::Int(8));
+assert_eq!(another_mawu_value.get("key9").unwrap(), &MawuValue::Int(9));
+assert_eq!(another_mawu_value.get("key10").unwrap(), &MawuValue::Int(10));
 ```
+
+There are more examples in the function docs.
 
 #### Creating a `MawuValue` for CSV data
 Writing CSV data presents its own challenges, thanks to the differing implementations in use.
-Because of this, the `MawuValue` for CSV data is a bit different than the other types and needs to be constructed with a bit more help.
+Because of this, the `MawuValue` for CSV data is a bit different from the other types and needs to be constructed with a bit more help.
 ```rust
 use mawu::mawu_value::MawuValue;
-use mawu::write::csv_pretty;
+use mawu::write_pretty;
 
 let path_to_file = "csv_output_pretty.csv";
 let csv_value = MawuValue::CSVArray(vec![
@@ -389,14 +508,14 @@ let csv_value = MawuValue::CSVArray(vec![
         MawuValue::from(true),
     ],
 ]);
-csv_pretty(path_to_file, csv_value, 4).unwrap();
+write_pretty(path_to_file, csv_value, 4).unwrap();
 ```
 
 To create a headed CSV file, you will need a `Vec<HashMap<String, MawuValue>>` as the value.
 ```rust
 use std::collections::HashMap;
 use mawu::mawu_value::MawuValue;
-use mawu::write::csv_pretty;
+use mawu::write_pretty;
 
 let path_to_file = "csv_output_pretty2.csv";
 
@@ -415,10 +534,11 @@ let row2 = HashMap::from([
 
 let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
 
-csv_pretty(path_to_file, csv_value, 4).unwrap();
+write_pretty(path_to_file, csv_value, 4).unwrap();
 ```
 
 #### A comprehensive list of all types a `MawuValue` can be constructed from
+Any of these values can be passed into a `Mawuvalue::from` and will be converted to a valid `MawuValue`
 - primitives
     - numbers
          - `u8`, `u16`, `u32`, `u64`, `usize`
@@ -466,6 +586,9 @@ For a better understanding of what a `MawuError` is, please refer to the list be
                 - `ExtraValue(String)`
                 - `UnrecognizedHeader(String)`
                 - `UnexpectedNewline`
+        - `WriteError(CsvWriteError)`
+            - `NotCSV`
+            - `UnallowedType(String)`
     - `JsonError`
         - `ParseError(JsonParseError)`
             - should you encounter this, I am certain that your file is not valid JSON
@@ -484,19 +607,23 @@ For a better understanding of what a `MawuError` is, please refer to the list be
                 - `ExpectedValue`
                 - `ExpectedEndOfObject`
                 - `InvalidNumber(String)`
+        - `WriteError(JsonWriteError)`
+            - `NotJSON`
+            - `NotJSONType(String)`
     - `InternalError`
-        - should you encounter this, I am certain that there is a bug in Mawu, please report it
-        - `UnableToLockMasterMutex`
-        - `StringWithNoChars(String)`
-        - `UnableToUnescapeUnicode(String)`
+    - should you encounter this, I am certain that there is a bug in Mawu, please report it
+         - `UnableToLockMasterMutex`
+         - `StringWithNoChars(String)`
+         - `UnableToUnescapeUnicode(String)`
+         - `NotUTF8(String)`
 
-## CSV
+## Reading CSV
 This library supports CSV files, conforming to the rfc4180 standard and is itself conforming to the rfc4180 standard and nothing else.
 
 Please note that CSV, while a standard exists, is seldom implemented as such in practice, and almost every implementation of CSV is not conforming to the rfc4180 standard in some way and thus more or less compatible with each other.
 
-One example would be a common shorthand for an array by using `aaa / bbb / ccc` to represent `[aaa, bbb, ccc]`. 
-This is not part of the rfc4180 standard and thus not implemented in Mawu, instead it would be treated as a single string, with the appropriate errors.
+One example would be a common shorthand for an array by using `aaa / bbb / ccc` to represent `[aaa, bbb, ccc]`.
+This is not part of the rfc4180 standard and thus not implemented in Mawu, instead it would be treated as a single string, with the appropriate errors. Meaning that Mawu would produce a `MawuValue::String("[aaa, bbb, ccc]")` instead.
 `aaa / "bbb" / ccc` would produce an error for example, as Mawu treats the entire thing as one string, but it encounters unescaped double-quotes.
 
 Another example is the way encoding is implemented. Mawu uses `utf-8` encoding exclusively for CSV, and does not recognize or produce a `BOM` or similar at the beginning of the file.
@@ -506,13 +633,12 @@ Because of this, most if not all CSV files are only supported in the ecosystem o
 
 Mawu handles CSV files with an empty or filled last row.
 
-> [!NOTE]
 > While the usage of the header is optional, you will need to use either the `read_csv_headless(path)`, or the `read_csv_headed(path)` method.
 > [Learn more.](#csv-usage)
 
 ### Handling missing or not provided values
 The rfc4180 standard allows for missing or not provided values in CSV files only implicitly. There are many different ways libraries have implemented this in the past, and Mawu goes with the closest interpretation the rfc4180 allows.
-So while Mawu does handle missing or not provided values, it is, and cannot ever be, 100% reliable.
+So while Mawu does handle missing or not provided values, it is not 100% reliable.
 Exactly how this is handled is explained in the following paragraphs.
 
 Because of the rfc4180 standard, a missing value in the form of `aaa, ,ccc` would still result in 3 `MawuValue`'s in the form of `[aaa][ ][ccc]` as CSV has significant white space, so the missing `bbb` is converted into a space.
@@ -529,7 +655,6 @@ A header of `AAA,BBB,CCC`, and the row `aaa,bbb,` would result in a `MawuValue` 
 With a header of `AAA,BBB,CCC,DDD`, the row `aaa,bbb,` would result in a `MawuValue` of `[aaa][bbb][Mawu::None][Mawu::None]`.
 
 Please note that as long as a header is present Mawu will append `Mawu::None` values for as many columns as there are columns declared in the header.
-
 
 #### Without header
 Should a header be not present, any row ending in a `,` will append as many `Mawu::None` values as there are columns in the first row.
@@ -560,7 +685,7 @@ let mawu: Vec<HashMap<String, MawuValue>> = csv_headed(path_to_file).unwrap().to
 // mawu will return a Result<MawuResult, MawuError>
 for entry in mawu {
     for (key, value) in &entry {
-     println!("{}: {}", key, value);
+        println!("{}: {}", key, value);
     }
 }
 
@@ -575,7 +700,7 @@ for entry in mawu_headless {
 }
 ```
 
-## JSON
+## Reading JSON
 This library supports JSON files that conform to the rfc8259 and the ECMA-404 standard.
 JSON is one of the most used and common file formats used for data interchange. Defined in 2001 by Douglas Crockford, JSON has gone through several editions and has been used in production for over 20 years.
 Because of the several editions and conciseness of JSON grammar, many aspects are left undefined and the various implementations are not consistent in the way they parse JSON.
@@ -600,7 +725,7 @@ Because of the same behavior of `HashMap`, Mawu will return JSON objects not in 
 Ordering of arrays is kept the same as in the JSON file.
 
 #### Numbers
-`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will error.Should you pass in a string into `MawuValue::from` like "1.0e500000" instead of a float with Infinity (or NaN), you will be returned a `MawuValue::None`.
+`Infinity` and `NaN` are explicitly not part of the rfc8259 standard, but are implemented in some parsers. Mawu does not support them at all, and any `NaN` or `Infinity` encountered will error. Should you pass in a string into `MawuValue::from` like "1.0e500000" instead of a float with Infinity (or NaN), you will be returned a `MawuValue::None`.
 If you want or need to use `NaN` or `Infinity` in your code, you can always just cast them to strings.
 
 The rfc8259 doesn't set any limits on the range and precision of numbers, but recommends the implementation of `IEEE 754 binary64`. Because of this recommendation, Mawu supports only 64-bit systems, and all numbers parsed by Mawu are returned in a `_64` type.
@@ -609,10 +734,10 @@ As any implementor of the standards is free to set its own limits on the range a
 This can be the case for large numbers expressed in exponent notation. For example, `123.456e+350` is not representable in 64-bits (and will return `MawuValue::None`) while `123.456e300` is representable.
 In the case of `123.456e-350`, the parser of the rust standard library will approximate to `0` and Mawu return `0`.
 
-Some numbers supplied as integers, eg `123456789e29`, can be converted into `f64` numbers should they be too large to be represented as `u64` but a `f64` can still hold them.
+Some numbers supplied as integers, e.g. `123456789e29`, can be converted into `f64` numbers should they be too large to be represented as `u64` but a `f64` can still hold them.
 As a result of using the rust standard library, precision can be lost.
 
-> [!IMPORTANT]
+> [!important]
 > Any overflow will result in a `MawuValue::None`.
 > Any underflow will result in a `0`.
 
@@ -665,9 +790,9 @@ A more complex example:
 ```json
 {
 "key1": {
-    "key2": {
+    key2": {
         "key3": "value3"
-        }
+    }
 },
 "key4": "value4",
 "key5": null,
@@ -694,4 +819,170 @@ let key9: &Vec<MawuValue> = json_value.get("key9").unwrap().as_array().unwrap();
 for value in key9 {
     println!("{}", value);
 }
+```
+
+## Writing
+The writing functionality is unified, meaning that there are only two functions:
+- `write()`
+- `write_pretty()`
+
+The `write()` function will write the `MawuValue` to a file.
+
+The `write_pretty()` function will write the `MawuValue` in a more human-readable formatting
+with a custom amount of whitespace.
+
+Both take in a `MawuValue` and a `Path` to write to.
+The correct encoding is decided by the `MawuValue` type you pass in.
+Passing in either `MawuValue::CSVObject` or `MawuValue::CSVArray` will result in an CSV file
+being written. Passing any other `MawuValue` will result in a JSON file being written.
+
+> [!important]
+> Please supply the `.json` extension if you want to write a JSON file, or `.csv` if you want to write a CSV file.
+
+### Writing data to disk
+To write data to disk, you can make use of the `mawu::write()` function. It takes in a `MawuValue` and a `Path` to write to.
+Depending on the type of `MawuValue` passed in, the correct encoding is decided. `CSVObject`
+and `CSVArray` are written as CSV files, while any other `MawuValue` is written as JSON.
+
+#### Writing examples
+##### JSON
+```rust
+use std::collections::HashMap;
+use mawu::mawu_value::MawuValue;
+use mawu::write;
+
+let path_to_file = "json_output.json";
+let data = vec![
+    MawuValue::from("a"),
+    MawuValue::from(1),
+    vec![
+        MawuValue::from(-1),
+        MawuValue::from(true),
+    ].into(),
+];
+let json_value = MawuValue::from(data);
+write(path_to_file, json_value).unwrap();
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+std::fs::remove_file(path_to_file).unwrap();
+```
+
+##### CSV
+```rust
+use mawu::write;
+use mawu::mawu_value::MawuValue;
+
+let path_to_file = "csv_output.csv";
+let csv_value = MawuValue::CSVArray(vec![
+    vec![
+        MawuValue::from("a"),
+        MawuValue::from(1),
+    ],
+    vec![
+        MawuValue::from(-1),
+        MawuValue::from(true),
+    ],
+]);
+write(path_to_file, csv_value).unwrap();
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+std::fs::remove_file(path_to_file).unwrap();
+```
+```rust
+use std::collections::HashMap;
+use mawu::mawu_value::MawuValue;
+use mawu::write;
+
+let path_to_file = "csv_output_2.csv";
+
+let row0 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value1")),
+  ("key2".to_string(), MawuValue::from(2))  
+]);
+let row1 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value2")),
+  ("key2".to_string(), MawuValue::from(3))  
+]);
+let row2 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value3")),
+  ("key2".to_string(), MawuValue::from(4))
+]);
+
+let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+
+write(path_to_file, csv_value).unwrap();
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+std::fs::remove_file(path_to_file).unwrap();
+```
+
+### Writing pretty data to disk
+To write formatted data to disk, you can make use of the `mawu::write_pretty()` function. Like the `write()` function it takes in a `MawuValue` and a `Path` to write to, but it also takes in a `spaces` argument, where you define the amount of whitespace that is used for indenting the different rows.
+
+Depending on the type of `MawuValue` passed in, the correct encoding is decided. `CSVObject`
+and `CSVArray` are written as CSV files, while any other `MawuValue` is written as JSON.
+
+#### Writing pretty examples
+##### JSON
+```rust
+use mawu::mawu_value::MawuValue;
+use mawu::write_pretty;
+
+let path_to_file = "json_output_pretty.json";
+let mut json_value = MawuValue::new_object().to_object().unwrap();
+json_value.insert("key1".to_string(), MawuValue::from("value1"));
+json_value.insert("key2".to_string(), MawuValue::from(2));
+write_pretty(path_to_file, json_value, 4).unwrap();
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+std::fs::remove_file(path_to_file).unwrap();
+```
+
+##### CSV
+```rust
+use mawu::mawu_value::MawuValue;
+use mawu::write_pretty;
+
+let path_to_file = "csv_output_pretty.csv";
+let csv_value = MawuValue::CSVArray(vec![
+    vec![
+        MawuValue::from("a"),
+        MawuValue::from(1),
+    ],
+    vec![
+        MawuValue::from(-1),
+        MawuValue::from(true),
+    ],
+]);
+write_pretty(path_to_file, csv_value, 4).unwrap();
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+std::fs::remove_file(path_to_file).unwrap();
+```
+```rust
+use std::collections::HashMap;
+use mawu::mawu_value::MawuValue;
+use mawu::write_pretty;
+
+let path_to_file = "csv_output_pretty2.csv";
+
+let row0 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value1")),
+  ("key2".to_string(), MawuValue::from(2))  
+]);
+let row1 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value2")),
+  ("key2".to_string(), MawuValue::from(3))  
+]);
+let row2 = HashMap::from([
+  ("key1".to_string(), MawuValue::from("value3")),
+  ("key2".to_string(), MawuValue::from(4))
+]);
+
+let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+
+write_pretty(path_to_file, csv_value, 4).unwrap();
+
+// Cleaning up, as `cargo test` actually creates the file on disc during testing
+std::fs::remove_file(path_to_file).unwrap();
 ```
