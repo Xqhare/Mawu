@@ -1,25 +1,25 @@
 //! # Mawu
-//! A simple JSON and CSV parsing and writing rust library.
+//! A JSON and CSV serialization and deserialization library written in rust.
+//! 
+//! Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a JSON and CSV serialization and deserialization library implementing the rfc4180, rfc8259 and the ECMA-404 standard.
 //!
-//! Mawu supports 64bit systems only.
+//! Mawu is a zero dependency library and supports 64bit systems only..
 //!
-//! Mawu, named after the ancient creator goddess Mawu in West African mythology, offers a simple yet robust and reliable JSON and CSV parsing library implementing the rfc4180, rfc8259 and the ECMA-404 standard.
-//! Mawu is a zero dependency library.
-//!
-//! A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON parser, this results in a bloat of almost 8kb!
+//! A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON functionality, this results in a bloat of almost 13kb!
 //!
 //! ***This is a hobbyist repo badly reinventing the wheel and not ready for production use.*** 
 //!
-//! The performance of Mawu does leave a lot of room for improvement. The JSON parser
-//! manages about 84mb in 25sec, while the CSV parser manages about 84mb in 26sec. In comparison,
+//! The performance of Mawu does leave room for improvement.
+//! Talking about the parsing alone, the JSON parser manages about 84mb in 10 to 11 seconds, while the CSV parser manages about 84mb in 14 to 15 seconds. In comparison,
 //! an actual parser takes about 2sec to open the same file.
 //!
 //! ## Features
 //! - Simple
 //! - Type aware
 //! - Supports both CSV and JSON
-//! - CSV
-//! - With or without header
+//! - Reading and writing
+//! - Write pretty with custom spacing
+//! - Supports CSV files with or without header
 //! - Supports missing or not provided values
 //! - Fully documented
 //! - Handling of edge cases is explained in the documentation
@@ -27,8 +27,7 @@
 //! - Actually written by a human
 //!
 //! ## Naming the creation: A Legacy of the Divine
-//! The name "Mawu" isn't chosen by chance, it honors the powerful West African goddess associated with the moon, the sun, and creation itself.
-//! Mawu follows the long tradition of naming things after deities.
+//! The name "Mawu" isn't chosen by chance, it honors the long tradition of naming things after deities, by naming it after the powerful West African goddess associated with the moon, the sun, and creation itself.
 //!
 //! Just as Mawu, the goddess, is linked to creation, Mawu, the library, empowers you to create new things from raw data.  JSON and CSV files are like raw materials, and Mawu provides the tools to shape them into meaningful structures, ready to be used for analysis, manipulation, and ultimately, new creations.
 //!
@@ -60,18 +59,19 @@
 //!             - [Strings](#strings)
 //!             - [Structure](#structure)
 //!         - [JSON Usage](#json-usage)
-//!     - [Writing CSV](#writing-csv)
-//!         - [CSV Usage](#csv-usage)
-//!     - [Writing JSON](#writing-json)
-//!         - [JSON Usage](#json-usage)
+//!     - [Writing](#writing)
+//!         - [Writing data to disk](#writing-data-to-disk)
+//!             - [Writing examples](#writing-examples)
+//!         - [Writing pretty data to disk](#writing-pretty-data-to-disk)
+//!             - [Writing pretty examples](#writing-pretty-examples)
 //!
 //! ## Using Mawu
-//! To use Mawu, simply add this repository to your `Cargo.toml` and follow the instructions below.
+//! Start by adding this repository to your `Cargo.toml`.
 //! ```toml
 //! [dependencies]
 //! mawu = { git = "https://github.com/Xqhare/mawu" }
 //! ```
-//! Then simply run a quick:
+//! Then run a shell command: 
 //! ```shell
 //! cargo update
 //! ```
@@ -138,6 +138,9 @@
 //!
 //! If you are going to clone the data anyway, you can call `to_` directly. Should you call the right `to_` function on the right type, (`to_float` on a `f64` for example) no conversion checks will be done, but you could call `to_string()` on everything and parse the values yourself if you wanted to, with the added overhead of parsing the data, re-encoding it into a String and then parsing it again. I don't think you should, but you could.
 //!
+//! There are some miscellaneous functions that are not `as_` or `to_`. Some, like `len` and
+//! `is_empty`, work on most or all types, and some, like `clear`, `iter_array`, `iter_object` work only on `Array` and `Object` types.
+//!
 //! ### An exhaustive list of all `MawuValue` types and functions
 //! - Primitive types
 //!     - `MawuValue::None`
@@ -199,6 +202,14 @@
 //!         - `push` appends an element to the end of the array
 //!         - `contains` returns `true` if the array contains the element
 //!         - `len` returns the number of elements in the array
+//!         - `clear` removes all elements from the array
+//!         - `iter_array` returns an iterator over the array
+//!         - `array_insert` inserts an element into the array at the given index
+//!         - `array_remove` removes an element from the array at the given index
+//!         - `array_peek` returns a reference to the element from the array at the given index
+//!         - `pop` removes and returns the last element of the array
+//!         - `push` appends an element to the end of the array
+//!         - `contains` returns `true` if the array contains the element
 //!     - `MawuValue::Object`
 //!         - wrapping a `HashMap<String, MawuValue>`
 //!         - `as_object` and `to_object` return `Option<HashMap<String, MawuValue>>`
@@ -212,6 +223,12 @@
 //!         - `object_remove` removes an element from the object at the given key
 //!         - `has_key` returns `true` if the object contains the key
 //!         - `len` returns the number of elements in the object
+//!         - `clear` removes all elements from the object
+//!         - `iter_object` returns an iterator over the object
+//!         - `get` returns a `Option<MawuValue>` if the object contains the key
+//!         - `object_insert` inserts an element into the object at the given key
+//!         - `object_remove` removes an element from the object at the given key
+//!         - `has_key` returns `true` if the object contains the key
 //! - CSV exclusive types
 //!     - `MawuValue::CsvArray`
 //!         - wrapping a `Vec<Vec<MawuValue>>`
@@ -221,6 +238,7 @@
 //!         - `is_empty` returns `true` if the array is empty
 //!         - `clear` removes all elements from the array
 //!         - `len` returns the number of elements in the array
+//!         - `clear` removes all elements from the array
 //!     - `MawuValue::CsvObject`
 //!         - wrapping a `Vec<HashMap<String, MawuValue>>`
 //!         - `as_csv_object` and `to_csv_object` return `Option<Vec<HashMap<String, MawuValue>>>`
@@ -229,6 +247,7 @@
 //!         - `is_empty` returns `true` if the object is empty
 //!         - `clear` removes all elements from the object
 //!         - `len` returns the number of elements in the object
+//!         - `clear` removes all elements from the object
 //!
 //! #### Example of getting a `MawuValue` if its type is not known or different in the same field
 //! ```rust
@@ -376,7 +395,7 @@
 //! Because of this, the `MawuValue` for CSV data is a bit different than the other types and needs to be constructed with a bit more help.
 //! ```rust
 //! use mawu::mawu_value::MawuValue;
-//! use mawu::write::csv_pretty;
+//! use mawu::write_pretty;
 //! 
 //! let path_to_file = "csv_output_pretty.csv";
 //! let csv_value = MawuValue::CSVArray(vec![
@@ -390,14 +409,14 @@
 //!         MawuValue::from(true),
 //!     ],
 //! ]);
-//! csv_pretty(path_to_file, csv_value, 4).unwrap();
+//! write_pretty(path_to_file, csv_value, 4).unwrap();
 //! ```
 //! 
 //! To create a headed CSV file, you will need a `Vec<HashMap<String, MawuValue>>` as the value.
 //! ```rust
 //! use std::collections::HashMap;
 //! use mawu::mawu_value::MawuValue;
-//! use mawu::write::csv_pretty;
+//! use mawu::write_pretty;
 //! 
 //! let path_to_file = "csv_output_pretty2.csv";
 //! 
@@ -416,7 +435,7 @@
 //! 
 //! let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
 //! 
-//! csv_pretty(path_to_file, csv_value, 4).unwrap();
+//! write_pretty(path_to_file, csv_value, 4).unwrap();
 //! ```
 //! 
 //! #### A comprehensive list of all types a `MawuValue` can be constructed from
@@ -694,7 +713,171 @@
 //!     println!("{}", value);
 //! }
 //! ```
-
+//!
+//! ## Writing
+//! The writing functionality is unified, meaning that there are only two functions:
+//! - `write()`
+//! - `write_pretty()`
+//! 
+//! The `write()` function will write the `MawuValue` to a file.
+//!
+//! The `write_pretty()` function will write the `MawuValue` in a more human-readable formatting
+//! with a custom amount of whitespaces.
+//!
+//! Both take in a `MawuValue` and a `Path` to write to.
+//! The correct encoding is decided by the `MawuValue` type you pass in.
+//! Passing in either `MawuValue::CSVObject` or `MawuValue::CSVArray` will result in an csv file
+//! being written. Passing any other `MawuValue` will result in a JSON file being written.
+//! > [!Note]
+//! > Please supply the `.json` extension if you want to write a JSON file, or `.csv` if you want to write a CSV file.
+//!
+//! ### Writing data to disk
+//! To write data to disk, you can make use of the `mawu::write()` function. It takes in a `MawuValue` and a `Path` to write to.
+//! Depending on the type of `MawuValue` passed in, the correct encoding is decided. `CSVObject`
+//! and `CSVArray` are written as CSV files, while any other `MawuValue` is written as JSON.
+//! 
+//! #### Writing examples
+//! ##### JSON
+//!```rust
+//! use std::collections::HashMap;
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write;
+//!
+//! let path_to_file = "json_output.json";
+//! let data = vec![
+//!     MawuValue::from("a"),
+//!     MawuValue::from(1),
+//!     vec![
+//!         MawuValue::from(-1),
+//!         MawuValue::from(true),
+//!     ].into(),
+//! ];
+//! let json_value = MawuValue::from(data);
+//! write(path_to_file, json_value).unwrap();
+//!
+//! // Cleaning up, as `cargo test` actually creates the file on disc during testing
+//! std::fs::remove_file(path_to_file).unwrap();
+//! ```
+//!
+//! ##### CSV
+//! ```rust
+//! use mawu::write;
+//! use mawu::mawu_value::MawuValue;
+//!
+//! let path_to_file = "csv_output.csv";
+//! let csv_value = MawuValue::CSVArray(vec![
+//!     vec![
+//!         MawuValue::from("a"),
+//!         MawuValue::from(1),
+//!     ],
+//!     vec![
+//!         MawuValue::from(-1),
+//!         MawuValue::from(true),
+//!     ],
+//! ]);
+//! write(path_to_file, csv_value).unwrap();
+//!
+//! // Cleaning up, as `cargo test` actually creates the file on disc during testing
+//! std::fs::remove_file(path_to_file).unwrap();
+//! ```
+//! ```rust
+//! use std::collections::HashMap;
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write;
+//! 
+//! let path_to_file = "csv_output_2.csv";
+//!
+//! let row0 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value1")),
+//!   ("key2".to_string(), MawuValue::from(2))  
+//! ]);
+//! let row1 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value2")),
+//!   ("key2".to_string(), MawuValue::from(3))  
+//! ]);
+//! let row2 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value3")),
+//!   ("key2".to_string(), MawuValue::from(4))
+//! ]);
+//! 
+//! let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+//!
+//! write(path_to_file, csv_value).unwrap();
+//!
+//! // Cleaning up, as `cargo test` actually creates the file on disc during testing
+//! std::fs::remove_file(path_to_file).unwrap();
+//! ```
+//!
+//! ### Writing pretty data to disk
+//! To write formatted data to disk, you can make use of the `mawu::write_pretty()` function. Like the `write()` function it takes in a `MawuValue` and a `Path` to write to, but it also takes in a `spaces` argument, where you define the amount of whitespace that is used for indenting the different rows.
+//! 
+//! Depending on the type of `MawuValue` passed in, the correct encoding is decided. `CSVObject`
+//! and `CSVArray` are written as CSV files, while any other `MawuValue` is written as JSON.
+//!
+//! #### Writing pretty examples
+//! ##### JSON
+//! ```rust
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write_pretty;
+//!
+//! let path_to_file = "json_output_pretty.json";
+//! let mut json_value = MawuValue::new_object().to_object().unwrap();
+//! json_value.insert("key1".to_string(), MawuValue::from("value1"));
+//! json_value.insert("key2".to_string(), MawuValue::from(2));
+//! write_pretty(path_to_file, json_value, 4).unwrap();
+//!
+//! // Cleaning up, as `cargo test` actually creates the file on disc during testing
+//! std::fs::remove_file(path_to_file).unwrap();
+//! ```
+//!
+//! ##### CSV
+//! ```rust
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write_pretty;
+//!
+//! let path_to_file = "csv_output_pretty.csv";
+//! let csv_value = MawuValue::CSVArray(vec![
+//!     vec![
+//!         MawuValue::from("a"),
+//!         MawuValue::from(1),
+//!     ],
+//!     vec![
+//!         MawuValue::from(-1),
+//!         MawuValue::from(true),
+//!     ],
+//! ]);
+//! write_pretty(path_to_file, csv_value, 4).unwrap();
+//!
+//! // Cleaning up, as `cargo test` actually creates the file on disc during testing
+//! std::fs::remove_file(path_to_file).unwrap();
+//! ```
+//! ```rust
+//! use std::collections::HashMap;
+//! use mawu::mawu_value::MawuValue;
+//! use mawu::write_pretty;
+//! 
+//! let path_to_file = "csv_output_pretty2.csv";
+//!
+//! let row0 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value1")),
+//!   ("key2".to_string(), MawuValue::from(2))  
+//! ]);
+//! let row1 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value2")),
+//!   ("key2".to_string(), MawuValue::from(3))  
+//! ]);
+//! let row2 = HashMap::from([
+//!   ("key1".to_string(), MawuValue::from("value3")),
+//!   ("key2".to_string(), MawuValue::from(4))
+//! ]);
+//! 
+//! let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+//!
+//! write_pretty(path_to_file, csv_value, 4).unwrap();
+//!
+//! // Cleaning up, as `cargo test` actually creates the file on disc during testing
+//! std::fs::remove_file(path_to_file).unwrap();
+//! ```
 
 pub mod errors;
 mod lexers;
@@ -704,7 +887,7 @@ mod serializers;
 
 /// Reads CSV and JSON files into `MawuValue`
 pub mod read {
-    use std::{collections::VecDeque, path::Path};
+    use std::path::Path;
 
     use crate::{
         errors::MawuError,
@@ -732,8 +915,6 @@ pub mod read {
     pub fn csv_headed<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headed(
             file_handling::read_file(path)?
-                .chars()
-                .collect::<VecDeque<char>>(),
         )
     }
 
@@ -756,8 +937,6 @@ pub mod read {
     pub fn csv_headless<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         csv_lexer::headless(
             file_handling::read_file(path)?
-                .chars()
-                .collect::<VecDeque<char>>(),        
         )
     }
 
@@ -781,203 +960,171 @@ pub mod read {
     pub fn json<T: AsRef<Path>>(path: T) -> Result<MawuValue, MawuError> {
         json_lexer::json_lexer(
             file_handling::read_file(path)?
-                .chars()
-                .collect::<VecDeque<char>>(),
         )
     }
 }
 
-/// Writes CSV and JSON files from `MawuValue`
-pub mod write {
-    use std::path::Path;
+use std::path::Path;
+use crate::{errors::MawuError, mawu_value::MawuValue, serializers::{csv_serializer, json_serializer}, utils::file_handling::write_file};
 
-    use crate::{errors::MawuError, mawu_value::MawuValue};
+/// Writes a file with the given contents.
+/// Writes a CSV-file if the contents are a `MawuValue::CSVObject` our `MawuValue::CSVArray` and a JSON-file if the contents are any other `MawuValue`.
+///
+/// ## Arguments
+/// * `path` - The path to the JSON file, relative or absolute
+/// * `contents` - The contents of the JSON file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+///
+/// ## Example
+/// ### JSON
+/// ```rust
+/// use std::collections::HashMap;
+/// use mawu::mawu_value::MawuValue;
+/// use mawu::write;
+///
+/// let path_to_file = "json_output.json";
+/// let data = vec![
+///     MawuValue::from("a"),
+///     MawuValue::from(1),
+///     vec![
+///         MawuValue::from(-1),
+///         MawuValue::from(true),
+///     ].into(),
+/// ];
+/// let json_value = MawuValue::from(data);
+/// write(path_to_file, json_value).unwrap();
+///
+/// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+/// std::fs::remove_file(path_to_file).unwrap();
+/// ```
+/// ### CSV
+/// ```rust
+/// use mawu::write;
+/// use mawu::mawu_value::MawuValue;
+///
+/// let path_to_file = "csv_output.csv";
+/// let csv_value = MawuValue::CSVArray(vec![
+///     vec![
+///         MawuValue::from("a"),
+///         MawuValue::from(1),
+///     ],
+///     vec![
+///         MawuValue::from(-1),
+///         MawuValue::from(true),
+///     ],
+/// ]);
+/// write(path_to_file, csv_value).unwrap();
+///
+/// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+/// std::fs::remove_file(path_to_file).unwrap();
+/// ```
+/// ```rust
+/// use std::collections::HashMap;
+/// use mawu::mawu_value::MawuValue;
+/// use mawu::write;
+/// 
+/// let path_to_file = "csv_output_2.csv";
+///
+/// let row0 = HashMap::from([
+///   ("key1".to_string(), MawuValue::from("value1")),
+///   ("key2".to_string(), MawuValue::from(2))  
+/// ]);
+/// let row1 = HashMap::from([
+///   ("key1".to_string(), MawuValue::from("value2")),
+///   ("key2".to_string(), MawuValue::from(3))  
+/// ]);
+/// let row2 = HashMap::from([
+///   ("key1".to_string(), MawuValue::from("value3")),
+///   ("key2".to_string(), MawuValue::from(4))
+/// ]);
+/// 
+/// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+///
+/// write(path_to_file, csv_value).unwrap();
+///
+/// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+/// std::fs::remove_file(path_to_file).unwrap();
+/// ```
+pub fn write<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C) -> Result<(), MawuError> {
+    write_pretty(path, contents, 0)
+}
 
-    /// Writes a CSV file with the given contents.
-    /// I recommend constructing a `MawuValue` using the methods shown in the example
-    ///
-    /// # Arguments
-    /// * `path` - The path to the CSV file, relative or absolute
-    /// * `contents` - The contents of the CSV file, can be any `MawuValue` or value that can be converted to a `MawuValue`
-    ///     - please note that CSV does not support all types, only `MawuValue::Array` as an input
-    ///     type
-    ///
-    /// # Example
-    /// ```rust
-    /// use mawu::write::csv;
-    /// use mawu::mawu_value::MawuValue;
-    ///
-    /// let path_to_file = "csv_output.csv";
-    /// let csv_value = MawuValue::CSVArray(vec![
-    ///     vec![
-    ///         MawuValue::from("a"),
-    ///         MawuValue::from(1),
-    ///     ],
-    ///     vec![
-    ///         MawuValue::from(-1),
-    ///         MawuValue::from(true),
-    ///     ],
-    /// ]);
-    /// csv(path_to_file, csv_value).unwrap();
-    ///
-    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
-    /// std::fs::remove_file(path_to_file).unwrap();
-    /// ```
-    /// ```rust
-    /// use std::collections::HashMap;
-    /// use mawu::mawu_value::MawuValue;
-    /// use mawu::write::csv;
-    /// 
-    /// let path_to_file = "csv_output_2.csv";
-    ///
-    /// let row0 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value1")),
-    ///   ("key2".to_string(), MawuValue::from(2))  
-    /// ]);
-    /// let row1 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value2")),
-    ///   ("key2".to_string(), MawuValue::from(3))  
-    /// ]);
-    /// let row2 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value3")),
-    ///   ("key2".to_string(), MawuValue::from(4))
-    /// ]);
-    /// 
-    /// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
-    ///
-    /// csv(path_to_file, csv_value).unwrap();
-    ///
-    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
-    /// std::fs::remove_file(path_to_file).unwrap();
-    /// ```
-    ///
-    /// # Errors
-    /// Only returns `MawuError`'s
-    pub fn csv<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C) -> Result<(), MawuError> {
-        contents.into().write_to_file(path)
-    }
-
-    /// Writes a pretty printed CSV file with the given contents.
-    /// I recommend constructing a `MawuValue` using the methods shown in the example
-    ///
-    /// # Arguments
-    /// * `path` - The path to the CSV file, relative or absolute
-    /// * `contents` - The contents of the CSV file, can be any `MawuValue` or value that can be converted to a `MawuValue`
-    ///     - please note that CSV does not support all types, only `MawuValue::Array` as an input
-    /// * `space` - The number of spaces to use for indentation
-    ///
-    /// # Example
-    /// ```rust
-    /// use mawu::mawu_value::MawuValue;
-    /// use mawu::write::csv_pretty;
-    ///
-    /// let path_to_file = "csv_output_pretty.csv";
-    /// let csv_value = MawuValue::CSVArray(vec![
-    ///     vec![
-    ///         MawuValue::from("a"),
-    ///         MawuValue::from(1),
-    ///     ],
-    ///     vec![
-    ///         MawuValue::from(-1),
-    ///         MawuValue::from(true),
-    ///     ],
-    /// ]);
-    /// csv_pretty(path_to_file, csv_value, 4).unwrap();
-    ///
-    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
-    /// std::fs::remove_file(path_to_file).unwrap();
-    /// ```
-    /// ```rust
-    /// use std::collections::HashMap;
-    /// use mawu::mawu_value::MawuValue;
-    /// use mawu::write::csv_pretty;
-    /// 
-    /// let path_to_file = "csv_output_pretty2.csv";
-    ///
-    /// let row0 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value1")),
-    ///   ("key2".to_string(), MawuValue::from(2))  
-    /// ]);
-    /// let row1 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value2")),
-    ///   ("key2".to_string(), MawuValue::from(3))  
-    /// ]);
-    /// let row2 = HashMap::from([
-    ///   ("key1".to_string(), MawuValue::from("value3")),
-    ///   ("key2".to_string(), MawuValue::from(4))
-    /// ]);
-    /// 
-    /// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
-    ///
-    /// csv_pretty(path_to_file, csv_value, 4).unwrap();
-    ///
-    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
-    /// std::fs::remove_file(path_to_file).unwrap();
-    /// ```
-    ///
-    /// # Errors
-    /// Only returns `MawuError`'s
-    pub fn csv_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
-        contents.into().write_to_file_pretty(path, space)
-    }
-
-    /// Writes a JSON file with the given contents.
-    ///
-    /// # Arguments
-    /// * `path` - The path to the JSON file, relative or absolute
-    /// * `contents` - The contents of the JSON file, can be any `MawuValue` or value that can be converted to a `MawuValue`
-    ///
-    /// # Example
-    /// ```rust
-    /// use std::collections::HashMap;
-    /// use mawu::mawu_value::MawuValue;
-    /// use mawu::write::json;
-    ///
-    /// let path_to_file = "json_output.json";
-    /// let data = vec![
-    ///     MawuValue::from("a"),
-    ///     MawuValue::from(1),
-    ///     vec![
-    ///         MawuValue::from(-1),
-    ///         MawuValue::from(true),
-    ///     ].into(),
-    /// ];
-    /// let json_value = MawuValue::from(data);
-    /// json(path_to_file, json_value).unwrap();
-    ///
-    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
-    /// std::fs::remove_file(path_to_file).unwrap();
-    /// ```
-    ///
-    /// # Errors
-    /// Only returns `MawuError`'s
-    pub fn json<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C) -> Result<(), MawuError> {
-        contents.into().write_to_file(path)
-    }
-
-    /// Writes a pretty printed JSON file with the given contents.
-    ///
-    /// # Arguments
-    /// * `path` - The path to the JSON file, relative or absolute
-    /// * `contents` - The contents of the JSON file, can be any `MawuValue` or value that can be converted to a `MawuValue`
-    /// * `space` - The number of spaces to use for indentation
-    ///
-    /// # Example
-    /// ```rust
-    /// use mawu::mawu_value::MawuValue;
-    /// use mawu::write::json_pretty;
-    ///
-    /// let path_to_file = "json_output_pretty.json";
-    /// let mut json_value = MawuValue::new_object().to_object().unwrap();
-    /// json_value.insert("key1".to_string(), MawuValue::from("value1"));
-    /// json_value.insert("key2".to_string(), MawuValue::from(2));
-    /// json_pretty(path_to_file, json_value, 4).unwrap();
-    ///
-    /// // Cleaning up, as `cargo test` actually creates the file on disc during testing
-    /// std::fs::remove_file(path_to_file).unwrap();
-    /// ```
-    pub fn json_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, space: u8) -> Result<(), MawuError> {
-        contents.into().write_to_file_pretty(path, space)
+/// Writes a pretty printed file with the given contents.
+/// Writes a CSV-file if the contents are a `MawuValue::CSVObject` our `MawuValue::CSVArray` and a JSON-file if the contents are any other `MawuValue`.
+///
+/// ## Arguments
+/// * `path` - The path to the file, relative or absolute
+/// * `contents` - The contents of the file, can be any `MawuValue` or value that can be converted to a `MawuValue`
+/// * `space` - The number of spaces to use for indentation
+///
+/// ## Examples
+/// ### JSON
+/// ```rust
+/// use mawu::mawu_value::MawuValue;
+/// use mawu::write_pretty;
+///
+/// let path_to_file = "json_output_pretty.json";
+/// let mut json_value = MawuValue::new_object().to_object().unwrap();
+/// json_value.insert("key1".to_string(), MawuValue::from("value1"));
+/// json_value.insert("key2".to_string(), MawuValue::from(2));
+/// write_pretty(path_to_file, json_value, 4).unwrap();
+///
+/// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+/// std::fs::remove_file(path_to_file).unwrap();
+/// ```
+/// ### CSV
+/// ```rust
+/// use mawu::mawu_value::MawuValue;
+/// use mawu::write_pretty;
+///
+/// let path_to_file = "csv_output_pretty.csv";
+/// let csv_value = MawuValue::CSVArray(vec![
+///     vec![
+///         MawuValue::from("a"),
+///         MawuValue::from(1),
+///     ],
+///     vec![
+///         MawuValue::from(-1),
+///         MawuValue::from(true),
+///     ],
+/// ]);
+/// write_pretty(path_to_file, csv_value, 4).unwrap();
+///
+/// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+/// std::fs::remove_file(path_to_file).unwrap();
+/// ```
+/// ```rust
+/// use std::collections::HashMap;
+/// use mawu::mawu_value::MawuValue;
+/// use mawu::write_pretty;
+/// 
+/// let path_to_file = "csv_output_pretty2.csv";
+///
+/// let row0 = HashMap::from([
+///   ("key1".to_string(), MawuValue::from("value1")),
+///   ("key2".to_string(), MawuValue::from(2))  
+/// ]);
+/// let row1 = HashMap::from([
+///   ("key1".to_string(), MawuValue::from("value2")),
+///   ("key2".to_string(), MawuValue::from(3))  
+/// ]);
+/// let row2 = HashMap::from([
+///   ("key1".to_string(), MawuValue::from("value3")),
+///   ("key2".to_string(), MawuValue::from(4))
+/// ]);
+/// 
+/// let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
+///
+/// write_pretty(path_to_file, csv_value, 4).unwrap();
+///
+/// // Cleaning up, as `cargo test` actually creates the file on disc during testing
+/// std::fs::remove_file(path_to_file).unwrap();
+/// ```
+pub fn write_pretty<T: AsRef<Path>, C: Into<MawuValue>>(path: T, contents: C, spaces: u8) -> Result<(), MawuError> {
+    let contents = contents.into();
+    match contents {
+        MawuValue::CSVObject(v) => write_file(path, csv_serializer::serialize_csv_headed(MawuValue::CSVObject(v.clone()), spaces)?),
+        MawuValue::CSVArray(v) => write_file(path, csv_serializer::serialize_csv_unheaded(MawuValue::CSVArray(v.clone()), spaces)?),
+        _ => write_file(path, json_serializer::serialize_json(contents, spaces, 0)?),
     }
 }
 
@@ -990,7 +1137,7 @@ fn write_json_doc_files() {
         let mut json_value = mawu_value::MawuValue::new_object().to_object().unwrap();
         json_value.insert("key1".to_string(), mawu_value::MawuValue::from("value1"));
         json_value.insert("key2".to_string(), mawu_value::MawuValue::from(2));
-        write::json_pretty(path_to_file, json_value, 4).expect("Failed to write JSON file");
+        crate::write_pretty(path_to_file, json_value, 4).expect("Failed to write JSON file");
     }
     if std::fs::File::open(path_to_file2).is_err() {
         let path_to_file = "json_output.json";
@@ -1003,7 +1150,7 @@ fn write_json_doc_files() {
             ].into(),
         ];
         let json_value = mawu_value::MawuValue::from(data);
-        write::json(path_to_file, json_value).expect("Failed to write JSON file");
+        crate::write(path_to_file, json_value).expect("Failed to write JSON file");
     }
     let json_value1 = read::json(path_to_file1).unwrap();
     let json_value2 = read::json(path_to_file2).unwrap();
@@ -1031,13 +1178,12 @@ fn write_json() {
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
     use crate::mawu_value::MawuValue;
-    use crate::write::{json, json_pretty};
 
     let path_to_file = "json_output_pretty2.json";
     let mut json_value = MawuValue::new_object().to_object().unwrap();
     json_value.insert("key1".to_string(), MawuValue::from("value1"));
     json_value.insert("key2".to_string(), MawuValue::from(u8::from(2)));
-    json(path_to_file, json_value).unwrap();
+    crate::write_pretty(path_to_file, json_value, 4).unwrap();
     // parse output
     let pretty_output = read::json(path_to_file).unwrap();
     assert!(pretty_output.is_object());
@@ -1065,7 +1211,7 @@ fn write_json() {
             ])),
         ]),
     ]);
-    json_pretty(filepath, json_value, 4).unwrap();
+    crate::write_pretty(filepath, json_value, 4).unwrap();
     // again parse output
     let large_output: MawuValue = read::json(filepath).unwrap();
 
@@ -1092,7 +1238,8 @@ fn write_csv() {
     use std::collections::HashMap;
 
     use crate::mawu_value::MawuValue;
-    use crate::write::{csv, csv_pretty};
+    use crate::write;
+    use crate::write_pretty;
     
     // test headed
     let path_to_file = "csv_output_pretty2.csv";
@@ -1112,7 +1259,7 @@ fn write_csv() {
     
     let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
 
-    csv_pretty(path_to_file, csv_value.clone(), 4).unwrap();
+    write_pretty(path_to_file, csv_value.clone(), 4).unwrap();
     // lets parse the output and make sure it is correct
     let pretty_output = read::csv_headed(path_to_file);
     assert!(pretty_output.is_ok());
@@ -1135,7 +1282,7 @@ fn write_csv() {
             MawuValue::from(true),
         ],
     ]);
-    csv(filepath, csv_value_headless.clone()).unwrap();
+    write(filepath, csv_value_headless.clone()).unwrap();
     // again parse output
     let output = read::csv_headless(filepath);
     assert!(output.is_ok());
