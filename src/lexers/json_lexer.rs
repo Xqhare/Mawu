@@ -3,7 +3,6 @@
 use std::{
     char, collections::{HashMap, VecDeque}, rc::Rc, sync::{Mutex, MutexGuard}
 };
-use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     errors::{
@@ -12,8 +11,7 @@ use crate::{
     },
     mawu_value::MawuValue,
     utils::{
-        file_handling::read_file, is_digit, is_end_of_primitive_value,
-        is_json_string_terminator_token, is_whitespace, unescape_unicode,
+        file_handling::read_file, is_digit, is_end_of_primitive_value, is_json_string_terminator_token, is_whitespace, unescape_unicode
     },
 };
 
@@ -189,10 +187,7 @@ fn json_array_lexer(
 #[test]
 fn object_lexer() {
     let input = json_lexer(
-        read_file("data/json/json-test-data/rfc8259-test-data/object.json")
-            .unwrap()
-            .chars()
-            .collect::<VecDeque<char>>(),
+        read_file("data/json/json-test-data/rfc8259-test-data/object.json").unwrap()
     );
     assert!(input.is_ok());
 }
@@ -200,10 +195,7 @@ fn object_lexer() {
 #[test]
 fn array_lexer() {
     let input = json_lexer(
-        read_file("data/json/json-test-data/rfc8259-test-data/array.json")
-            .unwrap()
-            .chars()
-            .collect::<VecDeque<char>>(),
+        read_file("data/json/json-test-data/rfc8259-test-data/array.json").unwrap()
     );
     assert!(input.is_ok());
 }
