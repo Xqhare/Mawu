@@ -30,6 +30,7 @@ pub fn json_lexer(file_contents: VecDeque<char>) -> Result<MawuValue, MawuError>
         Ok(MawuValue::default())
     }
 }
+
 fn json_value_lexer(
     file_contents: &mut MutexGuard<VecDeque<char>>,
 ) -> Result<MawuValue, MawuError> {
