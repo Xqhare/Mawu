@@ -7,12 +7,15 @@ Mawu is a zero dependency library and supports 64bit systems only.
 
 A little technical note: While Mawu uses the same return value types for both CSV and JSON, the parsing is done by two different lexers (or implementors as the standards like to call it) bundled together into one library. If you only use the JSON functionality, this results in a bloat of almost 13kb!
 
-> [!warning]
+> [!note]
 > This is a hobbyist repo badly reinventing the wheel and not ready for production use. 
 
 The performance of Mawu does leave room for improvement.
 Talking about the parsing alone, the JSON parser manages about 84mb in 10 to 11 seconds, while the CSV parser manages about 84mb in 14 to 15 seconds. In comparison,
 an actual parser takes about 2sec to open the same file.
+
+With about 1k lines, this README contains everything you never wanted to know about Mawu, but writing good documentation is never easy.
+So I hope everything below makes sense to you.
 
 ## Features
 - Simple
@@ -633,6 +636,7 @@ Because of this, most if not all CSV files are only supported in the ecosystem o
 
 Mawu handles CSV files with an empty or filled last row.
 
+> [!note]
 > While the usage of the header is optional, you will need to use either the `read_csv_headless(path)`, or the `read_csv_headed(path)` method.
 > [Learn more.](#csv-usage)
 

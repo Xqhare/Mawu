@@ -13,6 +13,9 @@
 //! Talking about the parsing alone, the JSON parser manages about 84mb in 10 to 11 seconds, while the CSV parser manages about 84mb in 14 to 15 seconds. In comparison,
 //! an actual parser takes about 2sec to open the same file.
 //!
+//! With about 1k lines, this README contains everything you never wanted to know about Mawu, but writing good documentation is never easy.
+//! So I hope everything below makes sense to you.
+//!
 //! ## Features
 //! - Simple
 //! - Type aware
