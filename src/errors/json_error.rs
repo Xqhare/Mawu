@@ -5,6 +5,7 @@ use std::fmt;
 pub enum JsonError {
     /// A wrapper for all JSON parsing errors
     ParseError(JsonParseError),
+    /// A wrapper for all JSON writing errors
     WriteError(JsonWriteError),
 }
 
@@ -38,6 +39,7 @@ impl fmt::Display for JsonWriteError {
 }
 
 #[derive(Debug)]
+/// JsonParseError wraps all parsing errors
 pub enum JsonParseError {
     /// Encountered an unescaped double quote
     UnescapedDoubleQuote,

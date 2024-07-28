@@ -5,6 +5,7 @@ use std::fmt;
 pub enum CsvError {
     /// A wrapper for all parsing errors
     ParseError(CsvParseError),
+    /// A wrapper for all writing errors
     WriteError(CsvWriteError),
 }
 
@@ -24,6 +25,7 @@ impl fmt::Display for CsvError {
 pub enum CsvWriteError {
     /// Supplied value is not a CSV value
     NotCSV,
+    /// Unallowed MawuValue
     UnallowedType(String),
 }
 

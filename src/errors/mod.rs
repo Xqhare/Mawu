@@ -1,6 +1,8 @@
 use std::{fmt, result};
 
+/// Module holding all possible csv errors
 pub mod csv_error;
+/// Module holding all possible json errors
 pub mod json_error;
 
 #[derive(Debug)]
