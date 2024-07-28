@@ -118,9 +118,9 @@ let write_pretty_result = write_pretty(path_to_file, mawu_value, 4);
 assert!(write_pretty_result.is_ok());
 assert_eq!(std::path::Path::new(path_to_file).exists(), true);
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-// this step is of course not required in the real world
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# // this step is of course not required in the real world
+# std::fs::remove_file(path_to_file).unwrap();
 ```
 This would print out the following (the order of the key-value-pairs may differ):
 ```shell
@@ -867,8 +867,8 @@ let data = vec![
 let json_value = MawuValue::from(data);
 write(path_to_file, json_value).unwrap();
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# std::fs::remove_file(path_to_file).unwrap();
 ```
 
 ##### CSV
@@ -889,8 +889,8 @@ let csv_value = MawuValue::CSVArray(vec![
 ]);
 write(path_to_file, csv_value).unwrap();
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# std::fs::remove_file(path_to_file).unwrap();
 ```
 ```rust
 use std::collections::HashMap;
@@ -916,8 +916,8 @@ let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
 
 write(path_to_file, csv_value).unwrap();
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# std::fs::remove_file(path_to_file).unwrap();
 ```
 
 ### Writing pretty data to disk
@@ -938,8 +938,8 @@ json_value.insert("key1".to_string(), MawuValue::from("value1"));
 json_value.insert("key2".to_string(), MawuValue::from(2));
 write_pretty(path_to_file, json_value, 4).unwrap();
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# std::fs::remove_file(path_to_file).unwrap();
 ```
 
 ##### CSV
@@ -960,8 +960,8 @@ let csv_value = MawuValue::CSVArray(vec![
 ]);
 write_pretty(path_to_file, csv_value, 4).unwrap();
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# std::fs::remove_file(path_to_file).unwrap();
 ```
 ```rust
 use std::collections::HashMap;
@@ -987,6 +987,6 @@ let csv_value = MawuValue::CSVObject(vec![row0, row1, row2]);
 
 write_pretty(path_to_file, csv_value, 4).unwrap();
 
-// Cleaning up, as `cargo test` actually creates the file on disc during testing
-std::fs::remove_file(path_to_file).unwrap();
+# // Cleaning up, as `cargo test` actually creates the file on disc during testing
+# std::fs::remove_file(path_to_file).unwrap();
 ```
